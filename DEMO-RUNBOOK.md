@@ -12,7 +12,7 @@ One page. Keep it open on a second device during the run.
 - [ ] Demo tray tested: long-press the mark for 1.2 s, all staged messages listed.
 - [ ] Rehearsal mode toggled **off** in the tray before the real run, so the report is not marked as a test.
 - [ ] Screen recording of a full clean run saved on the phone **and** on a USB stick.
-- [ ] `https://<url>/api/health` opened once: `key_present: true`.
+- [ ] `https://<url>/api/health` opened once: `key_present: true` **and** `db_ready: true`.
 
 ## The click path
 

@@ -46,11 +46,33 @@ function chosenModel(configured: string, requested: string | undefined): string 
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/api/health", (c) => {
+/**
+ * Nothing under /api is cacheable. Without this a browser is free to reuse a
+ * GET /api/health heuristically, which is how you end up staring at a stale
+ * key_present:false minutes after adding the secret.
+ */
+app.use("/api/*", async (c, next) => {
+  await next();
+  c.header("Cache-Control", "no-store");
+});
+
+app.get("/api/health", async (c) => {
+  // A deploy does not run migrations, so a Worker can be perfectly healthy and
+  // still have no reports table. Health has to say so, or the first report of
+  // the demo is the thing that finds out.
+  let db_ready = false;
+  try {
+    await c.env.DB.prepare("SELECT 1 FROM reports LIMIT 1").first();
+    db_ready = true;
+  } catch {
+    db_ready = false;
+  }
+
   return c.json({
     ok: true,
     // Presence only. The key itself is never read into a response or a log.
     key_present: Boolean(c.env.ANTHROPIC_API_KEY),
+    db_ready,
     model: c.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
   });
 });
@@ -190,15 +212,26 @@ app.get("/api/report/:case_number", async (c) => {
   const id = idFromCaseNumber(c.req.param("case_number"));
   if (id === null) return c.json({ error: "bad_request" }, 400);
 
-  const row = await c.env.DB.prepare(`SELECT status FROM reports WHERE id = ?`)
-    .bind(id)
-    .first<{ status: string }>();
+  let row: { status: string } | null;
+  try {
+    row = await c.env.DB.prepare(`SELECT status FROM reports WHERE id = ?`)
+      .bind(id)
+      .first<{ status: string }>();
+  } catch (error) {
+    // Without this, a D1 error escapes to Hono's default handler and answers
+    // text/plain, breaking the JSON error shape every other route keeps.
+    console.error("report lookup failed:", (error as Error).message);
+    return c.json({ error: "server_error" }, 500);
+  }
 
   if (!row) return c.json({ error: "not_found" }, 404);
   // Status only — the report's contents are never read back over the API.
   return c.json({ status: row.status });
 });
 
+// The bare path too: "/api/*" does not match "/api", which would otherwise
+// fall through to the asset server and answer with the app's index.html.
+app.all("/api", (c) => c.json({ error: "not_found" }, 404));
 app.all("/api/*", (c) => c.json({ error: "not_found" }, 404));
 
 export default app;

@@ -63,10 +63,16 @@ A secret only reaches a Worker on its next deploy. Push anything, or hit
 Open `https://dara.<your-subdomain>.workers.dev/api/health` on the phone:
 
 ```json
-{ "ok": true, "key_present": true, "model": "claude-sonnet-5" }
+{ "ok": true, "key_present": true, "db_ready": true, "model": "claude-sonnet-5" }
 ```
 
-`key_present: false` means A4 has not reached a deploy yet.
+Both flags must be `true`.
+
+- `key_present: false` — A4 has not reached a deploy yet.
+- `db_ready: false` — the `reports` table does not exist. A deploy does not run
+  migrations on its own, so this means A3's deploy command is missing the
+  migration step. Fix it there and redeploy, or run `npm run db:migrate` once
+  from a laptop that is logged in.
 
 ## Reading a failed build log
 
@@ -74,7 +80,7 @@ Open `https://dara.<your-subdomain>.workers.dev/api/health` on the phone:
 |---|---|
 | `Cannot find type definition file for './worker-configuration.d.ts'` | Old commit. Fixed — the build now generates it. Push again. |
 | `Couldn't find a D1 DB with the name or binding 'dara'` | A1/A2 not done. |
-| `no such table: reports` at runtime, not in the log | A3's deploy command is missing the migration step. |
+| Build fine, but `/api/health` says `db_ready: false` | The `reports` table does not exist — A3's deploy command is missing the migration step. Reports will fail with a 500. |
 | `binding ANALYZE_LIMITER ... ratelimits` | The rate-limit binding is not on this plan. Delete the whole `"ratelimits": [...]` block from `wrangler.jsonc`; the Worker falls back to its own limiter and nothing else changes. |
 | Build succeeds, `/api/analyze` returns 503 | The key secret is missing — A4. |
 
