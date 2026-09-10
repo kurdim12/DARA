@@ -79,6 +79,7 @@ Both flags must be `true`.
 | What the log says | What it means |
 |---|---|
 | `Cannot find type definition file for './worker-configuration.d.ts'` | Old commit. Fixed — the build now generates it. Push again. |
+| ``The `assets` property in your configuration is missing the required `directory` property`` | The build step did not run, so there is nothing to deploy. Set the build command in A3. |
 | `Couldn't find a D1 DB with the name or binding 'dara'` | A1/A2 not done. |
 | Build fine, but `/api/health` says `db_ready: false` | The `reports` table does not exist — A3's deploy command is missing the migration step. Reports will fail with a 500. |
 | `binding ANALYZE_LIMITER ... ratelimits` | The rate-limit binding is not on this plan. Delete the whole `"ratelimits": [...]` block from `wrangler.jsonc`; the Worker falls back to its own limiter and nothing else changes. |
