@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { cacheMeta, stagedMessages } from "../lib/demo";
+import { cacheMeta, hasCachedVerdict, stagedMessages } from "../lib/demo";
 import { clearLocalHistory, isTestMode, setTestMode } from "../lib/storage";
 import { useI18n } from "../i18n";
 
@@ -33,7 +33,8 @@ export function DemoTray({
 
         {staged.length === 0 ? (
           <p className="mt-4 text-base text-ink-70">
-            No staged messages yet — run <code>npm run cache-demo</code>.
+            No staged messages — every case marked <code>demo: true</code> in
+            content/eval-cases.json still has placeholder text.
           </p>
         ) : (
           <ul className="mt-4 space-y-2">
@@ -47,6 +48,11 @@ export function DemoTray({
                 >
                   <span className="block text-xs uppercase tracking-widest text-ink-55">
                     {item.id}
+                    {/* No saved verdict yet means no airplane-mode fallback for
+                        this one — worth knowing before a rehearsal. */}
+                    {!hasCachedVerdict(item.id) && (
+                      <span className="ms-2 text-ink-55">no saved result</span>
+                    )}
                   </span>
                   <span className="mt-1 line-clamp-2 block">{item.text}</span>
                 </button>
