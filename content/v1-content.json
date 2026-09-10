@@ -1,0 +1,340 @@
+{
+  "_meta": {
+    "source": "dara-app.apk v1.0.0 (Expo SDK 51, Hermes bytecode v96). String table parsed 2026-09-10.",
+    "v1_reality": "v1 had no backend and made no AI calls. Every verdict, score and 'sent to authorities' confirmation in v1 was scripted text.",
+    "how_to_use": "Port into src/i18n and src/content. verified:false items must not render in production builds (render with a VERIFY tag in dev). Nothing under rewrite_required may be used as written.",
+    "origin_values": {
+      "v1": "copied exactly from v1",
+      "v1-edited": "v1 text trimmed or cleaned",
+      "new": "written for v2 — Abdelrahman reviews before stage"
+    }
+  },
+  "contacts": [
+    {
+      "id": "emergency",
+      "label": {
+        "ar": "الطوارئ",
+        "en": "Emergency"
+      },
+      "number": "911",
+      "verified": false,
+      "note": "Widely published as Jordan's unified emergency number. Confirm from an official PSD source, then flip to true."
+    },
+    {
+      "id": "family_protection",
+      "label": {
+        "ar": "إدارة حماية الأسرة",
+        "en": "Family Protection Department"
+      },
+      "number": "110",
+      "verified": false,
+      "note": "v1 claim. Confirm from an official PSD source."
+    },
+    {
+      "id": "cybercrime_unit",
+      "label": {
+        "ar": "وحدة الجرائم الإلكترونية",
+        "en": "Cybercrime Unit"
+      },
+      "number": "+962 6 4655660",
+      "verified": false,
+      "note": "v1 attributed this to the 'Ministry of Interior' and also used it as the app's own error-screen support line. Unconfirmed. Do not show until confirmed."
+    },
+    {
+      "id": "telecom_regulator",
+      "label": {
+        "ar": "هيئة تنظيم قطاع الاتصالات",
+        "en": "Telecommunications Regulatory Commission"
+      },
+      "number": "1700",
+      "verified": false,
+      "note": "v1 called it 'TRA Jordan'. Confirm name and number."
+    },
+    {
+      "id": "ministry_of_labour",
+      "label": {
+        "ar": "وزارة العمل",
+        "en": "Ministry of Labour"
+      },
+      "number": "5008080",
+      "verified": false,
+      "note": "v1 claim."
+    },
+    {
+      "id": "arab_bank_fraud",
+      "label": {
+        "ar": "البنك العربي — الاحتيال",
+        "en": "Arab Bank fraud line"
+      },
+      "number": "06-5600000",
+      "verified": false,
+      "note": "CONFLICT: v1 also lists '06 500 0000' for the same line. Prefer the generic advice 'call the number printed on your card' over listing bank numbers."
+    },
+    {
+      "id": "housing_bank_fraud",
+      "label": {
+        "ar": "بنك الإسكان — الاحتيال",
+        "en": "Housing Bank fraud line"
+      },
+      "number": "06-5007777",
+      "verified": false,
+      "note": "v1 claim."
+    }
+  ],
+  "legal": [
+    {
+      "id": "cybercrime_law",
+      "ar": "قانون الجرائم الإلكترونية رقم 17 لسنة 2023 يحميك",
+      "en": "Cybercrime Law No. 17 of 2023 protects you",
+      "origin": "v1",
+      "verified": false,
+      "note": "Confirm law number and year against the official text."
+    },
+    {
+      "id": "extortion_penalty",
+      "ar": "بموجب **قانون الجرائم الإلكترونية رقم 17 لسنة 2023** (الأردن):\n\n• الابتزاز الإلكتروني: من 1 إلى 3 سنوات سجن + غرامة تصل إلى 5000 دينار\n• الوصول غير المصرح به للحسابات: من 6 أشهر إلى سنتين + غرامات\n• الاتصالات التهديدية: من 3 أشهر إلى سنة سجن\n\nأنت الضحية. الشخص الذي يهددك يرتكب جريمة خطيرة. لديك حماية قانونية كاملة.",
+      "en": null,
+      "origin": "v1",
+      "verified": false,
+      "note": "CONFLICT: v1 states two different extortion penalties (this string vs. 'لا تقل عن سنة' elsewhere). Show no penalty numbers until checked against the law text. Use shield.reassurance instead."
+    }
+  ],
+  "shield": {
+    "why_not_ai": "Victims get fixed, reviewed guidance — never generated text.",
+    "intro": {
+      "ar": "ما حدث لك ليس خطأك. هناك أشخاص يمكنهم مساعدتك الآن.",
+      "en": "What happened to you is not your fault. There are people who can help you right now.",
+      "origin": "v1"
+    },
+    "danger_check": {
+      "question": {
+        "ar": "هل أنت في خطر مباشر الآن؟",
+        "en": "Are you in immediate danger right now?",
+        "origin": "new"
+      },
+      "if_yes": {
+        "ar": "سلامتك الجسدية أولاً. اتصل بالطوارئ الآن.",
+        "en": "Your physical safety comes first. Call emergency services now.",
+        "contacts": [
+          "emergency"
+        ],
+        "origin": "v1-edited"
+      },
+      "if_safe_now": [
+        {
+          "ar": "انتقل إلى مكان آمن إن أمكن",
+          "en": "Move to a safe place if you can",
+          "origin": "v1"
+        },
+        {
+          "ar": "أخبر شخصاً تثق به بمكانك",
+          "en": "Tell someone you trust where you are",
+          "origin": "v1"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "id": "dont_pay",
+        "ar": "لا تدفع أي أموال — الدفع لا يضمن توقف المهاجم",
+        "en": "Do not pay any money — paying doesn't guarantee the attacker will stop",
+        "origin": "v1"
+      },
+      {
+        "id": "keep_evidence",
+        "ar": "لا تحذف أي رسائل أو صور أو مقاطع — فهي أدلة قانونية مهمة",
+        "en": "Do NOT delete any messages or images — they are legal evidence",
+        "origin": "v1"
+      },
+      {
+        "id": "screenshot_before_block",
+        "ar": "وثق كل شيء قبل الحجب — لقطات شاشة لجميع الرسائل",
+        "en": "Document everything before blocking — screenshots of all messages",
+        "origin": "v1"
+      },
+      {
+        "id": "restrict_accounts",
+        "ar": "قيّد حسابات وسائل التواصل الاجتماعي الخاصة بك مؤقتاً",
+        "en": "Temporarily restrict your social media accounts to private",
+        "origin": "v1"
+      },
+      {
+        "id": "block",
+        "ar": "احجب الشخص الذي يهددك على جميع المنصات",
+        "en": "Block the person threatening you on all platforms",
+        "origin": "v1"
+      },
+      {
+        "id": "not_public",
+        "ar": "لا تشارك هذا الموقف علناً قبل الحصول على مشورة قانونية",
+        "en": "Do NOT share this situation publicly before seeking legal advice",
+        "origin": "v1"
+      }
+    ],
+    "reassurance": {
+      "ar": "لست وحدك في هذا. الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.",
+      "en": "You are not alone in this. Cyber extortion is a crime under Jordanian law.",
+      "origin": "new",
+      "note": "Replaces v1's 'thousands of Jordanians have faced this', which had no source."
+    },
+    "report_cta": {
+      "ar": "أبلغ بشكل مجهول",
+      "en": "Report anonymously",
+      "origin": "new"
+    },
+    "quick_exit": {
+      "ar": "خروج سريع",
+      "en": "Quick exit",
+      "origin": "new"
+    }
+  },
+  "recover_stretch": {
+    "note": "Stretch only. Rewrite each before use: they contain unverified numbers and unverified claims.",
+    "account_takeover": {
+      "ar": "الاستيلاء على الحساب يتطلب إجراءً فورياً:\n\n1. غير كلمة مرورك الآن من جهاز مختلف\n2. اذهب إلى إعدادات الحساب ← الأمان ← تسجيل الخروج من جميع الجلسات\n3. فعّل المصادقة الثنائية (2FA) فوراً\n4. تحقق مما إذا تم تغيير بريدك الإلكتروني أو هاتف الاسترداد\n\nإذا فقدت الوصول تماماً، تواصل مع دعم المنصة (Meta، Google، إلخ) باستخدام تدفق استرداد الحساب الخاص بهم.\n\nهل لا تزال تملك وصولاً للحساب؟",
+      "en": "Account takeover requires immediate action:\n\n1. Change your password RIGHT NOW from a different device\n2. Go to account settings → Security → Log out all sessions\n3. Enable two-factor authentication (2FA) immediately\n4. Check if your recovery email/phone was changed\n\nIf you've lost access completely, contact the platform's support (Meta, Google, etc.) using their account recovery flow.\n\nDo you still have access to the account?",
+      "origin": "v1"
+    },
+    "money_sent": {
+      "ar": "لا تحول أي أموال — بمجرد الإرسال، يكاد يكون من المستحيل استرداده.\n\nإذا تم الدفع بالفعل:\n1️⃣ اتصل بخط الاحتيال في بنكك فوراً (البنك العربي: 5600000-06)\n2️⃣ اطلب تجميد المعاملة أو استردادها\n3️⃣ قدم بلاغاً للشرطة واحصل على رقم مرجعي للقضية\n\nيمكن لوحدة الجرائم الإلكترونية المساعدة في استرداد الأموال عبر الحدود. هل تريد مني مساعدتك في تقديم بلاغ؟",
+      "en": "Do NOT transfer any money — once sent, it is nearly impossible to recover.\n\nIf payment was already made:\n1️⃣ Call your bank's fraud line immediately (Arab Bank: 06-5600000)\n2️⃣ Request a transaction freeze or recall\n3️⃣ File a police report and get a case reference number\n\nThe Cybercrime Unit can assist with cross-border fund recovery. Shall I help you file a report?",
+      "origin": "v1",
+      "problems": [
+        "unverified Arab Bank number",
+        "claims the Cybercrime Unit can recover funds across borders"
+      ]
+    },
+    "data_theft": {
+      "ar": "سرقة البيانات خطيرة — التصرف السريع يحد من الضرر.\n\nأولاً، حدد ما تمت سرقته:\n• 🪪 رقم الهوية الوطنية / جواز السفر\n• 💳 تفاصيل البطاقة البنكية أو الحساب\n• 📧 بيانات البريد الإلكتروني أو وسائل التواصل الاجتماعي\n• 📋 وثائق شخصية أخرى\n\nلكل فئة خطوات محددة. هل يمكنك إخباري بالبيانات التي تعرضت للاختراق حتى أتمكن من إعطائك الإجراءات الدقيقة؟",
+      "en": "Data theft is serious — acting fast limits the damage.\n\nFirst, identify what was stolen:\n• 🪪 National ID / passport number\n• 💳 Bank card or account details\n• 📧 Email or social media credentials\n• 📋 Other personal documents\n\nFor each category there are specific steps. Can you tell me what data was exposed so I can give you the exact actions to take?",
+      "origin": "v1"
+    }
+  },
+  "educate_stretch": {
+    "patterns": [
+      {
+        "id": "customs_parcel",
+        "ar": "يتلقى الضحايا رسائل واتساب تدّعي أن طرداً محتجز في الجمارك ويتطلب دفعاً فورياً للإفراج عنه.",
+        "en": "Victims receive WhatsApp messages claiming a parcel is held at customs and requiring immediate payment to release it.",
+        "origin": "v1"
+      },
+      {
+        "id": "bank_otp_call",
+        "ar": "مكالمات احتيالية تدّعي أنها من البنك العربي تفيد بأن حسابك موقوف وتطلب رمز OTP لإعادة تفعيله.",
+        "en": "Phishing calls claiming to be from Arab Bank saying your account is suspended and requesting OTP to reactivate.",
+        "origin": "v1"
+      },
+      {
+        "id": "traffic_fine_sms",
+        "ar": "رسائل SMS تنتحل صفة إدارة السير تدّعي وجود مخالفات مرورية مستحقة الدفع عبر رابط.",
+        "en": "SMS messages impersonating the traffic department claiming outstanding fines payable via link.",
+        "origin": "v1"
+      },
+      {
+        "id": "tax_refund_sms",
+        "ar": "يقوم المحتالون بإرسال رسائل SMS تدّعي أنها من وزارة المالية تطلب تحديث بيانات الحساب البنكي لاستلام المبالغ الضريبية المستردة.",
+        "en": "Fraudsters are sending SMS messages claiming to be from the Ministry of Finance requesting bank account updates to receive tax refunds.",
+        "origin": "v1"
+      },
+      {
+        "id": "crypto_telegram",
+        "ar": "مجموعات تيليغرام تعد بعائدات 200% على الاستثمارات في العملات الرقمية خلال 48 ساعة تستهدف الشباب الأردني.",
+        "en": "Telegram groups promising 200% returns on crypto investments in 48 hours targeting Jordanian youth.",
+        "origin": "v1"
+      },
+      {
+        "id": "fake_scholarship",
+        "ar": "رسائل بريد إلكتروني تعرض منحاً دراسية كاملة في جامعات أوروبية تتطلب \"رسوم معالجة\" ووثائق شخصية.",
+        "en": "Emails offering full scholarships to European universities requiring \"processing fees\" and personal documents.",
+        "origin": "v1"
+      },
+      {
+        "id": "fake_ssc_jobs",
+        "ar": "وظائف شاغرة مزيفة يُدّعى أنها من مؤسسة الضمان الاجتماعي تتطلب دفع رسوم تسجيل.",
+        "en": "Fake job vacancies supposedly from the Social Security Corporation requiring payment for registration fees.",
+        "origin": "v1"
+      },
+      {
+        "id": "gift_card",
+        "ar": "رسائل تدّعي أنك فزت ببطاقة هدايا أمازون، تُوجّه إلى مواقع احتيالية تسرق تفاصيل البطاقة.",
+        "en": "Messages claiming you won an Amazon gift card, directing to phishing sites that steal card details.",
+        "origin": "v1"
+      }
+    ],
+    "rules_of_thumb": [
+      {
+        "ar": "البنوك والجهات الحكومية لا تطلب أبداً رموز OTP عبر واتساب",
+        "en": "Banks and government agencies never ask for OTPs over WhatsApp",
+        "origin": "v1"
+      },
+      {
+        "ar": "إذا بدا العرض جيداً أكثر مما ينبغي، فهو على الأرجح كذلك",
+        "en": "If an offer seems too good to be true, it probably is",
+        "origin": "v1"
+      },
+      {
+        "ar": "أي وظيفة تتطلب دفعاً مسبقاً هي دائماً احتيال — أبلغ عنها",
+        "en": "Any job requiring upfront payment is always a scam — report it",
+        "origin": "v1"
+      },
+      {
+        "ar": "تحقق دائماً من الرابط قبل أن تضغط عليه",
+        "en": "Always check a link before you tap it",
+        "origin": "v1-edited"
+      }
+    ],
+    "known_inconsistency": "v1 Arabic names 'بنك الاستثمار الأردني' where the English names 'Jordan Islamic Bank' for the same OTP-call pattern. Don't port either bank name."
+  },
+  "rewrite_required": [
+    {
+      "v1_ar": "تم إرسال بلاغك بشكل مشفر ومجهول الهوية إلى السلطات المختصة. ستتابع الجهات المعنية قضيتك.",
+      "problem": "Claims the report was sent, encrypted, to the competent authorities.",
+      "use_instead": {
+        "ar": "استُلم بلاغك في منصة درع. احتفظ برقم البلاغ للمتابعة.",
+        "en": "Your report was received on the DARA' platform. Keep the case number to follow up."
+      }
+    },
+    {
+      "v1_ar": "تم إخطار السلطات. لن يتم الاتصال بك دون موافقتك.",
+      "problem": "Claims authorities were notified.",
+      "use_instead": "same as above"
+    },
+    {
+      "v1_ar": "لا تُحفظ أي بيانات شخصية. البلاغ مشفر بالكامل.",
+      "problem": "'Fully encrypted' and 'no personal data stored' — unverifiable.",
+      "use_instead": {
+        "ar": "لا نطلب اسمك أو رقم هاتفك.",
+        "en": "We don't ask for your name or phone number."
+      }
+    },
+    {
+      "v1_ar": "مجهول الهوية تلقائياً — لا نحفظ أي بيانات شخصية",
+      "problem": "Same as above.",
+      "use_instead": "same as above"
+    },
+    {
+      "v1_ar": "مرحباً. هذا خط دعم جرائم الإنترنت في درع — جلستك مجهولة الهوية ومشفرة بالكامل.\n\nأنا هنا لمساعدتك الآن. أخبرني بما حدث وسأرشدك خلال الخطوات الصحيحة.",
+      "problem": "Presents the app as a 'cybercrime support line', 'fully encrypted'. v2 Shield is guided steps, not a hotline."
+    },
+    {
+      "v1_ar": "يمكنني إعداد بلاغ رسمي مجهول الهوية لوحدة الجرائم الإلكترونية الآن. لن يتم الكشف عن هويتك أبداً.\n\nسيُرسل البلاغ إلى:\n• وحدة الجرائم الإلكترونية — وزارة الداخلية (+962 6 4655660)\n• إدارة حماية الأسرة (110)\n\nهذا ينشئ ملف قضية يمكن للمحققين التصرف بناءً عليه. عد إلى الشاشة الرئيسية واضغط على **'أرسل بلاغاً للسلطات'** — يستغرق أقل من 30 ثانية.\n\nهل هناك شيء آخر يمكنني مساعدتك به؟",
+      "problem": "Promises the report 'will be sent to' the Cybercrime Unit and Family Protection."
+    },
+    {
+      "v1_ar": "عذراً، حدث خطأ. يرجى المحاولة مرة أخرى أو الاتصال بـ +962 6 4655660",
+      "problem": "Error screen sends users to an unverified phone number."
+    },
+    {
+      "v1_ar": "ما يحدث لك ليس خطأك. أنت شجاع لطلب المساعدة. واجه آلاف الأردنيين هذا الموقف وتعافوا. السلطات مجهزة لمساعدتك — لا يجب أن تواجه هذا وحدك.",
+      "problem": "'Thousands of Jordanians' — unsourced statistic."
+    },
+    {
+      "v1_ar": "يحصل عرض العمل هذا على 87/100 في مؤشر كشف الاحتيال. مجموعة الرسوم المسبقة والراتب غير الواقعي وعدم الحاجة لخبرة هي سمات احتيال الرسوم المسبقة الذي يستهدف الباحثين عن عمل في الأردن.",
+      "problem": "Scripted '87/100' score presented as if computed."
+    },
+    {
+      "v1_ar": "يقارن الذكاء الاصطناعي المحتوى مع أنماط احتيال خاصة بالأردن وقواعد بيانات التهديدات العالمية.",
+      "problem": "Claims cross-referencing 'global threat databases' — v2 does not."
+    }
+  ]
+}

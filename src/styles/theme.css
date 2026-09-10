@@ -1,0 +1,20 @@
+/*
+ * The deck's identity. Three colours, nothing else.
+ *
+ * --paper is a PLACEHOLDER cream until reference/brand/dara-mark.png is in the
+ * repo: run `npm run brand:sample` and it is replaced with the exact colour
+ * sampled from the mark's background, so the mark sits on the page with no
+ * visible box. See DECISIONS.md.
+ */
+:root {
+  --paper: #f4efe6; /* PLACEHOLDER — npm run brand:sample */
+  --ink: #000000;
+  --threat: #c40b29;
+
+  --ink-70: color-mix(in srgb, var(--ink) 70%, var(--paper));
+  --ink-55: color-mix(in srgb, var(--ink) 55%, var(--paper));
+  --ink-20: color-mix(in srgb, var(--ink) 20%, var(--paper));
+  --ink-12: color-mix(in srgb, var(--ink) 12%, var(--paper));
+
+  color-scheme: light;
+}

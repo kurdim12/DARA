@@ -1,0 +1,110 @@
+import type {
+  AnalyzeResponse,
+  Channel,
+  Lang,
+  ReportRequest,
+  ReportResponse,
+} from "../../shared/types";
+import { cachedVerdictFor } from "./demo";
+import type { TextKey } from "../i18n";
+
+/** A live check that takes longer than this falls back to a saved result. */
+const SLOW_MS = 8000;
+
+export class AppError extends Error {
+  constructor(readonly key: TextKey) {
+    super(key);
+  }
+}
+
+function errorKeyForStatus(status: number, code?: string): TextKey {
+  if (status === 504 || code === "timeout") return "error.timeout";
+  if (status === 413 || code === "too_long") return "error.too_long";
+  if (status === 429 || code === "rate_limited") return "error.rate_limited";
+  return "error.generic";
+}
+
+async function postAnalyze(
+  text: string,
+  lang: Lang,
+  channel: Channel | undefined,
+  signal: AbortSignal,
+): Promise<AnalyzeResponse> {
+  const res = await fetch("/api/analyze", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text, lang, channel }),
+    signal,
+  });
+
+  if (!res.ok) {
+    let code: string | undefined;
+    try {
+      code = ((await res.json()) as { error?: string }).error;
+    } catch {
+      code = undefined;
+    }
+    throw new AppError(errorKeyForStatus(res.status, code));
+  }
+
+  return (await res.json()) as AnalyzeResponse;
+}
+
+/**
+ * Runs the live check. A staged message falls back to its saved verdict when
+ * the device is offline, the request fails, or it passes the slow mark — and
+ * the screen says so. Anything else surfaces the error.
+ */
+export async function analyze(
+  text: string,
+  lang: Lang,
+  channel?: Channel,
+): Promise<AnalyzeResponse> {
+  const fallback = cachedVerdictFor(text, lang);
+
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    if (fallback) return fallback;
+    throw new AppError("error.offline");
+  }
+
+  const controller = new AbortController();
+  const live = postAnalyze(text, lang, channel, controller.signal);
+
+  if (!fallback) {
+    try {
+      return await live;
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError("error.generic");
+    }
+  }
+
+  let slowTimer: ReturnType<typeof setTimeout> | undefined;
+  const slow = new Promise<"slow">((resolve) => {
+    slowTimer = setTimeout(() => resolve("slow"), SLOW_MS);
+  });
+
+  try {
+    const outcome = await Promise.race([
+      live.then((value) => ({ ok: true as const, value })).catch(() => ({ ok: false as const })),
+      slow,
+    ]);
+    if (outcome === "slow" || outcome.ok === false) {
+      controller.abort();
+      return fallback;
+    }
+    return outcome.value;
+  } finally {
+    if (slowTimer) clearTimeout(slowTimer);
+  }
+}
+
+export async function sendReport(payload: ReportRequest): Promise<ReportResponse> {
+  const res = await fetch("/api/report", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new AppError("error.generic");
+  return (await res.json()) as ReportResponse;
+}

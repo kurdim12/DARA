@@ -1,0 +1,45 @@
+import type { RedFlag } from "../../shared/types";
+
+/**
+ * The original message with each red flag underlined in place and numbered,
+ * so the "Why" list below can point at it.
+ *
+ * The text is rendered as text. A link inside an analyzed message is never
+ * made clickable — tapping it is the exact thing the app is warning against.
+ */
+export function HighlightedMessage({
+  text,
+  flags,
+}: {
+  text: string;
+  flags: RedFlag[];
+}) {
+  const pieces: React.ReactNode[] = [];
+  let cursor = 0;
+
+  flags.forEach((flag, index) => {
+    if (flag.start > cursor) {
+      pieces.push(<span key={`t${index}`}>{text.slice(cursor, flag.start)}</span>);
+    }
+    pieces.push(
+      <mark className="flag" key={`f${index}`}>
+        {text.slice(flag.start, flag.end)}
+        <sup>{index + 1}</sup>
+      </mark>,
+    );
+    cursor = flag.end;
+  });
+
+  if (cursor < text.length) {
+    pieces.push(<span key="tail">{text.slice(cursor)}</span>);
+  }
+
+  return (
+    <p
+      dir="auto"
+      className="whitespace-pre-wrap break-words border-s-2 border-ink-20 ps-4 text-ink"
+    >
+      {pieces}
+    </p>
+  );
+}

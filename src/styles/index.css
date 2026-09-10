@@ -1,0 +1,79 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+@import "@fontsource/ibm-plex-sans-arabic/400.css";
+@import "@fontsource/ibm-plex-sans-arabic/600.css";
+@import "@fontsource/ibm-plex-sans-arabic/700.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-400.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-600.css";
+@import "@fontsource/ibm-plex-sans-arabic/arabic-700.css";
+
+@theme {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-threat: var(--threat);
+  --color-ink-70: var(--ink-70);
+  --color-ink-55: var(--ink-55);
+  --color-ink-20: var(--ink-20);
+  --color-ink-12: var(--ink-12);
+  --font-sans: "IBM Plex Sans Arabic", system-ui, sans-serif;
+}
+
+/*
+ * These go in @layer base on purpose. An unlayered rule beats every layered
+ * one, so a bare `button { color: inherit }` would silently override
+ * `text-paper` and paint a button's label the same colour as its background.
+ */
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    background: var(--paper);
+  }
+
+  body {
+    margin: 0;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    /* A judge reads this over the presenter's shoulder. */
+    font-size: 18px;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Latin digits everywhere, in both languages. */
+  * {
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+
+  button {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+  }
+}
+
+/* The one memorable moment: a red flag marked inside the original message. */
+mark.flag {
+  background: transparent;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--threat);
+  text-decoration-thickness: 3px;
+  text-underline-offset: 6px;
+  /* Arabic sits a lot of dots below the baseline; skip-ink would chop the
+     underline into crumbs exactly where the flag needs to read as one mark. */
+  text-decoration-skip-ink: none;
+}
+
+mark.flag sup {
+  color: var(--threat);
+  font-weight: 700;
+  font-size: 0.7em;
+  padding-inline-start: 2px;
+}

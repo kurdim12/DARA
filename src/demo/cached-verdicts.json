@@ -1,0 +1,8 @@
+{
+  "_meta": {
+    "generated_at": null,
+    "model": null,
+    "note": "Real engine outputs for the staged messages, written by `npm run cache-demo` against the deployed URL. Empty until that has been run. Used only when the pasted text exactly matches a staged message AND the live check is offline, errored, or slower than 8 s."
+  },
+  "verdicts": []
+}
