@@ -41,15 +41,50 @@ export interface AnalyzeArgs {
   channel?: string;
 }
 
+/**
+ * The request body, split out so the per-model shape can be asserted in tests.
+ * Sending `temperature` to Sonnet 5, or letting it default to adaptive thinking,
+ * are both silent mistakes a local run cannot catch — the first is a 400, the
+ * second quietly spends the token budget and the demo's seconds.
+ */
+export function buildRequestBody(
+  args: AnalyzeArgs,
+): Anthropic.MessageCreateParamsNonStreaming {
+  const profile = modelProfile(args.model);
+  const wantsThinking = args.thinking === "adaptive";
+
+  const body: Anthropic.MessageCreateParamsNonStreaming = {
+    model: args.model,
+    // Adaptive thinking shares this budget with the answer, so it needs room.
+    max_tokens: wantsThinking ? 4000 : BASE_MAX_TOKENS,
+    system: ENGINE_PROMPT_V1,
+    tools: [REPORT_VERDICT_TOOL],
+    tool_choice: { type: "tool", name: REPORT_VERDICT_TOOL.name },
+    messages: [
+      {
+        role: "user",
+        content: buildUserContent(args.text, args.lang, args.channel),
+      },
+    ],
+  };
+
+  if (wantsThinking) {
+    body.thinking = { type: "adaptive" };
+  } else if (profile.acceptsThinkingDisabled) {
+    body.thinking = { type: "disabled" };
+  } else if (profile.acceptsTemperature) {
+    body.temperature = 0;
+  }
+
+  return body;
+}
+
 export interface AnalyzeResult extends PostValidated {
   model: string;
   latency_ms: number;
 }
 
 export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
-  const profile = modelProfile(args.model);
-  const wantsThinking = args.thinking === "adaptive";
-
   const client = new Anthropic({
     apiKey: args.apiKey,
     // One shot inside the 10s wall: a retry would spend the whole budget.
@@ -62,29 +97,7 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
 
   let message: Anthropic.Message;
   try {
-    const body: Anthropic.MessageCreateParamsNonStreaming = {
-      model: args.model,
-      // Adaptive thinking shares this budget with the answer, so it needs room.
-      max_tokens: wantsThinking ? 4000 : BASE_MAX_TOKENS,
-      system: ENGINE_PROMPT_V1,
-      tools: [REPORT_VERDICT_TOOL],
-      tool_choice: { type: "tool", name: REPORT_VERDICT_TOOL.name },
-      messages: [
-        {
-          role: "user",
-          content: buildUserContent(args.text, args.lang, args.channel),
-        },
-      ],
-    };
-
-    if (wantsThinking) {
-      body.thinking = { type: "adaptive" };
-    } else if (profile.acceptsThinkingDisabled) {
-      body.thinking = { type: "disabled" };
-    } else if (profile.acceptsTemperature) {
-      body.temperature = 0;
-    }
-
+    const body = buildRequestBody(args);
     message = await client.messages.create(body, { signal: controller.signal });
   } catch (error) {
     if (controller.signal.aborted) throw new EngineTimeout("engine timed out");

@@ -42,15 +42,26 @@ function percentile(values, p) {
 
 async function callAnalyze(target, model, testCase) {
   const started = Date.now();
-  const res = await fetch(new URL("/api/analyze", target), {
-    method: "POST",
-    headers: { "content-type": "application/json", "X-DARA-Model": model },
-    body: JSON.stringify({
-      text: testCase.text,
-      lang: testCase.lang,
-      channel: testCase.channel,
-    }),
-  });
+  let res;
+  try {
+    res = await fetch(new URL("/api/analyze", target), {
+      method: "POST",
+      headers: { "content-type": "application/json", "X-DARA-Model": model },
+      body: JSON.stringify({
+        text: testCase.text,
+        lang: testCase.lang,
+        channel: testCase.channel,
+      }),
+    });
+  } catch (error) {
+    // A dropped connection must cost one case, not the whole run and every
+    // result already collected.
+    return {
+      status: 0,
+      body: { error: `network: ${error.cause?.code ?? error.message}` },
+      wall: Date.now() - started,
+    };
+  }
   const wall = Date.now() - started;
   let body = null;
   try {
@@ -237,7 +248,12 @@ async function main() {
     md += `| ${s.model} | ${s.cases} | ${s.criticalFailures} | ${s.warnings} | ${s.p50} ms | ${s.p90} ms | ${(s.quoteMatchRate * 100).toFixed(1)}% |\n`;
   }
 
-  const pass = runs.every((r) => r.summary.criticalFailures === 0);
+  const reachable = runs.every((r) => r.rows.some((row) => !row.skipped && row.result.status === 200));
+  const pass =
+    reachable && runs.every((r) => r.summary.criticalFailures === 0);
+  if (!reachable) {
+    md += "> **The target was unreachable — no case returned a verdict.**\n\n";
+  }
   const quotesOk = runs.every((r) => r.summary.quoteMatchRate >= 0.95);
   md += `\n**Deploy gate:** ${pass ? "no critical failures" : "BLOCKED — critical failures above"}. `;
   md += `Quote match rule (95%): ${quotesOk ? "met" : "NOT met"}.\n`;
