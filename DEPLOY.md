@@ -42,13 +42,13 @@ D1 binding to a database the account cannot find.
 | Field | Value |
 |---|---|
 | Build command | `npm run build` |
-| Deploy command | `npx wrangler d1 migrations apply dara --remote && npx wrangler deploy` |
+| Deploy command | `npm run deploy:ci` |
 | Root directory | `/` |
 
-The deploy command creates the `reports` table before deploying. It is safe to
-run every time — a migration already applied is skipped. Leaving it out gives
-you a Worker that looks fine until the first report, which then fails with a
-500 because the table does not exist.
+`deploy:ci` applies the migrations and then deploys. It is safe to run every
+time — a migration already applied is skipped. A plain `npx wrangler deploy`
+gives you a Worker that looks fine until the first report, which then fails
+with a 500 because the `reports` table does not exist.
 
 ## A4. Add the API key
 
@@ -80,7 +80,8 @@ Both flags must be `true`.
 |---|---|
 | `Cannot find type definition file for './worker-configuration.d.ts'` | Old commit. Fixed — the build now generates it. Push again. |
 | ``The `assets` property in your configuration is missing the required `directory` property`` | The build step did not run, so there is nothing to deploy. Set the build command in A3. |
-| `Couldn't find a D1 DB with the name or binding 'dara'` | A1/A2 not done. |
+| ``binding DB of type d1 must have a valid `database_id` specified [code: 10021]`` | `wrangler.jsonc` still says `REPLACE_WITH_DATABASE_ID`. Do A1 and A2. |
+| `Couldn't find a D1 DB with the name or binding 'dara'` | The id in `wrangler.jsonc` does not match a database on this account. |
 | Build fine, but `/api/health` says `db_ready: false` | The `reports` table does not exist — A3's deploy command is missing the migration step. Reports will fail with a 500. |
 | `binding ANALYZE_LIMITER ... ratelimits` | The rate-limit binding is not on this plan. Delete the whole `"ratelimits": [...]` block from `wrangler.jsonc`; the Worker falls back to its own limiter and nothing else changes. |
 | Build succeeds, `/api/analyze` returns 503 | The key secret is missing — A4. |
