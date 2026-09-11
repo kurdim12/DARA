@@ -21,21 +21,24 @@ export function Home({
         <LangToggle />
       </header>
 
-      <div className="flex flex-col items-center pt-14 text-center">
+      <div className="flex flex-col items-center pt-12 text-center">
         <Mark size={148} onLongPress={() => setTrayOpen(true)} />
         <p className="mt-8 max-w-[22rem] text-2xl leading-snug">{t("home.line")}</p>
       </div>
 
-      <div className="mt-12">
+      <div className="mt-11">
         <PrimaryButton onClick={() => navigate("detect")}>
           {t("home.check")}
         </PrimaryButton>
+        {/* What "a digital threat" means here, said once and quietly. Not a
+            feature list, not cards — one line of secondary type. */}
+        <p className="mt-3 text-center text-sm text-ink-55">{t("home.scope")}</p>
       </div>
 
       <button
         type="button"
         onClick={() => navigate("shield")}
-        className="mt-10 block w-full border-2 border-threat px-5 py-4 text-start"
+        className="mt-9 block w-full border-2 border-threat px-5 py-4 text-start"
       >
         <span className="block text-xl font-semibold text-threat">
           {t("shield.entry")}
