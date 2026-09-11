@@ -108,11 +108,11 @@ secret is picked up.
 ```bash
 npm run eval -- --target https://<your-url> --compare   # writes EVAL-REPORT.md
 npm run cache-demo -- --target https://<your-url>       # fills the offline fallback
-npm run brand:sample                                    # once dara-mark.png is in reference/brand/
+npm run brand:apply                                    # once dara-mark.png is in reference/brand/
 npm run verify                                          # typecheck, tests, honesty grep, build
 ```
 
-`npm run brand:sample` changes the paper colour and all three icons, so commit
+`npm run brand:apply` changes the paper colour and all three icons, so commit
 and push (Path A) or run `npm run deploy` (Path B) afterwards.
 
 # Local development

@@ -22,7 +22,7 @@ The detection engine calls Claude from the Worker; the key never leaves it.
 | `npm run deploy` | Build and deploy to Cloudflare |
 | `npm run eval -- --target <url> --compare` | Golden set on both candidate models → `EVAL-REPORT.md` |
 | `npm run cache-demo -- --target <url>` | Record the staged messages' verdicts for the offline fallback |
-| `npm run brand:sample` | Sample the paper colour from the mark and render the PWA icons |
+| `npm run brand:apply` | Put the brand mark into the app and render the PWA icons |
 
 ## Layout
 

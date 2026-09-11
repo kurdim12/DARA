@@ -15,11 +15,11 @@
     "db:migrate": "wrangler d1 migrations apply dara --remote",
     "eval": "node scripts/eval.mjs",
     "cache-demo": "node scripts/cache-demo.mjs",
-    "brand:sample": "node scripts/sample-paper.mjs",
     "honesty": "node scripts/honesty-check.mjs",
     "verify": "npm run typecheck && npm run test && npm run honesty && npm run build",
     "demo:stage": "node scripts/stage-demo.mjs",
-    "deploy:ci": "wrangler d1 migrations apply dara --remote && wrangler deploy"
+    "deploy:ci": "wrangler d1 migrations apply dara --remote && wrangler deploy",
+    "brand:apply": "node scripts/brand.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

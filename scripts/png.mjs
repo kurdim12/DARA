@@ -160,6 +160,46 @@ export function encodePng({ width, height, data }) {
   ]);
 }
 
+/**
+ * Area-average downscale. Nearest-neighbour would turn a brush stroke's edge
+ * into crunch; averaging the source pixels each destination pixel covers keeps
+ * the texture the mark is made of.
+ */
+export function resize(image, width, height) {
+  const out = Buffer.alloc(width * height * 4);
+  const sx = image.width / width;
+  const sy = image.height / height;
+
+  for (let y = 0; y < height; y++) {
+    const y0 = Math.floor(y * sy);
+    const y1 = Math.max(y0 + 1, Math.ceil((y + 1) * sy));
+    for (let x = 0; x < width; x++) {
+      const x0 = Math.floor(x * sx);
+      const x1 = Math.max(x0 + 1, Math.ceil((x + 1) * sx));
+      let r = 0, g = 0, b = 0, a = 0, n = 0;
+      for (let yy = y0; yy < Math.min(y1, image.height); yy++) {
+        for (let xx = x0; xx < Math.min(x1, image.width); xx++) {
+          const i = (yy * image.width + xx) * 4;
+          const alpha = image.data[i + 3] / 255;
+          r += image.data[i] * alpha;
+          g += image.data[i + 1] * alpha;
+          b += image.data[i + 2] * alpha;
+          a += image.data[i + 3];
+          n += alpha;
+        }
+      }
+      const count = Math.max(1, (Math.min(y1, image.height) - y0) * (Math.min(x1, image.width) - x0));
+      const dst = (y * width + x) * 4;
+      const weight = n || 1;
+      out[dst] = Math.round(r / weight);
+      out[dst + 1] = Math.round(g / weight);
+      out[dst + 2] = Math.round(b / weight);
+      out[dst + 3] = Math.round(a / count);
+    }
+  }
+  return { width, height, data: out };
+}
+
 /** Nearest-neighbour scale of `image` onto a solid background square. */
 export function renderIcon(image, size, background, coverage) {
   const out = Buffer.alloc(size * size * 4);
@@ -177,16 +217,16 @@ export function renderIcon(image, size, background, coverage) {
   const offsetX = Math.round((size - drawW) / 2);
   const offsetY = Math.round((size - drawH) / 2);
 
+  const scaled = resize(image, drawW, drawH);
+
   for (let y = 0; y < drawH; y++) {
-    const sy = Math.min(image.height - 1, Math.floor((y / drawH) * image.height));
     for (let x = 0; x < drawW; x++) {
-      const sx = Math.min(image.width - 1, Math.floor((x / drawW) * image.width));
-      const src = (sy * image.width + sx) * 4;
-      const alpha = image.data[src + 3] / 255;
+      const src = (y * drawW + x) * 4;
+      const alpha = scaled.data[src + 3] / 255;
       if (alpha === 0) continue;
       const dst = ((offsetY + y) * size + (offsetX + x)) * 4;
       for (let c = 0; c < 3; c++) {
-        out[dst + c] = Math.round(image.data[src + c] * alpha + out[dst + c] * (1 - alpha));
+        out[dst + c] = Math.round(scaled.data[src + c] * alpha + out[dst + c] * (1 - alpha));
       }
     }
   }

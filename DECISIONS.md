@@ -9,8 +9,8 @@ One line per default I chose so Abdelrahman didn't have to. Newest last.
 - Left `assets.directory` out of wrangler.jsonc: the Vite plugin sets it from the build output (`dist/client`), confirmed by `wrangler deploy --dry-run`.
 - `compatibility_date` is 2026-09-10 with `nodejs_compat`, which the Anthropic SDK needs on Workers.
 - Local development is `vite dev`, not `wrangler dev`. Bare `wrangler dev` picks up the generated `dist/dara/wrangler.json` and serves the *last build* instead of the current source — that cost an hour of chasing a phantom bug, so `npm run dev` is Vite.
-- Paper is `#F4EFE6`, a **placeholder**. `reference/brand/dara-mark.png` is not in the kit, so nothing could be sampled. `npm run brand:sample` replaces it with the exact colour from the mark, copies the mark to `public/brand/`, and renders the three PWA icons — one command, once the file is there.
-- The PWA icons currently in `public/icons/` are blank squares in the paper colour. The app is installable now; the icons become the mark when `npm run brand:sample` runs.
+- Paper is `#F4EFE6`, a **placeholder**. `reference/brand/dara-mark.png` is not in the kit, so nothing could be sampled. `npm run brand:apply` replaces it with the exact colour from the mark, copies the mark to `public/brand/`, and renders the three PWA icons — one command, once the file is there.
+- The PWA icons currently in `public/icons/` are blank squares in the paper colour. The app is installable now; the icons become the mark when `npm run brand:apply` runs.
 - Until the mark is present the app renders the word درع as plain text rather than drawing a lookalike. The mark is never redrawn, recoloured or traced.
 - Type is IBM Plex Sans Arabic, self-hosted through `@fontsource` (no Google Fonts CDN, so the demo does not depend on venue internet). `reference/deck.pdf` is not in the kit, so `pdffonts` could not be run.
 
@@ -75,8 +75,16 @@ Each of these was reproduced by running the code before it was changed.
 - **The header and Shield's Quick exit sat under the status bar.** `viewport-fit=cover` was set with no safe-area insets. Both now use `env(safe-area-inset-*)`.
 - **A plain tap could open the hidden demo tray.** The long-press timer was a render-scoped variable, and the missing brand mark guarantees a re-render mid-press, so the release could not cancel it. It is a ref now, cleared on unmount.
 - **A redeploy stayed invisible until the next cold launch.** The service worker updated and claimed the page but nothing replaced the document. The app now reloads when a *new* worker takes over, never on first install.
-- **`npm run brand:sample` left `index.html` behind.** The paper colour lives in three places and the sampler updated two, which would have left a seam between the status bar and the page.
+- **`npm run brand:apply` left `index.html` behind.** The paper colour lives in three places and the sampler updated two, which would have left a seam between the status bar and the page.
 - **The whole golden set shipped to the client.** The demo tray imported `content/eval-cases.json`, so every case and its expected verdict landed in the bundle. `npm run demo:stage` now writes a trimmed `src/demo/staged.json`, and a test fails if the two drift.
 
 Accepted, not fixed: `content/v1-content.json` is still imported whole, so the unverified v1 contact numbers sit in the client bundle even though the production build never renders them. Nothing displays them, so rule 3 holds; splitting the file is a tidier follow-up, not a demo blocker.
+
+## The real brand mark
+
+- The mark is white brush strokes on a solid field, and that field is `#C40B29` — the same red the design system reserves for threat. It is shipped exactly as delivered: resized for the web, never redrawn, recoloured or traced.
+- **Paper was NOT sampled from it.** CLAUDE.md says to take the page colour from the mark's background, but doing that here would paint the entire product in the one colour that is supposed to mean danger. Paper stays cream and red keeps its meaning. `npm run brand:apply` now checks this itself: it only adopts the sampled colour when that colour is a light, near-neutral tone, and otherwise leaves the palette alone and says why.
+- One consequence worth Abdelrahman's eye: Home now carries a red mark and a red Shield entry, so red appears twice on a screen where nothing is a threat. If that reads as dilution, the fix is a version of the mark on paper rather than any change in code.
+- The icons are the artwork itself, full-bleed. The maskable one pulls the strokes to 80% so a circular crop cannot cut them, while the red still reaches the edge.
+- Downscaling averages the source pixels each destination pixel covers instead of sampling one. Nearest-neighbour turned the brush edges to crunch, and the texture is the mark.
 
