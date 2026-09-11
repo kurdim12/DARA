@@ -26,27 +26,6 @@ type Stage =
   | { name: "report"; result: AnalyzeResponse }
   | { name: "done"; caseNumber: string };
 
-/**
- * What the person is holding, not what the app does with it. Everything still
- * goes to the same analyze endpoint as text — the mode only shapes the input
- * and, for a call, the channel.
- */
-type InputMode = "text" | "link" | "image" | "call";
-
-const MODES: { id: InputMode; enabled: boolean }[] = [
-  { id: "text", enabled: true },
-  { id: "link", enabled: true },
-  // The engine reads text. There is no OCR behind this, so it is not offered.
-  { id: "image", enabled: false },
-  { id: "call", enabled: true },
-];
-
-const PLACEHOLDER: Record<Exclude<InputMode, "image">, TextKey> = {
-  text: "detect.placeholder",
-  link: "detect.placeholder_link",
-  call: "detect.placeholder_call",
-};
-
 export function Detect({
   navigate,
   seedText,
@@ -58,26 +37,15 @@ export function Detect({
 }) {
   const { t, lang } = useI18n();
   const [text, setText] = useState("");
-  const [mode, setMode] = useState<InputMode>("text");
   const [channel, setChannel] = useState<Channel>("sms");
   const [stage, setStage] = useState<Stage>({ name: "input" });
   const [errorKey, setErrorKey] = useState<TextKey | null>(null);
   const boxRef = useRef<HTMLTextAreaElement>(null);
-  const linkRef = useRef<HTMLInputElement>(null);
-
-  // A call is a call whatever the chips say; a link arrived by no channel we
-  // asked about, so none is claimed.
-  const effectiveChannel: Channel | undefined =
-    mode === "call" ? "call" : mode === "link" ? undefined : channel;
-
-  const focusInput = () =>
-    mode === "link" ? linkRef.current?.focus() : boxRef.current?.focus();
 
   // A message picked from the demo tray lands in the box, unsent.
   useEffect(() => {
     if (seedText === null) return;
     setText(seedText);
-    setMode("text");
     setStage({ name: "input" });
     setErrorKey(null);
     onSeedUsed();
@@ -88,11 +56,11 @@ export function Detect({
     try {
       const clip = await navigator.clipboard.readText();
       if (clip) setText(clip.slice(0, MAX_INPUT_CHARS));
-      else focusInput();
+      else boxRef.current?.focus();
     } catch {
       // Clipboard read is blocked on plenty of phones; say so and move on.
       setErrorKey("detect.paste_failed");
-      focusInput();
+      boxRef.current?.focus();
     }
   }
 
@@ -106,7 +74,7 @@ export function Detect({
     setErrorKey(null);
     setStage({ name: "loading" });
     try {
-      const result = await analyze(trimmed, lang, effectiveChannel);
+      const result = await analyze(trimmed, lang, channel);
       setStage({ name: "verdict", result });
     } catch (error) {
       setErrorKey(error instanceof AppError ? error.key : "error.generic");
@@ -137,7 +105,7 @@ export function Detect({
       <ReportSheet
         result={stage.result}
         text={text.trim()}
-        channel={effectiveChannel}
+        channel={channel}
         onCancel={() => setStage({ name: "verdict", result: stage.result })}
         onDone={(caseNumber) => setStage({ name: "done", caseNumber })}
       />
@@ -160,120 +128,67 @@ export function Detect({
       </header>
 
       <h1 className="mt-6 text-3xl font-bold">{t("detect.title")}</h1>
-      <p className="mt-1.5 text-base text-ink-70">{t("detect.subtitle")}</p>
+      <p className="mt-2 text-base text-ink-70">{t("detect.subtitle")}</p>
 
-      {/* What you are holding. Plain tabs, no icons, and never red — red is
-          reserved for a threat, and choosing an input is not one. */}
-      <div className="mt-6 flex flex-wrap gap-2">
-        {MODES.map(({ id, enabled }) => {
-          const active = mode === id;
-          if (!enabled) {
-            return (
-              <button
-                key={id}
-                type="button"
-                disabled
-                aria-disabled="true"
-                className="cursor-not-allowed border border-ink-12 px-3 py-1.5 text-base text-ink-55"
-              >
-                {t(`mode.${id}` as TextKey)}
-                <span className="ms-1.5 text-xs">{t("mode.soon")}</span>
-              </button>
-            );
-          }
-          return (
-            <button
-              key={id}
-              type="button"
-              aria-pressed={active}
-              onClick={() => {
-                setMode(id);
-                setErrorKey(null);
-              }}
-              className={`border px-3 py-1.5 text-base ${
-                active ? "border-ink bg-ink text-paper" : "border-ink-20 text-ink-70"
-              }`}
-            >
-              {t(`mode.${id}` as TextKey)}
-            </button>
-          );
-        })}
-      </div>
+      {/* One input for everything. A link is text, a number is text, and what
+          a caller said is text — so the person is never asked to file it
+          first. The engine works out what it is looking at. */}
+      <textarea
+        ref={boxRef}
+        // Pasted text sets its own direction. An empty box has none to read, so
+        // it follows the interface instead — otherwise the Arabic placeholder
+        // is laid out as an LTR line and its full stop lands on the wrong end.
+        dir={text.length > 0 ? "auto" : undefined}
+        value={text}
+        disabled={busy}
+        maxLength={MAX_INPUT_CHARS}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={t("detect.placeholder")}
+        className="mt-7 h-[248px] w-full resize-none border-[1.5px] border-ink bg-paper p-4 text-lg leading-relaxed placeholder:text-ink-55"
+      />
 
-      {mode === "link" ? (
-        <input
-          ref={linkRef}
-          type="text"
-          inputMode="url"
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          dir="auto"
-          value={text}
-          disabled={busy}
-          maxLength={MAX_INPUT_CHARS}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t("detect.placeholder_link")}
-          className="mt-5 w-full border-2 border-ink bg-paper p-4 text-lg placeholder:text-ink-55"
-        />
-      ) : (
-        <textarea
-          ref={boxRef}
-          dir="auto"
-          value={text}
-          disabled={busy}
-          maxLength={MAX_INPUT_CHARS}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={t(PLACEHOLDER[mode === "call" ? "call" : "text"])}
-          rows={6}
-          className="mt-5 w-full resize-y border-2 border-ink bg-paper p-4 text-lg leading-relaxed placeholder:text-ink-55"
-        />
-      )}
-
-      <div className="mt-3 flex items-center justify-between">
+      <div className="mt-2.5 flex items-center justify-between text-sm">
         <button type="button" onClick={onPaste} className="border-b border-ink pb-0.5">
           {t("detect.paste")}
         </button>
-        {mode !== "link" && (
-          <span className="text-sm text-ink-55">
-            <bdi>
-              {text.length} / {MAX_INPUT_CHARS}
-            </bdi>
-          </span>
-        )}
+        <span className="text-ink-55">
+          <bdi>
+            {text.length} / {MAX_INPUT_CHARS}
+          </bdi>
+        </span>
       </div>
 
-      {/* Only text mode asks how it arrived: a call answers that by itself,
-          and a link does not have an answer worth guessing at. */}
-      {mode === "text" && (
-        <div className="mt-6">
-          <SectionTitle>{t("detect.channel")}</SectionTitle>
-          <div className="flex flex-wrap gap-1.5">
-            {CHANNELS.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setChannel(option)}
-                className={`border px-2.5 py-1 text-sm ${
-                  channel === option
-                    ? "border-ink bg-ink text-paper"
-                    : "border-ink-20 text-ink-70"
-                }`}
-              >
-                {t(`channel.${option}` as TextKey)}
-              </button>
-            ))}
-          </div>
+      {/* Useful to the engine, not a decision the person has to make: it is
+          already answered, and it stays quiet enough to skip. */}
+      <div className="mt-7">
+        <p className="text-xs font-semibold uppercase tracking-widest text-ink-55">
+          {t("detect.channel")}
+        </p>
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          {CHANNELS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => setChannel(option)}
+              className={`border px-2 py-0.5 text-sm ${
+                channel === option
+                  ? "border-ink bg-ink text-paper"
+                  : "border-ink-20 text-ink-70"
+              }`}
+            >
+              {t(`channel.${option}` as TextKey)}
+            </button>
+          ))}
         </div>
-      )}
+      </div>
 
       {errorKey && (
-        <p role="alert" className="mt-6 border-s-4 border-threat ps-3 text-base text-ink">
+        <p role="alert" className="mt-5 border-s-4 border-threat ps-3 text-base text-ink">
           {t(errorKey)}
         </p>
       )}
 
-      <div className="mt-8">
+      <div className="mt-7">
         <PrimaryButton onClick={onCheck} disabled={busy || text.trim().length === 0}>
           {busy ? t("detect.loading") : t("detect.cta")}
         </PrimaryButton>
@@ -397,7 +312,7 @@ function ReportSheet({
 }: {
   result: AnalyzeResponse;
   text: string;
-  channel: Channel | undefined;
+  channel: Channel;
   onCancel: () => void;
   onDone: (caseNumber: string) => void;
 }) {
