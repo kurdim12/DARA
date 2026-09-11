@@ -20,6 +20,7 @@ const PUBLIC_MARK = fileURLToPath(new URL("public/brand/dara-mark.png", root));
 const ICONS_DIR = fileURLToPath(new URL("public/icons/", root));
 const THEME = fileURLToPath(new URL("src/styles/theme.css", root));
 const VITE_CONFIG = fileURLToPath(new URL("vite.config.ts", root));
+const INDEX_HTML = fileURLToPath(new URL("index.html", root));
 
 if (!existsSync(MARK)) {
   console.error(`Missing ${MARK}`);
@@ -73,6 +74,15 @@ let viteConfig = await readFile(VITE_CONFIG, "utf8");
 viteConfig = viteConfig.replace(/const PAPER = "#[0-9a-fA-F]{6}";/, `const PAPER = "${hex}";`);
 await writeFile(VITE_CONFIG, viteConfig, "utf8");
 
+// Browsers prefer this meta over the manifest for the status-bar chrome, so
+// leaving it behind puts a visible seam at the top of the installed app.
+let indexHtml = await readFile(INDEX_HTML, "utf8");
+indexHtml = indexHtml.replace(
+  /(<meta name="theme-color" content=")#[0-9a-fA-F]{6}(")/,
+  `$1${hex}$2`,
+);
+await writeFile(INDEX_HTML, indexHtml, "utf8");
+
 await mkdir(fileURLToPath(new URL("public/brand/", root)), { recursive: true });
 await copyFile(MARK, PUBLIC_MARK);
 
@@ -90,6 +100,6 @@ for (const icon of icons) {
 }
 
 console.log(`paper = ${hex}  (from ${image.width}×${image.height} mark)`);
-console.log("updated src/styles/theme.css and vite.config.ts");
+console.log("updated src/styles/theme.css, vite.config.ts and index.html");
 console.log("copied public/brand/dara-mark.png");
 console.log(`wrote ${icons.map((i) => i.name).join(", ")}`);

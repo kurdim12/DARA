@@ -62,3 +62,21 @@ One line per default I chose so Abdelrahman didn't have to. Newest last.
 - The demo tray takes its staged messages from `content/eval-cases.json`, not from the saved verdicts, so it works before `npm run cache-demo` has ever run.
 - The eval harness survives a network error: one case fails instead of the whole run, and a run that reached nothing is reported unreachable rather than as a pass.
 
+## Audit findings, fixed
+
+Twelve findings came out of a multi-agent audit of the deploy path and the app.
+Each of these was reproduced by running the code before it was changed.
+
+- **Invented phone numbers could reach the user.** The action filter compared a candidate number against every digit in the message concatenated into one string, so `0791234567` passed against a message containing `079123`, `4567` and `24` separately. It now matches against each run of digits individually. This was a breach of hard rule 4, and it only ever failed one way — letting a fabricated number through.
+- **An action quoting the message's own URL was dropped.** The URL pattern swallowed the Arabic comma that normally follows a link in Arabic prose, so the action looked invented. Arabic punctuation is excluded from the match and stripped from the tail.
+- **`ENGINE_THINKING=adaptive` would have broken Haiku.** The adaptive branch ran before the model profile was consulted, so flipping that var — the whole point of it existing — would have sent an unsupported shape to Haiku 4.5 and 400'd every request. Covered by a test now.
+- **`max_tokens` raised from BUILD.md's 800 to 2000, and `stop_reason` is checked.** A full Arabic verdict (four quotes, four reasons, three actions) comes close enough to 800 that a long message could truncate the tool call; a truncated call still arrives as a tool_use block, so it surfaced as a generic error with nothing in the log to distinguish it. Output is billed on tokens produced, so the headroom costs nothing. This is a deliberate divergence from BUILD.md.
+- **iOS turned numbers in the analyzed message into tappable `tel:` links.** `format-detection: telephone=no` is now set. This was the "never render text from an analyzed message as a clickable link" rule, and it would only have appeared on an iPhone.
+- **The header and Shield's Quick exit sat under the status bar.** `viewport-fit=cover` was set with no safe-area insets. Both now use `env(safe-area-inset-*)`.
+- **A plain tap could open the hidden demo tray.** The long-press timer was a render-scoped variable, and the missing brand mark guarantees a re-render mid-press, so the release could not cancel it. It is a ref now, cleared on unmount.
+- **A redeploy stayed invisible until the next cold launch.** The service worker updated and claimed the page but nothing replaced the document. The app now reloads when a *new* worker takes over, never on first install.
+- **`npm run brand:sample` left `index.html` behind.** The paper colour lives in three places and the sampler updated two, which would have left a seam between the status bar and the page.
+- **The whole golden set shipped to the client.** The demo tray imported `content/eval-cases.json`, so every case and its expected verdict landed in the bundle. `npm run demo:stage` now writes a trimmed `src/demo/staged.json`, and a test fails if the two drift.
+
+Accepted, not fixed: `content/v1-content.json` is still imported whole, so the unverified v1 contact numbers sit in the client bundle even though the production build never renders them. Nothing displays them, so rule 3 holds; splitting the file is a tidier follow-up, not a demo blocker.
+

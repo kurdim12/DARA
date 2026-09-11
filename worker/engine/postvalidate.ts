@@ -29,15 +29,36 @@ export interface PostValidated {
 
 const VERDICTS: Verdict[] = ["scam", "suspicious", "likely_safe"];
 
-/** http(s) links, protocol-relative links, and bare www./domain-looking tokens. */
+/**
+ * http(s) links, protocol-relative links, and bare www./domain-looking tokens.
+ * Arabic punctuation is excluded from the run: a URL at the end of an Arabic
+ * clause is normally followed by ، or ؛, and swallowing it made the action
+ * look invented and got it dropped.
+ */
 const URL_LIKE =
-  /(?:https?:\/\/|www\.)[^\s<>"'()[\]{}]+|\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9-]+)*\.(?:com|net|org|info|biz|co|io|me|jo|gov|edu|xyz|top|link|live|site|online|shop|pay|app)\b(?:\/[^\s<>"'()[\]{}]*)?/gi;
+  /(?:https?:\/\/|www\.)[^\s<>"'()[\]{}،؛؟«»]+|\b[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9-]+)*\.(?:com|net|org|info|biz|co|io|me|jo|gov|edu|xyz|top|link|live|site|online|shop|pay|app)\b(?:\/[^\s<>"'()[\]{}،؛؟«»]*)?/gi;
+
+/** Trailing punctuation that ends a sentence rather than belonging to the URL. */
+const TRAILING_PUNCTUATION = /[.,;:!?،؛؟»)\]]+$/u;
 
 /** 6+ digits, optionally grouped by spaces, dashes, dots or parentheses. */
 const PHONE_LIKE = /\+?\d[\d\s().-]{4,}\d/g;
 
+/** Every separate run of digits in the message, each collapsed to bare digits. */
+const NUMBER_RUN = /\+?\d[\d\s().-]*\d|\d/g;
+
 function digitsOnly(value: string): string {
   return value.replace(/\D+/g, "");
+}
+
+/**
+ * A number counts as present only if it sits inside ONE run of digits in the
+ * message. Matching against every digit in the message glued together let a
+ * fabricated number be assembled out of pieces of unrelated ones — an order
+ * number, a price and a deadline — and shown to the user as a real one.
+ */
+function numberRuns(haystack: string): string[] {
+  return (haystack.match(NUMBER_RUN) ?? []).map(digitsOnly).filter(Boolean);
 }
 
 function asString(value: unknown): string {
@@ -117,6 +138,7 @@ export function postValidate(raw: RawVerdict, originalText: string): PostValidat
   kept.sort((a, b) => a.start - b.start);
 
   const haystack = normalize(originalText);
+  const haystackNumbers = numberRuns(haystack);
   const rawActions = Array.isArray(raw.actions) ? raw.actions : [];
   const actions: string[] = [];
   let droppedActions = 0;
@@ -132,12 +154,12 @@ export function postValidate(raw: RawVerdict, originalText: string): PostValidat
     const phones = action.match(PHONE_LIKE) ?? [];
 
     const inventedUrl = urls.some(
-      (url) => !haystack.includes(normalize(url).replace(/[.,;:]+$/, "")),
+      (url) => !haystack.includes(normalize(url).replace(TRAILING_PUNCTUATION, "")),
     );
     const inventedPhone = phones.some((phone) => {
       const digits = digitsOnly(phone);
       if (digits.length < 6) return false;
-      return !digitsOnly(haystack).includes(digits);
+      return !haystackNumbers.some((run) => run.includes(digits));
     });
 
     if (inventedUrl || inventedPhone) {

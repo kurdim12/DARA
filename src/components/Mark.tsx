@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Abdelrahman's brush-stroke درع. The file is dropped in at
@@ -13,15 +13,24 @@ export function Mark({
   onLongPress?: () => void;
 }) {
   const [missing, setMissing] = useState(false);
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  // A ref, not a local: swapping the <img> for the text fallback re-renders this
+  // component mid-press, and a render-scoped handle would be lost — so the
+  // release could not cancel the timer and a plain tap opened the tray.
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
+  const cancel = () => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+      timer.current = undefined;
+    }
+  };
   const start = () => {
     if (!onLongPress) return;
-    timer = setTimeout(onLongPress, 1200);
+    cancel();
+    timer.current = setTimeout(onLongPress, 1200);
   };
-  const cancel = () => {
-    if (timer) clearTimeout(timer);
-  };
+
+  useEffect(() => cancel, []);
 
   const handlers = onLongPress
     ? {

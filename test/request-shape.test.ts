@@ -17,7 +17,7 @@ describe("buildRequestBody", () => {
   it("turns thinking off explicitly on Sonnet 5, which would otherwise run adaptive", () => {
     const body = buildRequestBody({ ...base, model: "claude-sonnet-5" });
     expect(body.thinking).toEqual({ type: "disabled" });
-    expect(body.max_tokens).toBe(800);
+    expect(body.max_tokens).toBe(2000);
   });
 
   it("sends temperature to Haiku 4.5 and leaves thinking unset", () => {
@@ -41,6 +41,16 @@ describe("buildRequestBody", () => {
     expect(body.thinking).toEqual({ type: "adaptive" });
     expect(body.max_tokens).toBe(4000);
     expect(body).not.toHaveProperty("temperature");
+  });
+
+  it("never asks Haiku 4.5 for adaptive thinking, which it cannot do", () => {
+    const body = buildRequestBody({
+      ...base,
+      model: "claude-haiku-4-5",
+      thinking: "adaptive",
+    });
+    expect(body).not.toHaveProperty("thinking");
+    expect(body.temperature).toBe(0);
   });
 
   it("forces the verdict tool so no free prose is ever parsed", () => {

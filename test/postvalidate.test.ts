@@ -95,6 +95,41 @@ describe("postValidate", () => {
     expect(out.actions).toHaveLength(2);
   });
 
+  it("drops a phone number stitched together from unrelated numbers in the message", () => {
+    // 079123 + 4567 + 24 concatenated contains 0791234567, which appears nowhere.
+    const message = "طلبك رقم 079123 بقيمة 4567 دينار، ادفع خلال 24 ساعة";
+    const out = postValidate(
+      base({ actions: ["اتصل على 0791234567 للتأكد", "احذف الرسالة."] }),
+      message,
+    );
+    expect(out.actions).toEqual(["احذف الرسالة."]);
+    expect(out.stats.dropped_actions).toBe(1);
+  });
+
+  it("keeps a phone number that really is in the message, however it is spaced", () => {
+    const message = "للاستفسار اتصل على 079 123 4567 خلال ساعات الدوام.";
+    const out = postValidate(
+      base({ actions: ["تحقق من الرقم 0791234567 قبل أن ترد.", "احذف الرسالة."] }),
+      message,
+    );
+    expect(out.actions).toHaveLength(2);
+  });
+
+  it("keeps an action quoting the message's own URL before an Arabic comma", () => {
+    const message = "ادخل الرابط https://bank-secure.example.com/verify لتأكيد حسابك";
+    const out = postValidate(
+      base({
+        actions: [
+          "لا تفتح https://bank-secure.example.com/verify، واحذف الرسالة",
+          "احذف الرسالة.",
+        ],
+      }),
+      message,
+    );
+    expect(out.actions).toHaveLength(2);
+    expect(out.stats.dropped_actions).toBe(0);
+  });
+
   it("forces the Shield route for extortion", () => {
     const out = postValidate(
       base({ category: "extortion", route_to_shield: false }),

@@ -1,6 +1,6 @@
 import type { AnalyzeResponse, Lang } from "../../shared/types";
 import cached from "../demo/cached-verdicts.json";
-import evalCases from "../../content/eval-cases.json";
+import staged from "../demo/staged.json";
 
 interface CachedEntry {
   id: string;
@@ -18,24 +18,14 @@ const FILE = cached as unknown as CachedFile;
 
 export const cacheMeta = FILE._meta;
 
-const PLACEHOLDER = "REPLACE_WITH_EXACT_SMS_TEXT";
-
-interface EvalCase {
-  id: string;
-  demo?: boolean;
-  lang: Lang;
-  text: string;
-}
-
 /**
- * The staged messages come from the golden set, not from the saved verdicts —
- * the tray has to work before `npm run cache-demo` has ever run. A case whose
- * text is still the placeholder is left out: there is nothing to analyze.
+ * The staged messages, written from the golden set by `npm run demo:stage` —
+ * not read from the saved verdicts, because the tray has to work before
+ * `npm run cache-demo` has ever run. Importing the golden set directly would
+ * ship every case and its expected verdict to the client.
  */
 export function stagedMessages(): { id: string; text: string; lang: Lang }[] {
-  return (evalCases.cases as EvalCase[])
-    .filter((entry) => entry.demo === true && entry.text !== PLACEHOLDER)
-    .map(({ id, text, lang }) => ({ id, text, lang }));
+  return staged as { id: string; text: string; lang: Lang }[];
 }
 
 /** True once a staged message has a recorded verdict to fall back on. */

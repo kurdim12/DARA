@@ -45,7 +45,10 @@ export function Shield({ onExit, onHome }: { onExit: () => void; onHome: () => v
 
   // Quick exit stays reachable on every Shield screen, not just at the top.
   const exitBar = (
-    <div className="sticky top-0 z-10 -mx-5 flex justify-between bg-paper px-5 py-3">
+    <div
+      className="sticky top-0 z-10 flex justify-between bg-paper py-3"
+      style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
+    >
       <button type="button" onClick={onHome} className="text-ink-70">
         {t("shield.back")}
       </button>

@@ -5,7 +5,11 @@ import { postValidate, type PostValidated } from "./postvalidate";
 import { REPORT_VERDICT_TOOL, type RawVerdict } from "./tool";
 
 export const ENGINE_TIMEOUT_MS = 10_000;
-const BASE_MAX_TOKENS = 800;
+// BUILD.md specifies 800. A full Arabic verdict — four quotes, four reasons and
+// three actions — lands close enough to that ceiling that a long message can
+// truncate the tool call, and output is billed on tokens produced, so the
+// headroom is free. Logged as a deliberate divergence in DECISIONS.md.
+const BASE_MAX_TOKENS = 2000;
 
 export class EngineTimeout extends Error {}
 export class EngineRateLimited extends Error {}
@@ -68,12 +72,13 @@ export function buildRequestBody(
     ],
   };
 
-  if (wantsThinking) {
+  if (wantsThinking && profile.acceptsThinkingDisabled) {
     body.thinking = { type: "adaptive" };
+  } else if (profile.acceptsTemperature) {
+    // Haiku 4.5 has no adaptive mode; asking for one is a 400.
+    body.temperature = 0;
   } else if (profile.acceptsThinkingDisabled) {
     body.thinking = { type: "disabled" };
-  } else if (profile.acceptsTemperature) {
-    body.temperature = 0;
   }
 
   return body;
@@ -120,6 +125,10 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
   );
   if (!toolUse) {
     throw new EngineFailure(`engine returned no verdict (stop: ${message.stop_reason})`);
+  }
+
+  if (message.stop_reason === "max_tokens") {
+    throw new EngineFailure("engine output truncated at max_tokens");
   }
 
   const validated = postValidate(toolUse.input as RawVerdict, args.text);

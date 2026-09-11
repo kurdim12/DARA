@@ -3,7 +3,17 @@ import { useI18n } from "../i18n";
 
 export function Page({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-[46rem] px-5 pb-16 pt-2">
+    <div
+      className="mx-auto min-h-dvh w-full max-w-[46rem]"
+      // index.html asks for viewport-fit=cover, so the layout runs under the
+      // status bar and the notch. Nothing may sit there.
+      style={{
+        paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+        paddingBottom: "max(4rem, env(safe-area-inset-bottom))",
+        paddingInlineStart: "max(1.25rem, env(safe-area-inset-left))",
+        paddingInlineEnd: "max(1.25rem, env(safe-area-inset-right))",
+      }}
+    >
       {children}
     </div>
   );

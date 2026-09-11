@@ -17,7 +17,8 @@
     "cache-demo": "node scripts/cache-demo.mjs",
     "brand:sample": "node scripts/sample-paper.mjs",
     "honesty": "node scripts/honesty-check.mjs",
-    "verify": "npm run typecheck && npm run test && npm run honesty && npm run build"
+    "verify": "npm run typecheck && npm run test && npm run honesty && npm run build",
+    "demo:stage": "node scripts/stage-demo.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
