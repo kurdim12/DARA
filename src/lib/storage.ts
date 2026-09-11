@@ -8,6 +8,8 @@ const TEST_MODE_KEY = "dara.testMode";
 export interface StoredCase {
   case_number: string;
   saved_at: string;
+  /** What the server said when the report was sent. May be out of date. */
+  status?: string;
 }
 
 function read<T>(key: string, fallback: T): T {
@@ -31,9 +33,9 @@ export function listCases(): StoredCase[] {
   return read<StoredCase[]>(CASES_KEY, []);
 }
 
-export function rememberCase(caseNumber: string): void {
+export function rememberCase(caseNumber: string, status?: string): void {
   const next = [
-    { case_number: caseNumber, saved_at: new Date().toISOString() },
+    { case_number: caseNumber, saved_at: new Date().toISOString(), status },
     ...listCases().filter((c) => c.case_number !== caseNumber),
   ].slice(0, 20);
   write(CASES_KEY, next);

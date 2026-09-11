@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 
-export type Route = "home" | "detect" | "shield" | "lab";
+export type Route = "home" | "detect" | "reports" | "protection" | "shield" | "lab";
 
 const PATHS: Record<Route, string> = {
   home: "/",
   detect: "/detect",
+  reports: "/reports",
+  protection: "/protection",
   shield: "/shield",
   lab: "/lab",
 };
 
 function routeFor(pathname: string): Route {
   if (pathname.startsWith("/detect")) return "detect";
+  if (pathname.startsWith("/reports")) return "reports";
+  if (pathname.startsWith("/protection")) return "protection";
   if (pathname.startsWith("/shield")) return "shield";
   if (pathname.startsWith("/lab")) return "lab";
   return "home";

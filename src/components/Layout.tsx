@@ -1,15 +1,28 @@
 import type { ReactNode } from "react";
 import { useI18n } from "../i18n";
+import { NAV_CLEARANCE } from "./BottomNav";
 
-export function Page({ children }: { children: ReactNode }) {
+export function Page({
+  children,
+  withNav,
+}: {
+  children: ReactNode;
+  /** Set on the four primary destinations so content clears the bottom nav. */
+  withNav?: boolean;
+}) {
   return (
     <div
-      className="mx-auto min-h-dvh w-full max-w-[46rem]"
+      // A flex column so a screen can hand its spare height to a child with
+      // `my-auto` instead of leaving it all in one gap above the nav. Auto
+      // margins collapse when content is tall, so nothing can be clipped.
+      className="mx-auto flex min-h-dvh w-full max-w-[46rem] flex-col"
       // index.html asks for viewport-fit=cover, so the layout runs under the
       // status bar and the notch. Nothing may sit there.
       style={{
         paddingTop: "max(0.5rem, env(safe-area-inset-top))",
-        paddingBottom: "max(4rem, env(safe-area-inset-bottom))",
+        paddingBottom: withNav
+          ? NAV_CLEARANCE
+          : "max(4rem, env(safe-area-inset-bottom))",
         paddingInlineStart: "max(1.25rem, env(safe-area-inset-left))",
         paddingInlineEnd: "max(1.25rem, env(safe-area-inset-right))",
       }}

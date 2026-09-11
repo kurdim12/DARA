@@ -33,7 +33,7 @@ export function Shield({ onExit, onHome }: { onExit: () => void; onHome: () => v
         category: "extortion",
         is_test: isTestMode(),
       });
-      rememberCase(response.case_number);
+      rememberCase(response.case_number, response.status);
       setCaseNumber(response.case_number);
       setStage("done");
     } catch {

@@ -7,6 +7,7 @@ import {
 } from "../../shared/types";
 import { analyze, AppError, sendReport } from "../lib/api";
 import { isTestMode, rememberCase } from "../lib/storage";
+import { BottomNav } from "../components/BottomNav";
 import { HighlightedMessage } from "../components/HighlightedMessage";
 import { VerdictBand } from "../components/VerdictBand";
 import {
@@ -119,7 +120,8 @@ export function Detect({
   const busy = stage.name === "loading";
 
   return (
-    <Page>
+    <>
+      <Page withNav>
       <header className="flex items-center justify-between">
         <button type="button" onClick={() => navigate("home")} className="text-ink-70">
           {t("shield.back")}
@@ -194,7 +196,9 @@ export function Detect({
         </PrimaryButton>
         <p className="mt-3 text-center text-sm text-ink-55">{t("report.privacy")}</p>
       </div>
-    </Page>
+      </Page>
+      <BottomNav active="detect" navigate={navigate} />
+    </>
   );
 }
 
@@ -335,7 +339,7 @@ function ReportSheet({
         message_text: includeText ? text : undefined,
         is_test: isTestMode(),
       });
-      rememberCase(response.case_number);
+      rememberCase(response.case_number, response.status);
       onDone(response.case_number);
     } catch {
       setFailed(true);

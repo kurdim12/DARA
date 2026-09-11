@@ -3,6 +3,8 @@ import { LangProvider } from "./i18n";
 import { useRouter } from "./lib/router";
 import { Home } from "./routes/Home";
 import { Detect } from "./routes/Detect";
+import { Reports } from "./routes/Reports";
+import { Protection } from "./routes/Protection";
 import { Shield } from "./routes/Shield";
 import { Lab } from "./routes/Lab";
 
@@ -22,6 +24,10 @@ function Screens() {
   switch (route) {
     case "detect":
       return <Detect navigate={navigate} seedText={seedText} onSeedUsed={clearSeed} />;
+    case "reports":
+      return <Reports navigate={navigate} />;
+    case "protection":
+      return <Protection navigate={navigate} />;
     case "shield":
       return <Shield onExit={quickExit} onHome={() => navigate("home")} />;
     case "lab":
