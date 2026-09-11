@@ -1,11 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  ALLOWED_IMAGE_TYPES,
   CHANNELS,
   MAX_INPUT_CHARS,
+  type AnalyzeImage,
   type AnalyzeResponse,
   type Channel,
 } from "../../shared/types";
 import { analyze, AppError, sendReport } from "../lib/api";
+import { prepareImage, previewUrl } from "../lib/image";
 import { isTestMode, rememberCase } from "../lib/storage";
 import { BottomNav } from "../components/BottomNav";
 import { HighlightedMessage } from "../components/HighlightedMessage";
@@ -41,7 +44,10 @@ export function Detect({
   const [channel, setChannel] = useState<Channel>("sms");
   const [stage, setStage] = useState<Stage>({ name: "input" });
   const [errorKey, setErrorKey] = useState<TextKey | null>(null);
+  // Held in React state for this one check. Never written to storage.
+  const [image, setImage] = useState<AnalyzeImage | null>(null);
   const boxRef = useRef<HTMLTextAreaElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   // A message picked from the demo tray lands in the box, unsent.
   useEffect(() => {
@@ -65,9 +71,20 @@ export function Detect({
     }
   }
 
+  async function onPickImage(file: File | undefined) {
+    if (!file) return;
+    setErrorKey(null);
+    try {
+      setImage(await prepareImage(file));
+    } catch (error) {
+      setImage(null);
+      setErrorKey(error instanceof AppError ? error.key : "error.bad_image");
+    }
+  }
+
   async function onCheck() {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed && !image) return;
     if (trimmed.length > MAX_INPUT_CHARS) {
       setErrorKey("error.too_long");
       return;
@@ -75,7 +92,7 @@ export function Detect({
     setErrorKey(null);
     setStage({ name: "loading" });
     try {
-      const result = await analyze(trimmed, lang, channel);
+      const result = await analyze(trimmed, lang, channel, image ?? undefined);
       setStage({ name: "verdict", result });
     } catch (error) {
       setErrorKey(error instanceof AppError ? error.key : "error.generic");
@@ -85,6 +102,7 @@ export function Detect({
 
   function reset() {
     setText("");
+    setImage(null);
     setErrorKey(null);
     setStage({ name: "input" });
   }
@@ -94,6 +112,7 @@ export function Detect({
       <VerdictScreen
         result={stage.result}
         text={text.trim()}
+        image={image}
         onReport={() => setStage({ name: "report", result: stage.result })}
         onShield={() => navigate("shield")}
         onAgain={reset}
@@ -150,15 +169,51 @@ export function Detect({
       />
 
       <div className="mt-2.5 flex items-center justify-between text-sm">
-        <button type="button" onClick={onPaste} className="border-b border-ink pb-0.5">
-          {t("detect.paste")}
-        </button>
+        <div className="flex gap-4">
+          <button type="button" onClick={onPaste} className="border-b border-ink pb-0.5">
+            {t("detect.paste")}
+          </button>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            className="border-b border-ink pb-0.5"
+          >
+            {t("detect.image")}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept={ALLOWED_IMAGE_TYPES.join(",")}
+            className="hidden"
+            onChange={(e) => {
+              void onPickImage(e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+        </div>
         <span className="text-ink-55">
           <bdi>
             {text.length} / {MAX_INPUT_CHARS}
           </bdi>
         </span>
       </div>
+
+      {image && (
+        <div className="mt-4 flex items-center gap-3">
+          <img
+            src={previewUrl(image)}
+            alt=""
+            className="h-16 w-16 border border-ink-20 object-cover"
+          />
+          <button
+            type="button"
+            onClick={() => setImage(null)}
+            className="border-b border-ink pb-0.5 text-sm"
+          >
+            {t("detect.image_remove")}
+          </button>
+        </div>
+      )}
 
       {/* Useful to the engine, not a decision the person has to make: it is
           already answered, and it stays quiet enough to skip. */}
@@ -191,8 +246,13 @@ export function Detect({
       )}
 
       <div className="mt-7">
-        <PrimaryButton onClick={onCheck} disabled={busy || text.trim().length === 0}>
-          {busy ? t("detect.loading") : t("detect.cta")}
+        <PrimaryButton
+          onClick={onCheck}
+          disabled={busy || (text.trim().length === 0 && !image)}
+        >
+          {busy
+            ? t(image ? "detect.loading_image" : "detect.loading")
+            : t("detect.cta")}
         </PrimaryButton>
         <p className="mt-3 text-center text-sm text-ink-55">{t("report.privacy")}</p>
       </div>
@@ -202,20 +262,54 @@ export function Detect({
   );
 }
 
+/** One label and one value. Renders nothing when there is no value. */
+function Fact({ label, value }: { label: string; value: string | null }) {
+  if (!value) return null;
+  return (
+    <div className="py-2.5">
+      <dt className="text-xs font-semibold uppercase tracking-widest text-ink-55">
+        {label}
+      </dt>
+      <dd dir="auto" className="mt-1 text-base leading-snug">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
 function VerdictScreen({
   result,
   text,
+  image,
   onReport,
   onShield,
   onAgain,
 }: {
   result: AnalyzeResponse;
   text: string;
+  image: AnalyzeImage | null;
   onReport: () => void;
   onShield: () => void;
   onAgain: () => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
+
+  // A saved verdict recorded before this phase has none of these fields, and
+  // one of those is what airplane mode serves. Missing means absent, not a crash.
+  const category =
+    !result.category || result.category === "none"
+      ? null
+      : t(`category.${result.category}` as TextKey);
+  const goal =
+    !result.attack_goal || result.attack_goal === "none" || result.attack_goal === "unknown"
+      ? null
+      : t(`goal.${result.attack_goal}` as TextKey);
+  const pressure = (result.pressure_methods ?? [])
+    .map((m) => t(`pressure.${m}` as TextKey))
+    .join(" · ");
+  const hasBreakdown = Boolean(
+    category || result.impersonated_entity || result.requested_action || goal || pressure,
+  );
 
   return (
     <Page>
@@ -241,12 +335,92 @@ function VerdictScreen({
         )}
       </p>
 
-      <section className="mt-9">
-        <SectionTitle>{t("verdict.message")}</SectionTitle>
-        <HighlightedMessage text={text} flags={result.red_flags} />
-      </section>
+      {hasBreakdown && (
+        <section className="mt-9">
+          <SectionTitle>{t("verdict.whats_happening")}</SectionTitle>
+          <dl className="divide-y divide-ink-12 border-y border-ink-12">
+            <Fact label={t("verdict.threat_type")} value={category} />
+            <Fact
+              label={t("verdict.impersonated")}
+              value={result.impersonated_entity}
+            />
+            <Fact label={t("verdict.requested")} value={result.requested_action} />
+            <Fact label={t("verdict.goal")} value={goal} />
+            <Fact label={t("verdict.pressure")} value={pressure || null} />
+          </dl>
+        </section>
+      )}
 
-      {result.red_flags.length > 0 && (
+      {result.url_analysis && result.url_analysis.signals.length > 0 && (
+        <section className="mt-9">
+          <SectionTitle>{t("verdict.link")}</SectionTitle>
+          {/* The hostname only. Never a clickable link to the thing we are
+              warning about. */}
+          <p className="break-all text-base">
+            <bdi>{result.url_analysis.hostname}</bdi>
+          </p>
+          <ul className="mt-3 space-y-2">
+            {result.url_analysis.signals.map((code) => (
+              <li key={code} className="border-s-2 border-ink-20 ps-4 text-base">
+                {t(`url.${code}` as TextKey)}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {result.known_threat_match && (
+        <section className="mt-9">
+          <SectionTitle>{t("verdict.pattern")}</SectionTitle>
+          <p dir="auto" className="text-base leading-snug">
+            {lang === "en"
+              ? result.known_threat_match.title_en
+              : result.known_threat_match.title_ar}
+          </p>
+        </section>
+      )}
+
+      {image && result.extracted_text && (
+        <section className="mt-9">
+          <SectionTitle>{t("verdict.read_from_image")}</SectionTitle>
+          <p
+            dir="auto"
+            className="whitespace-pre-wrap break-words border-s-2 border-ink-20 ps-4"
+          >
+            {result.extracted_text}
+          </p>
+        </section>
+      )}
+
+      {image && result.evidence_items && result.evidence_items.length > 0 && (
+        <section className="mt-9">
+          <SectionTitle>{t("verdict.seen_in_image")}</SectionTitle>
+          <ul className="divide-y divide-ink-12 border-y border-ink-12">
+            {result.evidence_items.map((item, index) => (
+              <li key={index} className="py-3">
+                <span className="text-xs font-semibold uppercase tracking-widest text-ink-55">
+                  {t(`evidence.${item.type}` as TextKey)}
+                </span>
+                <p dir="auto" className="mt-1 text-base leading-snug">
+                  {item.value}
+                </p>
+                <p dir="auto" className="mt-1 text-base text-ink-70">
+                  {item.why}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {text && (
+        <section className="mt-9">
+          <SectionTitle>{t("verdict.message")}</SectionTitle>
+          <HighlightedMessage text={text} flags={result.red_flags} />
+        </section>
+      )}
+
+      {text && result.red_flags.length > 0 && (
         <section className="mt-9">
           <SectionTitle>{t("verdict.why")}</SectionTitle>
           <ol className="space-y-3">

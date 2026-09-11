@@ -106,6 +106,20 @@ function judge(testCase, result) {
     problems.push("CRITICAL: extortion did not route to Shield");
   }
 
+  if (testCase.expect_url_signal) {
+    const signals = result.body.url_analysis?.signals ?? [];
+    if (!signals.includes(testCase.expect_url_signal)) {
+      problems.push(`CRITICAL: url signal ${testCase.expect_url_signal} missing`);
+    }
+  }
+
+  if (testCase.accept_attack_goal) {
+    const goal = result.body.attack_goal;
+    if (!testCase.accept_attack_goal.includes(goal)) {
+      warnings.push(`attack_goal ${goal}, expected one of ${testCase.accept_attack_goal.join("/")}`);
+    }
+  }
+
   const headline = String(result.body.headline ?? "");
   const hasArabic = ARABIC.test(headline);
   if (testCase.lang === "ar" && !hasArabic) {
@@ -151,6 +165,7 @@ async function runModel(target, model, cases, gap) {
       flagsMatched: matched,
       flagsKept: stats.flags_kept ?? 0,
       droppedActions: stats.dropped_actions ?? 0,
+      inputKind: result.body?.input_kind ?? "text",
     });
 
     process.stdout.write(
@@ -164,6 +179,10 @@ async function runModel(target, model, cases, gap) {
 function summarize(model, rows) {
   const ran = rows.filter((r) => !r.skipped);
   const latencies = ran.map((r) => r.result.wall);
+  // Reading a screenshot is a different job from reading a line of text, so the
+  // two are never averaged together.
+  const textLatencies = ran.filter((r) => r.inputKind !== "image").map((r) => r.result.wall);
+  const imageLatencies = ran.filter((r) => r.inputKind === "image").map((r) => r.result.wall);
   const totalReturned = ran.reduce((sum, r) => sum + r.flagsReturned, 0);
   const totalMatched = ran.reduce((sum, r) => sum + r.flagsMatched, 0);
   return {
@@ -174,6 +193,11 @@ function summarize(model, rows) {
     warnings: ran.filter((r) => !r.critical && r.warnings.length).length,
     p50: percentile(latencies, 50),
     p90: percentile(latencies, 90),
+    textP50: percentile(textLatencies, 50),
+    textP90: percentile(textLatencies, 90),
+    imageCases: imageLatencies.length,
+    imageP50: percentile(imageLatencies, 50),
+    imageP90: percentile(imageLatencies, 90),
     quoteMatchRate: totalReturned === 0 ? 1 : totalMatched / totalReturned,
   };
 }
@@ -242,10 +266,21 @@ async function main() {
   }
 
   md += "## Summary\n\n";
-  md += "| model | cases | critical failures | warnings | p50 | p90 | quotes matched |\n|---|---|---|---|---|---|---|\n";
+  md += "| model | cases | critical failures | warnings | text p50 | text p90 | quotes matched |\n|---|---|---|---|---|---|---|\n";
   for (const run of runs) {
     const s = run.summary;
-    md += `| ${s.model} | ${s.cases} | ${s.criticalFailures} | ${s.warnings} | ${s.p50} ms | ${s.p90} ms | ${(s.quoteMatchRate * 100).toFixed(1)}% |\n`;
+    md += `| ${s.model} | ${s.cases} | ${s.criticalFailures} | ${s.warnings} | ${s.textP50} ms | ${s.textP90} ms | ${(s.quoteMatchRate * 100).toFixed(1)}% |\n`;
+  }
+
+  const withImages = runs.filter((r) => r.summary.imageCases > 0);
+  if (withImages.length > 0) {
+    md += "\n| model | screenshot cases | image p50 | image p90 |\n|---|---|---|---|\n";
+    for (const run of withImages) {
+      const s = run.summary;
+      md += `| ${s.model} | ${s.imageCases} | ${s.imageP50} ms | ${s.imageP90} ms |\n`;
+    }
+  } else {
+    md += "\nNo screenshot cases in the golden set, so image latency is unmeasured here.\n";
   }
 
   const reachable = runs.every((r) => r.rows.some((row) => !row.skipped && row.result.status === 200));

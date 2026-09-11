@@ -13,10 +13,11 @@ with the per-case table, the latency percentiles, the model comparison, and the
 three weakest outputs quoted in full. It exits non-zero if any critical rule
 fails, so it can gate a deploy.
 
-The harness itself has been exercised end to end against a mock engine: it
-detected a planted critical failure, reported the quote-match rate against the
-95% rule, flagged the case below as unrunnable, and exited non-zero. What it has
-never seen is a real verdict.
+The harness itself has been exercised end to end against a mock engine,
+including the rules added for the analysis phase: a missing
+`claimed_government_non_gov_jo` signal fails the run critically, an unexpected
+`attack_goal` is reported as a warning, and text and screenshot latency are
+measured and reported separately. What it has never seen is a real verdict.
 
 ## Known gap before the first run
 
@@ -25,3 +26,6 @@ never seen is a real verdict.
 `reference/gam-fake-fine.png` is not in the repo, so the SMS could not be
 transcribed and must not be invented. The harness skips the case and flags it
 as **AWAITING TEXT** at the top of the report.
+
+The golden set contains no screenshot cases, so image latency is unmeasured
+until one is added.

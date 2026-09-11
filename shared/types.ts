@@ -50,6 +50,79 @@ export const CATEGORIES: Category[] = [
   "none",
 ];
 
+/** What the interaction is ultimately trying to achieve. */
+export type AttackGoal =
+  | "steal_credentials"
+  | "steal_otp"
+  | "obtain_payment"
+  | "obtain_personal_data"
+  | "account_takeover"
+  | "extortion"
+  | "install_malware"
+  | "redirect_to_fake_service"
+  | "unknown"
+  | "none";
+
+export const ATTACK_GOALS: AttackGoal[] = [
+  "steal_credentials",
+  "steal_otp",
+  "obtain_payment",
+  "obtain_personal_data",
+  "account_takeover",
+  "extortion",
+  "install_malware",
+  "redirect_to_fake_service",
+  "unknown",
+  "none",
+];
+
+/** How the sender pushes the reader into acting. */
+export type PressureMethod =
+  | "urgency"
+  | "fear"
+  | "authority"
+  | "secrecy"
+  | "reward"
+  | "scarcity"
+  | "social_pressure";
+
+export const PRESSURE_METHODS: PressureMethod[] = [
+  "urgency",
+  "fear",
+  "authority",
+  "secrecy",
+  "reward",
+  "scarcity",
+  "social_pressure",
+];
+
+/**
+ * Something the engine could actually see in a screenshot. Takes the place of
+ * character offsets when there is no pasted text to offset into.
+ */
+export interface EvidenceItem {
+  type: string;
+  value: string;
+  why: string;
+}
+
+/** Deterministic facts about a link in the input. Codes, translated client-side. */
+export interface UrlAnalysis {
+  url: string;
+  hostname: string;
+  signals: string[];
+}
+
+/** A documented pattern this case resembles. Never "the same scam". */
+export interface KnownThreatMatch {
+  pattern_id: string;
+  title_ar: string;
+  title_en: string;
+  confidence: "strong";
+  matched_signals: string[];
+  source_name?: string;
+}
+
 /** A red flag that survived post-validation: its quote is present in the input. */
 export interface RedFlag {
   quote: string;
@@ -59,10 +132,26 @@ export interface RedFlag {
   end: number;
 }
 
+/** A screenshot the user chose. Held in memory for one request and no longer. */
+export interface AnalyzeImage {
+  media_type: "image/jpeg" | "image/png" | "image/webp";
+  /** Base64, no data: prefix. */
+  data: string;
+}
+
+export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
+
+/** Conservative: comfortably inside both the Worker and the API's limits. */
+export const MAX_IMAGE_BYTES = 3 * 1024 * 1024;
+
+/** Sonnet 5 reads images up to this on the long edge; larger is downscaled. */
+export const MAX_IMAGE_EDGE = 2576;
+
 export interface AnalyzeRequest {
   text: string;
   lang: Lang;
   channel?: Channel;
+  image?: AnalyzeImage;
 }
 
 export interface AnalyzeResponse {
@@ -75,6 +164,16 @@ export interface AnalyzeResponse {
   actions: string[];
   report_recommended: boolean;
   route_to_shield: boolean;
+  /** Structured breakdown of what is being attempted. */
+  attack_goal: AttackGoal;
+  requested_action: string | null;
+  pressure_methods: PressureMethod[];
+  /** Screenshots only: what the engine could actually read, and what it saw. */
+  extracted_text?: string;
+  evidence_items?: EvidenceItem[];
+  url_analysis?: UrlAnalysis;
+  known_threat_match?: KnownThreatMatch;
+  input_kind: "text" | "image";
   model: string;
   latency_ms: number;
   /** Set when the result came from src/demo/cached-verdicts.json, never from the API. */

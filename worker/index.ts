@@ -1,8 +1,11 @@
 import { Hono } from "hono";
 import {
+  ALLOWED_IMAGE_TYPES,
   CATEGORIES,
   CHANNELS,
+  MAX_IMAGE_BYTES,
   MAX_INPUT_CHARS,
+  type AnalyzeImage,
   type AnalyzeResponse,
   type Category,
   type Channel,
@@ -15,6 +18,8 @@ import {
   EngineTimeout,
   runEngine,
 } from "./engine/analyze";
+import { governmentImpersonationSignal, inspectText, type UrlSignalCode } from "./engine/url";
+import { matchVerifiedPattern, patternById } from "./engine/match";
 import { allowRequest, type RateLimitBinding } from "./lib/ratelimit";
 import { caseNumberFor, idFromCaseNumber } from "./lib/reports";
 
@@ -85,7 +90,12 @@ app.post("/api/analyze", async (c) => {
     return c.json({ error: "bad_request" }, 400);
   }
 
-  const payload = body as { text?: unknown; lang?: unknown; channel?: unknown };
+  const payload = body as {
+    text?: unknown;
+    lang?: unknown;
+    channel?: unknown;
+    image?: unknown;
+  };
   const text = typeof payload.text === "string" ? payload.text.trim() : "";
   const lang: Lang = payload.lang === "en" ? "en" : "ar";
   const channel =
@@ -93,7 +103,25 @@ app.post("/api/analyze", async (c) => {
       ? (payload.channel as Channel)
       : undefined;
 
-  if (text.length === 0) return c.json({ error: "bad_request" }, 400);
+  // A screenshot is accepted only as one of three raster types, under a size
+  // the Worker and the API both handle comfortably. No SVG, no HTML, nothing
+  // that could be executed, and the bytes are never written or logged.
+  let image: AnalyzeImage | undefined;
+  if (payload.image !== undefined && payload.image !== null) {
+    const candidate = payload.image as { media_type?: unknown; data?: unknown };
+    const mediaType = typeof candidate.media_type === "string" ? candidate.media_type : "";
+    const data = typeof candidate.data === "string" ? candidate.data : "";
+    if (!(ALLOWED_IMAGE_TYPES as readonly string[]).includes(mediaType) || !data) {
+      return c.json({ error: "bad_image" }, 415);
+    }
+    // Base64 carries about 3 bytes for every 4 characters.
+    if (Math.floor((data.length * 3) / 4) > MAX_IMAGE_BYTES) {
+      return c.json({ error: "image_too_large" }, 413);
+    }
+    image = { media_type: mediaType as AnalyzeImage["media_type"], data };
+  }
+
+  if (text.length === 0 && !image) return c.json({ error: "bad_request" }, 400);
   if (text.length > MAX_INPUT_CHARS) return c.json({ error: "too_long" }, 413);
 
   if (!(await allowRequest(c.req.raw, c.env.ANALYZE_LIMITER))) {
@@ -106,6 +134,12 @@ app.post("/api/analyze", async (c) => {
     return c.json({ error: "server_error", message: "engine not configured" }, 503);
   }
 
+  // Deterministic, before the model is asked anything: parse only, never fetch.
+  const urlFacts = text ? inspectText(text) : null;
+  const linkFacts = urlFacts
+    ? `hostname=${urlFacts.hostname}; registrable=${urlFacts.registrable}; https=${urlFacts.https}; signals=${urlFacts.signals.join(",") || "none"}`
+    : undefined;
+
   try {
     const result = await runEngine({
       apiKey,
@@ -117,7 +151,29 @@ app.post("/api/analyze", async (c) => {
       text,
       lang,
       channel,
+      image,
+      linkFacts,
     });
+
+    // The government-impersonation signal needs the model's read of who the
+    // message claims to be, so it is added once that is known.
+    const urlSignals: UrlSignalCode[] = urlFacts ? [...urlFacts.signals] : [];
+    if (urlFacts) {
+      const claim = governmentImpersonationSignal(urlFacts, result.category);
+      if (claim) urlSignals.push(claim);
+    }
+
+    // Compared in code against verified evidence only. The corpus is empty
+    // until real evidence is added, so today this is always null.
+    const match = matchVerifiedPattern({
+      category: result.category,
+      impersonated_entity: result.impersonated_entity,
+      channel,
+      attack_goal: result.attack_goal,
+      pressure_methods: result.pressure_methods,
+      url_signals: urlSignals,
+    });
+    const pattern = match ? patternById(match.pattern_id) : null;
 
     const response: AnalyzeResponse & { stats?: unknown } = {
       verdict: result.verdict,
@@ -129,9 +185,33 @@ app.post("/api/analyze", async (c) => {
       actions: result.actions,
       report_recommended: result.report_recommended,
       route_to_shield: result.route_to_shield,
+      attack_goal: result.attack_goal,
+      requested_action: result.requested_action,
+      pressure_methods: result.pressure_methods,
+      input_kind: image ? "image" : "text",
       model: result.model,
       latency_ms: result.latency_ms,
     };
+
+    if (result.extracted_text) response.extracted_text = result.extracted_text;
+    if (result.evidence_items.length > 0) response.evidence_items = result.evidence_items;
+    if (urlFacts) {
+      response.url_analysis = {
+        url: urlFacts.url,
+        hostname: urlFacts.hostname,
+        signals: urlSignals,
+      };
+    }
+    if (match && pattern) {
+      response.known_threat_match = {
+        pattern_id: match.pattern_id,
+        title_ar: pattern.title_ar,
+        title_en: pattern.title_en,
+        confidence: match.confidence,
+        matched_signals: match.matched_signals,
+        source_name: pattern.source_name,
+      };
+    }
     // The eval reads the filter counters; the app ignores them.
     response.stats = result.stats;
     return c.json(response);

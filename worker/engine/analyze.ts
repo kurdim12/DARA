@@ -1,10 +1,11 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { Lang } from "../../shared/types";
+import type { AnalyzeImage, Lang } from "../../shared/types";
 import { buildUserContent, ENGINE_PROMPT_V1 } from "./prompt";
 import { postValidate, type PostValidated } from "./postvalidate";
 import { REPORT_VERDICT_TOOL, type RawVerdict } from "./tool";
 
 export const ENGINE_TIMEOUT_MS = 10_000;
+export const ENGINE_IMAGE_TIMEOUT_MS = 25_000;
 // BUILD.md specifies 800. A full Arabic verdict — four quotes, four reasons and
 // three actions — lands close enough to that ceiling that a long message can
 // truncate the tool call, and output is billed on tokens produced, so the
@@ -43,6 +44,10 @@ export interface AnalyzeArgs {
   text: string;
   lang: Lang;
   channel?: string;
+  /** A screenshot to read. Held for this request only; never written anywhere. */
+  image?: AnalyzeImage;
+  /** Deterministic link facts computed before the call, passed as context. */
+  linkFacts?: string;
 }
 
 /**
@@ -57,19 +62,35 @@ export function buildRequestBody(
   const profile = modelProfile(args.model);
   const wantsThinking = args.thinking === "adaptive";
 
+  const instructions = buildUserContent(args.text, args.lang, args.channel, {
+    hasImage: Boolean(args.image),
+    linkFacts: args.linkFacts,
+  });
+
+  // The image goes first: the model reads the screenshot, then the framing that
+  // tells it what to do with what it read.
+  const content: Anthropic.ContentBlockParam[] = args.image
+    ? [
+        {
+          type: "image",
+          source: {
+            type: "base64",
+            media_type: args.image.media_type,
+            data: args.image.data,
+          },
+        },
+        { type: "text", text: instructions },
+      ]
+    : [{ type: "text", text: instructions }];
+
   const body: Anthropic.MessageCreateParamsNonStreaming = {
     model: args.model,
-    // Adaptive thinking shares this budget with the answer, so it needs room.
-    max_tokens: wantsThinking ? 4000 : BASE_MAX_TOKENS,
+    // A screenshot verdict also carries the text it read, so it needs more room.
+    max_tokens: wantsThinking ? 4000 : args.image ? 3000 : BASE_MAX_TOKENS,
     system: ENGINE_PROMPT_V1,
     tools: [REPORT_VERDICT_TOOL],
     tool_choice: { type: "tool", name: REPORT_VERDICT_TOOL.name },
-    messages: [
-      {
-        role: "user",
-        content: buildUserContent(args.text, args.lang, args.channel),
-      },
-    ],
+    messages: [{ role: "user", content }],
   };
 
   if (wantsThinking && profile.acceptsThinkingDisabled) {
@@ -97,7 +118,10 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
   });
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), ENGINE_TIMEOUT_MS);
+  const timer = setTimeout(
+    () => controller.abort(),
+    args.image ? ENGINE_IMAGE_TIMEOUT_MS : ENGINE_TIMEOUT_MS,
+  );
   const startedAt = Date.now();
 
   let message: Anthropic.Message;
@@ -131,6 +155,8 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
     throw new EngineFailure("engine output truncated at max_tokens");
   }
 
-  const validated = postValidate(toolUse.input as RawVerdict, args.text);
+  const validated = postValidate(toolUse.input as RawVerdict, args.text, {
+    hasImage: Boolean(args.image),
+  });
   return { ...validated, model: args.model, latency_ms };
 }

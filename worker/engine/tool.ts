@@ -1,4 +1,4 @@
-import { CATEGORIES } from "../../shared/types";
+import { ATTACK_GOALS, CATEGORIES, PRESSURE_METHODS } from "../../shared/types";
 
 /**
  * The one tool the engine may call. Forced tool choice means the model has to
@@ -38,6 +38,45 @@ export const REPORT_VERDICT_TOOL = {
       },
       report_recommended: { type: "boolean" },
       route_to_shield: { type: "boolean" },
+      attack_goal: { type: "string", enum: ATTACK_GOALS },
+      requested_action: { type: ["string", "null"] },
+      pressure_methods: {
+        type: "array",
+        maxItems: 3,
+        items: { type: "string", enum: PRESSURE_METHODS },
+      },
+      extracted_text: {
+        type: "string",
+        description:
+          "Screenshots only: text actually readable in the image. Never text you inferred.",
+      },
+      evidence_items: {
+        type: "array",
+        maxItems: 6,
+        description: "Screenshots only: what you could see, and why it matters.",
+        items: {
+          type: "object",
+          properties: {
+            type: {
+              type: "string",
+              enum: [
+                "sender",
+                "domain",
+                "amount",
+                "urgency",
+                "data_request",
+                "payment_demand",
+                "impersonation",
+                "instruction",
+                "other",
+              ],
+            },
+            value: { type: "string" },
+            why: { type: "string" },
+          },
+          required: ["type", "value", "why"],
+        },
+      },
     },
     required: [
       "verdict",
@@ -49,6 +88,9 @@ export const REPORT_VERDICT_TOOL = {
       "actions",
       "report_recommended",
       "route_to_shield",
+      "attack_goal",
+      "requested_action",
+      "pressure_methods",
     ],
   },
 };
@@ -64,4 +106,9 @@ export interface RawVerdict {
   actions?: unknown;
   report_recommended?: unknown;
   route_to_shield?: unknown;
+  attack_goal?: unknown;
+  requested_action?: unknown;
+  pressure_methods?: unknown;
+  extracted_text?: unknown;
+  evidence_items?: unknown;
 }

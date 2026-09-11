@@ -1,6 +1,11 @@
 import {
+  ATTACK_GOALS,
   CATEGORIES,
+  PRESSURE_METHODS,
+  type AttackGoal,
   type Category,
+  type EvidenceItem,
+  type PressureMethod,
   type RedFlag,
   type Verdict,
 } from "../../shared/types";
@@ -17,6 +22,11 @@ export interface PostValidated {
   actions: string[];
   report_recommended: boolean;
   route_to_shield: boolean;
+  attack_goal: AttackGoal;
+  requested_action: string | null;
+  pressure_methods: PressureMethod[];
+  extracted_text: string | null;
+  evidence_items: EvidenceItem[];
   /** Counters for EVAL-REPORT.md, never sent to the app. */
   stats: {
     flags_returned: number;
@@ -24,8 +34,21 @@ export interface PostValidated {
     dropped_unmatched: number;
     dropped_overlap: number;
     dropped_actions: number;
+    dropped_evidence: number;
   };
 }
+
+const EVIDENCE_TYPES = new Set([
+  "sender",
+  "domain",
+  "amount",
+  "urgency",
+  "data_request",
+  "payment_demand",
+  "impersonation",
+  "instruction",
+  "other",
+]);
 
 const VERDICTS: Verdict[] = ["scam", "suspicious", "likely_safe"];
 
@@ -69,7 +92,11 @@ function asString(value: unknown): string {
  * Everything the engine returns is treated as a claim to be checked against the
  * message the user actually pasted. Nothing that fails a check reaches the app.
  */
-export function postValidate(raw: RawVerdict, originalText: string): PostValidated {
+export function postValidate(
+  raw: RawVerdict,
+  originalText: string,
+  options?: { hasImage?: boolean },
+): PostValidated {
   const verdict = VERDICTS.includes(raw.verdict as Verdict)
     ? (raw.verdict as Verdict)
     : null;
@@ -171,6 +198,41 @@ export function postValidate(raw: RawVerdict, originalText: string): PostValidat
 
   const impersonated = asString(raw.impersonated_entity);
 
+  const attack_goal: AttackGoal = ATTACK_GOALS.includes(raw.attack_goal as AttackGoal)
+    ? (raw.attack_goal as AttackGoal)
+    : "unknown";
+
+  const requested_action = asString(raw.requested_action) || null;
+
+  const pressure_methods = (Array.isArray(raw.pressure_methods) ? raw.pressure_methods : [])
+    .filter((m): m is PressureMethod => PRESSURE_METHODS.includes(m as PressureMethod))
+    .filter((m, i, all) => all.indexOf(m) === i)
+    .slice(0, 3);
+
+  // Only a screenshot can produce read text or seen evidence. If no image was
+  // sent, anything here was imagined and is dropped.
+  const rawEvidence =
+    options?.hasImage && Array.isArray(raw.evidence_items) ? raw.evidence_items : [];
+  const evidence_items: EvidenceItem[] = [];
+  let droppedEvidence = 0;
+  for (const item of rawEvidence.slice(0, 6)) {
+    if (!item || typeof item !== "object") {
+      droppedEvidence++;
+      continue;
+    }
+    const entry = item as { type?: unknown; value?: unknown; why?: unknown };
+    const type = asString(entry.type);
+    const value = asString(entry.value);
+    const why = asString(entry.why);
+    if (!EVIDENCE_TYPES.has(type) || !value || !why) {
+      droppedEvidence++;
+      continue;
+    }
+    evidence_items.push({ type, value, why });
+  }
+
+  const extracted_text = options?.hasImage ? asString(raw.extracted_text) || null : null;
+
   return {
     verdict,
     confidence,
@@ -185,12 +247,18 @@ export function postValidate(raw: RawVerdict, originalText: string): PostValidat
     // The extortion route is not the engine's to decline: a victim of
     // blackmail gets the Shield flow regardless of how it filled the field.
     route_to_shield: raw.route_to_shield === true || category === "extortion",
+    attack_goal,
+    requested_action,
+    pressure_methods,
+    extracted_text,
+    evidence_items,
     stats: {
       flags_returned: rawFlags.length,
       flags_kept: kept.length,
       dropped_unmatched: droppedUnmatched,
       dropped_overlap: droppedOverlap,
       dropped_actions: droppedActions,
+      dropped_evidence: droppedEvidence,
     },
   };
 }

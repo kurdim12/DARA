@@ -1,4 +1,5 @@
 import type {
+  AnalyzeImage,
   AnalyzeResponse,
   Channel,
   Lang,
@@ -21,6 +22,8 @@ function errorKeyForStatus(status: number, code?: string): TextKey {
   if (status === 504 || code === "timeout") return "error.timeout";
   if (status === 413 || code === "too_long") return "error.too_long";
   if (status === 429 || code === "rate_limited") return "error.rate_limited";
+  if (status === 415 || code === "bad_image") return "error.bad_image";
+  if (code === "image_too_large") return "error.image_too_large";
   return "error.generic";
 }
 
@@ -29,11 +32,12 @@ async function postAnalyze(
   lang: Lang,
   channel: Channel | undefined,
   signal: AbortSignal,
+  image?: AnalyzeImage,
 ): Promise<AnalyzeResponse> {
   const res = await fetch("/api/analyze", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ text, lang, channel }),
+    body: JSON.stringify({ text, lang, channel, image }),
     signal,
   });
 
@@ -59,7 +63,24 @@ export async function analyze(
   text: string,
   lang: Lang,
   channel?: Channel,
+  image?: AnalyzeImage,
 ): Promise<AnalyzeResponse> {
+  // A screenshot has no saved verdict behind it and takes longer to read, so
+  // it goes straight through with no race against the slow mark.
+  if (image) {
+    const controller = new AbortController();
+    try {
+      return await postAnalyze(text, lang, channel, controller.signal, image);
+    } catch (error) {
+      if (error instanceof AppError) throw error;
+      throw new AppError(
+        typeof navigator !== "undefined" && navigator.onLine === false
+          ? "error.offline"
+          : "error.generic",
+      );
+    }
+  }
+
   const fallback = cachedVerdictFor(text, lang);
 
   if (typeof navigator !== "undefined" && navigator.onLine === false) {

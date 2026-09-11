@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "purpose": "Structured facts about Jordanian scam patterns that have been verified against a named source. DARA' compares a fresh analysis against these and, only on a strong match, tells the user the case resembles a documented pattern.",
+    "source_rule": "An entry may only be added when it comes from genuine evidence with a named source: an official warning, a documented case, or a real message captured from an official source. Content written for v2, model-generated text, and the synthetic eval cases are NOT evidence and must never appear here.",
+    "status": "EMPTY — no verified evidence exists in this repository yet. content/eval-cases.json marks one case as source 'real' (gam_parking_fine) but its text is still REPLACE_WITH_EXACT_SMS_TEXT and reference/gam-fake-fine.png was never added, so nothing can be normalised from it. content/v1-content.json is unverified throughout by its own _meta. Until an entry exists here, matching returns nothing and the app shows no pattern section at all.",
+    "how_to_add": "Append to `patterns` using the shape below. `verified` must be true and `source_name` must name the source. Nothing renders until then.",
+    "shape": {
+      "id": "short_snake_case_id",
+      "title_ar": "short Arabic title",
+      "title_en": "short English title",
+      "impersonated_entity": "the entity the scam claims to be",
+      "categories": ["parcel_customs", "phishing_link"],
+      "channels": ["sms", "whatsapp"],
+      "attack_goals": ["obtain_personal_data"],
+      "indicators": ["parcel", "short_deadline", "non_official_domain", "data_update"],
+      "pressure_methods": ["urgency"],
+      "url_signals": ["claimed_government_non_gov_jo"],
+      "source_name": "who documented it",
+      "source_date": "YYYY-MM-DD",
+      "verified": true
+    }
+  },
+  "patterns": []
+}

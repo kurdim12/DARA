@@ -7,7 +7,9 @@
       "expect=scam cases may return suspicious (logged as a warning, not a failure).",
       "route_to_shield must be true for category extortion.",
       "lang=ar output (headline, why, actions) must be Arabic; lang=en output must be English.",
-      "At least 95% of red_flags quotes must match the input before server-side filtering."
+      "At least 95% of red_flags quotes must match the input before server-side filtering.",
+      "accept_attack_goal, when present, lists the attack_goal values that are acceptable (logged as a warning, not a failure).",
+      "expect_url_signal, when present, must appear in url_analysis.signals. CRITICAL: a missing government-impersonation signal fails the run."
     ],
     "sources": {
       "v1": "message text copied from the v1 app",
@@ -34,7 +36,12 @@
       "channel": "whatsapp",
       "expect": "scam",
       "source": "v1",
-      "text": "عزيزي العميل، تم تعليق حساب البنك العربي مؤقتاً. انقر هنا للتحقق: http://arabbank-secure.verify-now.com"
+      "text": "عزيزي العميل، تم تعليق حساب البنك العربي مؤقتاً. انقر هنا للتحقق: http://arabbank-secure.verify-now.com",
+      "accept_attack_goal": [
+        "steal_credentials",
+        "obtain_personal_data",
+        "redirect_to_fake_service"
+      ]
     },
     {
       "id": "fake_job_fee",
@@ -53,7 +60,10 @@
       "expect": "scam",
       "expect_category": "extortion",
       "source": "synthetic",
-      "text": "عندي صورك الخاصة. إذا ما حولت 300 دينار خلال يومين رح أبعثها لأهلك وأصحابك."
+      "text": "عندي صورك الخاصة. إذا ما حولت 300 دينار خلال يومين رح أبعثها لأهلك وأصحابك.",
+      "accept_attack_goal": [
+        "extortion"
+      ]
     },
     {
       "id": "lottery_sms",
@@ -61,7 +71,10 @@
       "channel": "sms",
       "expect": "scam",
       "source": "v1",
-      "text": "تهانينا! رقمك فاز بـ 5000 دينار في يانصيبنا الوطني. أرسل تفاصيل حسابك البنكي للمطالبة بجائزتك خلال 24 ساعة."
+      "text": "تهانينا! رقمك فاز بـ 5000 دينار في يانصيبنا الوطني. أرسل تفاصيل حسابك البنكي للمطالبة بجائزتك خلال 24 ساعة.",
+      "accept_attack_goal": [
+        "obtain_personal_data"
+      ]
     },
     {
       "id": "bank_otp_call",
@@ -69,7 +82,10 @@
       "channel": "call",
       "expect": "scam",
       "source": "synthetic",
-      "text": "معك قسم الاحتيال في البنك. رصدنا حركة مشبوهة على حسابك. رح يوصلك رمز على هاتفك، اقرأه لي حتى نوقف العملية فوراً."
+      "text": "معك قسم الاحتيال في البنك. رصدنا حركة مشبوهة على حسابك. رح يوصلك رمز على هاتفك، اقرأه لي حتى نوقف العملية فوراً.",
+      "accept_attack_goal": [
+        "steal_otp"
+      ]
     },
     {
       "id": "customs_parcel",
@@ -77,7 +93,10 @@
       "channel": "sms",
       "expect": "scam",
       "source": "synthetic",
-      "text": "الجمارك الأردنية: شحنتك رقم JO48213 محتجزة بسبب رسوم غير مدفوعة بقيمة 1.85 دينار. ادفع خلال 24 ساعة لتجنب إعادتها: https://jo-customs-release.com/pay"
+      "text": "الجمارك الأردنية: شحنتك رقم JO48213 محتجزة بسبب رسوم غير مدفوعة بقيمة 1.85 دينار. ادفع خلال 24 ساعة لتجنب إعادتها: https://jo-customs-release.com/pay",
+      "accept_attack_goal": [
+        "obtain_payment"
+      ]
     },
     {
       "id": "traffic_fine",
@@ -85,7 +104,10 @@
       "channel": "sms",
       "expect": "scam",
       "source": "synthetic",
-      "text": "إدارة السير: لديك مخالفة مرورية غير مسددة بقيمة 20 دينار. سدد الآن عبر الرابط لتجنب مضاعفة الغرامة: https://jo-traffic-fines.net"
+      "text": "إدارة السير: لديك مخالفة مرورية غير مسددة بقيمة 20 دينار. سدد الآن عبر الرابط لتجنب مضاعفة الغرامة: https://jo-traffic-fines.net",
+      "accept_attack_goal": [
+        "obtain_payment"
+      ]
     },
     {
       "id": "tax_refund",
@@ -93,7 +115,12 @@
       "channel": "sms",
       "expect": "scam",
       "source": "synthetic",
-      "text": "وزارة المالية: يحق لك استرداد ضريبي بقيمة 87 دينار. حدّث بيانات حسابك البنكي لاستلام المبلغ: http://mof-jo.verify-now.com"
+      "text": "وزارة المالية: يحق لك استرداد ضريبي بقيمة 87 دينار. حدّث بيانات حسابك البنكي لاستلام المبلغ: http://mof-jo.verify-now.com",
+      "accept_attack_goal": [
+        "obtain_personal_data",
+        "steal_credentials"
+      ],
+      "expect_url_signal": "claimed_government_non_gov_jo"
     },
     {
       "id": "interpol_call",
@@ -159,7 +186,10 @@
       "channel": "sms",
       "expect": "likely_safe",
       "source": "synthetic",
-      "text": "رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبداً."
+      "text": "رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبداً.",
+      "accept_attack_goal": [
+        "none"
+      ]
     },
     {
       "id": "legit_delivery",
@@ -183,7 +213,10 @@
       "channel": "whatsapp",
       "expect": "likely_safe",
       "source": "synthetic",
-      "text": "وصلت البيت؟ طمنّي لما توصل."
+      "text": "وصلت البيت؟ طمنّي لما توصل.",
+      "accept_attack_goal": [
+        "none"
+      ]
     },
     {
       "id": "legit_job",
