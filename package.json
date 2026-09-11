@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "wrangler types && vite build",
+    "build": "node scripts/check-config.mjs && wrangler types && vite build",
     "preview": "vite preview",
     "deploy": "npm run build && wrangler deploy",
     "typecheck": "wrangler types && tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.worker.json --noEmit",

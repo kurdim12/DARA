@@ -17,7 +17,7 @@
     {
       "binding": "DB",
       "database_name": "dara",
-      "database_id": "https://dash.cloudflare.com/ba7ee85f12a6e9e360b2bf6b844a7e37/workers/d1/databases/5d224371-080c-48a6-92b4-fa8949870d38/metrics",
+      "database_id": "5d224371-080c-48a6-92b4-fa8949870d38",
       "migrations_dir": "./migrations"
     }
   ],
