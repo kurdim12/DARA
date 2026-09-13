@@ -51,3 +51,11 @@ jobs:
           name: eval-report
           path: EVAL-REPORT.md
           if-no-files-found: warn
+
+      # Last, so the one line that says whether the Worker is configured is at
+      # the bottom of the log instead of buried above 22 case rows.
+      - name: Health, again, at the end
+        if: always()
+        run: |
+          echo "HEALTH: $(curl -sS --max-time 20 \
+            "${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}/api/health")"
