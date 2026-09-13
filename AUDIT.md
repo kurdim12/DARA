@@ -1,0 +1,209 @@
+# AUDIT.md — DARA' v2, Phase 0
+
+Read-only audit. No code was changed.
+
+- Date: Sun 13 Sep 2026
+- Commit audited: `35bcf6d` on `claude/kind-cray-vyr1v6`, working tree clean
+- Deployed URL: https://dara.abdalrhmankurdi12.workers.dev/
+- `npm run typecheck` — pass. `npm run test` — 69 passed, 6 files. `npm run build` — pass.
+
+## How this audit was run, and what it could not reach
+
+**The deployed URL is not reachable from the machine this audit ran on.** Every
+request to it is refused by the network egress proxy before it leaves the box:
+
+```
+curl https://dara.abdalrhmankurdi12.workers.dev/          -> curl: (56) CONNECT tunnel failed, response 403
+curl https://dara.abdalrhmankurdi12.workers.dev/api/health -> curl: (56) CONNECT tunnel failed, response 403
+```
+
+`api.anthropic.com` is on the proxy's allowed list, but there is no API key on this
+machine and there must not be — the key exists only as a Worker secret.
+
+So sections 3 and 4 could not be run against the deployment as the brief asks.
+Instead they were run against **the production build of the same commit**, served
+locally by the Worker runtime (`npm run build` then `vite preview`, which runs the
+real `worker/index.ts` in workerd against a local D1). That verifies everything
+except the Anthropic call itself. Where a finding depends on the live engine it is
+marked **UNVERIFIED ON THE DEPLOYMENT** and the exact command to run it is given.
+
+---
+
+## 1. Route map
+
+Client-side routing only (`src/lib/router.ts`, `history.pushState`); the Worker
+serves `index.html` for any non-`/api` path. All six routes were loaded at
+390×844, iPhone user agent, RTL, on the production build.
+
+| Route | File | Renders | API called | 390px RTL |
+|---|---|---|---|---|
+| `/` | `src/routes/Home.tsx` (97) | Wordmark, `حمايتك الرقمية تبدأ قبل أن تتصرّف.`, two entries (`افحص تهديدًا`, `تحتاج مساعدة الآن؟`), last-report block when one is stored locally | none | OK — no overflow, `dir=rtl`, `lang=ar` |
+| `/detect` | `src/routes/Detect.tsx` (587) | One universal textarea, Paste + صورة, channel chips, `افحص الآن`; then the verdict screen (band, highlighted spans, `ما الذي يحدث هنا؟`, link signals, actions) | `POST /api/analyze` via `src/lib/api.ts:37` | OK — no overflow; 14 tap targets under 44px (A7) |
+| `/reports` | `src/routes/Reports.tsx` (102) | Case numbers stored in this device's localStorage, each with its status | `GET /api/report/:case_number` (`src/routes/Reports.tsx:29`) | OK — no overflow |
+| `/protection` | `src/routes/Protection.tsx` (41) | One entry into Shield; no content of its own yet | none | OK — no overflow |
+| `/shield` | `src/routes/Shield.tsx` (182) | درع الابتزاز: intro, danger check, 6 steps, reassurance, anonymous report | `POST /api/report` via `src/lib/api.ts:124` | OK — no overflow; `خروج سريع` is 98×40 (A7) |
+| `/lab` | `src/routes/Lab.tsx` (118) | Hidden engine console: raw JSON next to the rendered verdict | `POST /api/analyze` directly (`src/routes/Lab.tsx:26`) | Reachable in production (A9) |
+
+Bottom nav (`src/components/BottomNav.tsx`) is present on the four primary screens
+and absent on the Detect verdict screen and inside Shield, by design.
+
+## 2. API map
+
+All routes are in `worker/index.ts`. `app.use("/api/*")` (line 59) sets
+`cache-control: no-store` on every API response — confirmed on the wire
+(`201 POST /api/report cache-control=no-store`).
+
+| Method | Path | Does | D1 | Notes |
+|---|---|---|---|---|
+| GET | `/api/health` (64) | `{ok, key_present, db_ready, model}` | `SELECT 1` | Reports key presence only, never the key |
+| POST | `/api/analyze` (85) | Calls the engine, post-validates, returns the verdict | none | See limits below |
+| POST | `/api/report` (231) | Inserts one row, returns `case_number` + `status` | `INSERT … RETURNING` on `reports` | 201 |
+| GET | `/api/report/:case_number` (291) | Status only | `SELECT status FROM reports` | Contents are never read back |
+| ALL | `/api`, `/api/*` (314–315) | JSON 404 | none | Stops a bad path falling through to `index.html` |
+
+- Model: `ANTHROPIC_MODEL = claude-sonnet-5` (`wrangler.jsonc:37`), `ENGINE_THINKING = disabled`.
+- `max_tokens`: 2000 text, 3000 with an image, 4000 if thinking is ever enabled (`worker/engine/analyze.ts:89`).
+- Timeouts: 10 s text, 25 s image (`analyze.ts:7–8`); `maxRetries: 0`.
+- Input cap: 2000 characters (`shared/types.ts:188`) → 413 `too_long`.
+- Image: `image/jpeg|png|webp` only → 415 `bad_image`; 3 MB decoded → 413 `image_too_large`; client downscales past 2576 px.
+- Rate limit: `ANALYZE_LIMITER`, 30 requests / 60 s per IP (`wrangler.jsonc:28–34`), with an in-isolate fallback.
+- `reports` is the only table. Columns: id, created_at, source, category, verdict, confidence, impersonated_entity, channel, message_text, is_test, status. **No IP, user-agent or device column exists.** Case number is derived (`DR-2026-` + 5-digit id), not stored.
+
+## 3. Detect, tested live — **BLOCKED**
+
+Could not be run. The deployed URL is refused by the proxy (403 above) and there is
+no API key on this machine by design. **The engine has never returned a real verdict
+in this project's history** — `EVAL-REPORT.md` in the repo still says so in its first
+line: *"Not run against a real engine yet."* The harness has only ever been exercised
+against a mock.
+
+What is in place and ready:
+
+- Golden set: `content/eval-cases.json`, 22 cases — 16 `scam`, 6 `likely_safe`, 4 flagged `demo: true`.
+- Harness: `scripts/eval.mjs` — writes `EVAL-REPORT.md` with per-case verdicts, latency percentiles, a Sonnet/Haiku comparison and the three weakest outputs quoted. Exits non-zero if a critical rule fails.
+- The verbatim-quote property the brief asks to check per case is enforced in code, not left to the model: `worker/engine/postvalidate.ts` drops any flag whose quote is not in the input, and the behaviour is unit-tested (`drops a flag the engine invented`, `drops a second flag that overlaps the first`, and the digit-run tests that stop an invented phone number being stitched out of unrelated digits).
+
+To run it from a machine with network (no key needed — it talks to the Worker):
+
+```bash
+npm run eval -- --target https://dara.abdalrhmankurdi12.workers.dev --compare
+```
+
+Until that has run, **no claim about the engine's accuracy or latency is supported by evidence**, and that is the single largest risk to Wednesday (A1).
+
+## 4. Report, tested live — run against the production build, not the deployment
+
+One report was submitted through the UI: `/shield` → `أبلغ بشكل مجهول`.
+
+- `POST /api/report` → **201**, `cache-control: no-store`.
+- D1 row landed. Case-number format: `DR-2026-00003` — `DR-` + year + 5-digit zero-padded id, derived from the row id, not stored in a column.
+- `/reports` then listed `DR-2026-00003 / مُستلَم`, and Home showed it under `آخر بلاغ`.
+- **Every string on the confirmation screen, checked against the honesty rules:**
+
+| String | Verdict |
+|---|---|
+| `استُلم بلاغك في منصة درع.` | OK — names منصة درع, claims only receipt |
+| `رقم البلاغ` / `DR-2026-00003` | OK |
+| `احتفظ بهذا الرقم للمتابعة` | OK — no promise of who follows up |
+| `الحالة: مُستلَم` | OK — the literal DB value |
+| `نسخة تجريبية — البلاغات تُحفظ في منصة درع.` | OK — says pilot, says stored in منصة درع |
+| `لا نطلب اسمك أو رقم هاتفك.` (Shield, above the button) | OK — literally true; the table has no such column |
+
+No authority, no encryption claim, no "will be followed up". Nothing to fix in this
+copy. The one gap is that the case number cannot be copied (A10).
+
+**Test rows deleted** — `DELETE FROM reports` run against the local D1 after the
+test; `SELECT COUNT(*)` returns 0. No row was created on the deployment, because
+the deployment could not be reached.
+
+## 5. Shield
+
+All six steps render, in order, on the production build:
+
+1. لا تدفع أي أموال — الدفع لا يضمن توقف المهاجم
+2. لا تحذف أي رسائل أو صور أو مقاطع — فهي أدلة قانونية مهمة
+3. وثق كل شيء قبل الحجب — لقطات شاشة لجميع الرسائل
+4. قيّد حسابات وسائل التواصل الاجتماعي الخاصة بك مؤقتاً
+5. احجب الشخص الذي يهددك على جميع المنصات
+6. لا تشارك هذا الموقف علناً قبل الحصول على مشورة قانونية
+
+`خروج سريع` works (full `location.replace`, so Back cannot return). The danger
+check renders both branches.
+
+Numbers, laws, penalties and statistics on this screen:
+
+| Item | Where | `verified` | Renders in production? |
+|---|---|---|---|
+| Emergency number (911) | `contacts.emergency` | `false` | No — but the label `الطوارئ` renders with nothing after it (A4) |
+| `الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.` | `content/v1-content.json:175`, `shield.reassurance` | **no field at all** | **Yes** (A5) |
+| قانون الجرائم الإلكترونية رقم 17 لسنة 2023 + penalties | `content/v1-content.json:87,95`, `legal` | `false` | No — nothing references `legal` in the UI |
+| Cybercrime Unit / Family Protection / bank fraud lines (+962 6 4655660, 110, 1700, 5008080, 06-5600000, 06-5007777) | `contacts` | `false` | No |
+
+Seven contacts, two legal entries and three recover entries are `verified: false`.
+The production gate (`src/lib/content.ts:11`, `SHOW_UNVERIFIED = import.meta.env.DEV`)
+holds for everything that carries the flag. `shield.reassurance` does not carry one,
+which is how the legal claim gets through.
+
+## 6. Honesty sweep
+
+`npm run honesty` passes: **no** hits for السلطات، الجهات المختصة، الجرائم الإلكترونية،
+تم إرسال، تم إبلاغ، تم إخطار، مشفر، لا نحفظ، authorities, encrypted, Cybercrime in the
+files it scans. A manual grep over `src/`, `worker/`, `shared/` and the rendered
+content confirms it: the only hits in `content/v1-content.json` (lines 290–328) are
+inside the `rewrite_required` block, which records v1's bad strings as problems and
+never renders.
+
+Two real findings, both about what the sweep does *not* cover:
+
+| file:line | String | Fix |
+|---|---|---|
+| `content/v1-content.json:175` | `لست وحدك في هذا. الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.` — an unsourced legal claim, rendered in production, to a jury of government people | Add `"verified": false` (it then hides), or Abdelrahman checks the official text of Law 17/2023 and flips it to true with the article cited |
+| `scripts/honesty-check.mjs:13` | The gate reads only `src/i18n/ar.json`, `src/i18n/en.json`, `worker/engine/prompt.ts`. It does not read `content/v1-content.json` — where the Shield copy actually lives — or the inline strings in `src/routes/*.tsx`. Its term list has no legal or statistical terms | Add those paths, and the terms قانون، جريمة، عقوبة، غرامة، سجن، مادة، %, ألف، آلاف |
+
+## 7. Mobile QA (390×844, iPhone UA, production build)
+
+| Check | Result |
+|---|---|
+| Viewport meta | `width=device-width, initial-scale=1, viewport-fit=cover` |
+| Safe areas | Used — header, bottom nav and Shield's quick exit all read `env(safe-area-inset-*)` |
+| Root | `<html lang="ar" dir="rtl">` on every route |
+| `theme-color` | `#F4EFE6` |
+| `format-detection` | `telephone=no` — stops iOS turning a scam message's numbers into call links |
+| Fonts | **Self-hosted.** One family loaded: IBM Plex Sans Arabic. Zero external hosts requested on any route — no `fonts.googleapis.com`, no `gstatic` |
+| Horizontal overflow | **Zero** on all six routes (`scrollWidth - clientWidth = 0`) |
+| Tap targets under 44px | 32 instances across the app: Detect 14, Home/Reports/Protection 5 each, Shield 2, Lab 1 (A7) |
+| PWA manifest | `name: درع DARA'`, `short_name: درع`, `display: standalone`, `lang: ar`, `dir: rtl`, theme and background `#F4EFE6`, `start_url: /`, icons 192 / 512 / 512-maskable |
+| Offline shell | Works. Service worker controls the page, 18 precached entries, **0 of them under `/api/`**. With the network cut, Home re-loads fully and still shows the stored last report |
+| Add-to-home-screen icon | **Missing on iOS** — no `apple-touch-icon` and no `apple-mobile-web-app-capable` in `index.html`; iOS ignores manifest icons and will use a screenshot of the page (A8) |
+
+## 8. Console and network
+
+Zero console errors, zero warnings, zero page errors, zero failed requests on all
+six routes and through the report flow. No request to any host other than the app's
+own origin, on any route.
+
+## 9. Findings table
+
+| # | Severity | What | Where | One-line fix |
+|---|---|---|---|---|
+| A1 | DEMO-BREAKING | The engine has never produced a real verdict. No eval has ever run against a deployment; `EVAL-REPORT.md` says so in line 1 | `EVAL-REPORT.md`, `content/eval-cases.json` | Run `npm run eval -- --target https://dara.abdalrhmankurdi12.workers.dev --compare` from a machine with network and read the table before Wednesday |
+| A2 | DEMO-BREAKING | The venue-network fallback is dead: `cached-verdicts.json` holds 0 verdicts, and with no cached entry `analyze()` skips the slow race entirely, so a slow check just waits out the Worker's 10 s timeout and shows an error | `src/demo/cached-verdicts.json`, `src/lib/api.ts:93` | Run `npm run cache-demo -- --target <deployed>` after the next deploy, and raise the threshold to 12 s |
+| A3 | DEMO-BREAKING | The demo's headline message — the fake GAM parking fine from slide 2 — has no text. Its `text` is still `REPLACE_WITH_EXACT_SMS_TEXT`, so it is skipped by both the eval harness and `demo:stage`, and `reference/gam-fake-fine.png` does not exist either | `content/eval-cases.json` (`gam_parking_fine`) | Abdelrahman pastes the exact SMS text; then re-stage and re-cache |
+| A4 | DEMO-BREAKING | Shield → `نعم` (in immediate danger) says `اتصل بالطوارئ الآن.` and then renders the bare label `الطوارئ` with no number, because the contact is `verified: false`. The app's most urgent branch looks broken | `content/v1-content.json` (`contacts.emergency`), `src/routes/Shield.tsx` | Either Abdelrahman verifies 911 against an official source and flips the flag, or the copy stops promising a number it will not show |
+| A5 | DEMO-BREAKING | An unsourced legal claim renders in production: `الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.` It carries no `verified` field, so the production gate never sees it | `content/v1-content.json:175` | Add `"verified": false`, or cite Law 17/2023 after checking the official text |
+| A6 | DEMO-BREAKING | The honesty gate passed while A5 shipped: it reads 3 files, not the content file the Shield copy lives in, and has no legal or statistical terms | `scripts/honesty-check.mjs:13` | Add `content/v1-content.json` and `src/routes/*.tsx`, and the legal/statistic terms. (Severity is a judgement call — it is the control that is supposed to stop exactly the class of claim a jury probes) |
+| A7 | VISIBLE | 32 tap targets under 44px, worst on Detect: `لصق` 26×23, `صورة` 28×23, channel chips 26px tall, `رجوع` 34×31; the four nav tabs are 98×40 on every screen and `English` is 52×27 | `src/routes/Detect.tsx`, `src/components/BottomNav.tsx`, `src/components/Layout.tsx` | Pad to a 44px minimum hit area without changing the visual size |
+| A8 | VISIBLE | Adding to the iPhone home screen uses a screenshot, not the mark — no `apple-touch-icon`, no `apple-mobile-web-app-capable` | `index.html`, `public/icons/` | Add a 180×180 apple-touch-icon and the two meta tags |
+| A9 | VISIBLE | `/lab` is reachable in production and renders raw engine JSON. Nothing links to it, but the URL works | `src/lib/router.ts:19`, `src/App.tsx` | Gate the route on `import.meta.env.DEV` |
+| A10 | VISIBLE | The case number cannot be copied on the confirmation screen — the only buttons are `رجوع`, `خروج سريع`, `إغلاق` | `src/routes/Shield.tsx`, `src/routes/Detect.tsx` | Add a copy affordance next to the number (Phase 1 requires it) |
+| A11 | VISIBLE | The slow-fallback threshold is 8 s; the brief says 12 s | `src/lib/api.ts:13` | `SLOW_MS = 12_000` |
+| A12 | COSMETIC | Shield files a report on one tap with no preview of what is sent. A judge may ask what just left the phone | `src/routes/Shield.tsx` | Show the two fields that are sent, above the button |
+| A13 | COSMETIC | Every route shares one `<title>`; no `<meta name="description">` | `index.html` | Set a per-route title on navigate |
+| A14 | COSMETIC | `reference/deck.pdf` is absent, so the type direction was defaulted to IBM Plex Sans Arabic rather than read from the deck; `reference/` holds only the brand mark | `reference/` | Phase 2 uses Noto Kufi Arabic + IBM Plex Sans Arabic per the brief unless the deck says otherwise |
+
+**Counts — DEMO-BREAKING 6, VISIBLE 5, COSMETIC 3. Total 14.**
+
+Not a finding, recorded for completeness: the brand mark, the four-destination
+architecture, RTL, the no-store headers, the absence of any IP/user-agent column,
+the 2000-character cap, the 30/60 s rate limit and the image type and size
+validation were all checked and are as specified.
