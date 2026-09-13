@@ -6,11 +6,11 @@ import type {
   ReportRequest,
   ReportResponse,
 } from "../../shared/types";
-import { cachedVerdictFor } from "./demo";
+import { cachedVerdictFor, rememberVerdict } from "./demo";
 import type { TextKey } from "../i18n";
 
 /** A live check that takes longer than this falls back to a saved result. */
-const SLOW_MS = 8000;
+const SLOW_MS = 12_000;
 
 export class AppError extends Error {
   constructor(readonly key: TextKey) {
@@ -89,7 +89,13 @@ export async function analyze(
   }
 
   const controller = new AbortController();
-  const live = postAnalyze(text, lang, channel, controller.signal);
+  const live = postAnalyze(text, lang, channel, controller.signal).then((value) => {
+    // A staged message that has just been checked live leaves its verdict on
+    // this device, so the same message survives a bad network later. Nothing
+    // a person pastes themselves is ever written down — see rememberVerdict.
+    rememberVerdict(text, lang, value);
+    return value;
+  });
 
   if (!fallback) {
     try {
