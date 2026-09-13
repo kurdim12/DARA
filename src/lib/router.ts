@@ -16,7 +16,10 @@ function routeFor(pathname: string): Route {
   if (pathname.startsWith("/reports")) return "reports";
   if (pathname.startsWith("/protection")) return "protection";
   if (pathname.startsWith("/shield")) return "shield";
-  if (pathname.startsWith("/lab")) return "lab";
+  // The engine console is a development tool: it renders the raw API response
+  // next to the verdict. Nothing links to it, but the URL worked in production
+  // until now, and the demo is on a phone someone else may be holding.
+  if (pathname.startsWith("/lab") && import.meta.env.DEV) return "lab";
   return "home";
 }
 

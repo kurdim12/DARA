@@ -31,7 +31,7 @@ function Screens() {
     case "shield":
       return <Shield onExit={quickExit} onHome={() => navigate("home")} />;
     case "lab":
-      return <Lab />;
+      return import.meta.env.DEV ? <Lab /> : null;
     default:
       return (
         <Home
