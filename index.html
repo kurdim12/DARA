@@ -6,6 +6,15 @@
     <meta name="theme-color" content="#F4EFE6" />
     <!-- iOS otherwise turns any number in the analyzed message into a tel: link. -->
     <meta name="format-detection" content="telephone=no" />
+    <!--
+      iOS reads none of the manifest's icons for the home screen — only this
+      one. Without it, adding DARA' to an iPhone saves a screenshot of the page.
+    -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="درع" />
     <title>درع DARA'</title>
   </head>
   <body>

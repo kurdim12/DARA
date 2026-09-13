@@ -84,6 +84,11 @@ const icons = [
   // Launchers crop a maskable icon to a circle, so the strokes pull inside the
   // safe zone while the field still bleeds to the edge.
   { name: "icon-maskable-512.png", size: 512, coverage: 0.8 },
+  // iOS ignores the manifest's icons for the home screen and reads only
+  // apple-touch-icon. Without this one, adding DARA' to an iPhone home screen
+  // saves a screenshot of the page instead of the mark. It is drawn opaque
+  // because iOS composites a transparent apple icon onto black.
+  { name: "apple-touch-icon-180.png", size: 180, coverage: 1 },
 ];
 for (const icon of icons) {
   await writeFile(`${ICONS_DIR}${icon.name}`, encodePng(renderIcon(image, icon.size, rgb, icon.coverage)));
