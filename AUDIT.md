@@ -281,3 +281,67 @@ Same method as Phase 0: production build, served by the Worker runtime, Chromium
 Report submitted again end to end through Shield: `201`, row landed, case
 `DR-2026-00004`, `cache-control: no-store`. Row deleted after; `SELECT COUNT(*)`
 returns 0.
+
+## The eval, run at last — and what it found
+
+The audit could not reach the deployment and no machine that could reach it
+could run the harness. A CI job can do both, so A1 was fixed by putting the
+harness on the right side of that wall. It ran three times today.
+
+**Run 1** (`34758142635`) answered the question the audit left open, and the
+answer is worse than "unmeasured":
+
+| model | cases | critical failures | text p50 | quotes matched |
+|---|---|---|---|---|
+| claude-sonnet-5 | 22 | **22** | 11 ms | 100% (vacuously — nothing was returned) |
+
+Every single case came back in 9–19 ms with:
+
+```json
+{ "error": "server_error", "message": "engine not configured" }
+```
+
+`worker/index.ts:133` returns exactly that, and only that, when
+`c.env.ANTHROPIC_API_KEY` is falsy. Run 3 (`34758338926`) confirms it from the
+deployment's own health endpoint:
+
+```
+HEALTH: {"ok":true,"key_present":false,"db_ready":true,"model":"claude-sonnet-5"}
+```
+
+### A15 — DEMO-BREAKING — the deployed Worker has no API key
+
+**Detect does not work in production right now, and has not since it was
+deployed.** Every check returns a 503 the UI shows as a generic error. This was
+invisible to every check the audit could run locally, because a local build
+reads `.dev.vars` and reports `key_present: true` from a key that is not the
+deployment's.
+
+- The deployment is up, and `db_ready: true` — **Report works in production**. D1 is bound and migrated.
+- `ANTHROPIC_MODEL` reads `claude-sonnet-5` on the deployment, as configured.
+- The fix is not in this repository and cannot be: the key is a Worker secret.
+  Cloudflare dashboard → Workers & Pages → `dara` → Settings → Variables and
+  Secrets → add `ANTHROPIC_API_KEY` as a **Secret**, then redeploy. It must
+  never be pasted into a chat or written to a file here.
+- The eval re-runs itself on the next push and will report the real verdict
+  table the moment the key exists.
+
+`EVAL-REPORT.md` in the repo records this run. The engine's accuracy and
+latency remain **unmeasured** — not because the harness does not work, but
+because there is nothing behind the endpoint to measure.
+
+### Still open after Phase 1
+
+| # | Severity | What | Whose |
+|---|---|---|---|
+| A15 | DEMO-BREAKING | No `ANTHROPIC_API_KEY` on the deployed Worker; Detect 503s | Abdelrahman — dashboard only |
+| A1 | DEMO-BREAKING | Engine accuracy and latency still unmeasured | Unblocks itself once A15 is fixed |
+| A3 | DEMO-BREAKING (partial) | The real GAM parking-fine SMS text | Abdelrahman |
+| A4 | — | 911 stays hidden until someone verifies it against an official source | Abdelrahman, one flag |
+| A5 | — | The cybercrime-law sentence stays hidden until the article is cited | Abdelrahman, one flag |
+| A12–A14 | COSMETIC | Out of Phase 1's scope | Phase 2 or later |
+
+One more thing worth saying plainly: these fixes are pushed to
+`claude/kind-cray-vyr1v6`. Whether they are **deployed** depends on which branch
+Cloudflare Workers Builds is watching. If it only builds the default branch, the
+live site still has none of them.
