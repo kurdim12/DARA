@@ -126,9 +126,20 @@ async function tsxFiles(dir) {
  * cannot reach a production build, so it cannot mislead anyone. Everything
  * else is copy that renders, and is held to both rules.
  */
-function walkContent(node, path, out) {
+/**
+ * Key names a file has declared as quoted specimens — an invented example of a
+ * scam message, shown so a person can learn to recognise it. A specimen is not
+ * the app speaking, so the fake numbers inside it are exempt. Every other
+ * string in the same file is still held to the rule.
+ */
+function specimenKeys(content) {
+  const declared = content?._meta?.specimens;
+  return Array.isArray(declared) ? new Set(declared) : new Set();
+}
+
+function walkContent(node, path, out, specimens = new Set()) {
   if (Array.isArray(node)) {
-    node.forEach((item, index) => walkContent(item, `${path}[${index}]`, out));
+    node.forEach((item, index) => walkContent(item, `${path}[${index}]`, out, specimens));
     return;
   }
   if (node === null || typeof node !== "object") return;
@@ -139,7 +150,7 @@ function walkContent(node, path, out) {
       // `_meta` is notes to ourselves; `rewrite_required` is a record of the
       // v1 strings we threw out, quoted so nobody reinstates them.
       if (key === "_meta" || key === "rewrite_required") continue;
-      walkContent(value, key, out);
+      walkContent(value, key, out, specimens);
     }
     return;
   }
@@ -152,14 +163,18 @@ function walkContent(node, path, out) {
       key === "why_not_ai" ||
       key === "rule" ||
       key === "purpose" ||
-      key === "titles"
+      key === "titles" ||
+      key === "balance" ||
+      key === "state" ||
+      key === "specimens_note"
     ) {
       continue;
     }
+    if (specimens.has(key)) continue;
     if (typeof value === "string") {
       out.push({ path: `${path}.${key}`, value, gated: "verified" in node });
     } else {
-      walkContent(value, `${path}.${key}`, out);
+      walkContent(value, `${path}.${key}`, out, specimens);
     }
   }
 }
@@ -170,9 +185,13 @@ for (const file of await tsxFiles("src/components/")) await scanLines(file);
 
 const CONTENT_FILES = [
   "content/v1-content.json",
-  "content/layers/protect.json",
-  "content/layers/educate.json",
-  "content/layers/recover.json",
+  "content/protect.json",
+  "content/quiz.json",
+  "content/recover/money_lost.json",
+  "content/recover/account_hacked.json",
+  "content/recover/data_stolen.json",
+  "content/recover/device_compromised.json",
+  "content/recover/identity_theft.json",
   "content/threats.json",
   "content/community-seed.json",
   "content/verified.json",
@@ -187,7 +206,7 @@ const strings = [];
 for (const file of CONTENT_FILES) {
   const content = JSON.parse(await readFile(new URL(file, ROOT), "utf8"));
   const found = [];
-  walkContent(content, "", found);
+  walkContent(content, "", found, specimenKeys(content));
   for (const entry of found) strings.push({ ...entry, file });
 }
 

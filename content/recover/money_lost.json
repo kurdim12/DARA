@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "situation": "money_lost",
+    "purpose": "A recovery plan on the Recover screen, ordered by urgency. Reviewed, fixed text — no AI.",
+    "rule": "A step that names an institution's specific procedure or a number ships verified: false and does not render until someone has checked it."
+  },
+  "title": {
+    "en": "I lost money to fraud",
+    "ar": "خسرت مالًا في احتيال"
+  },
+  "summary": {
+    "en": "A transfer, a card payment, or a wallet top-up",
+    "ar": "تحويل أو دفعة ببطاقة أو شحن محفظة"
+  },
+  "steps": [
+    {
+      "id": "stop_payments",
+      "title": {
+        "en": "Stop further payments now",
+        "ar": "أوقف أي دفعة أخرى الآن"
+      },
+      "body": {
+        "en": "Send nothing more, whatever you are told. Whoever says a second payment recovers the first is the one who took it.",
+        "ar": "لا ترسل شيئًا آخر مهما قيل لك. من يقول إن دفعة ثانية تعيد الأولى هو من أخذها."
+      },
+      "verified": true
+    },
+    {
+      "id": "call_provider",
+      "title": {
+        "en": "Call your bank or wallet provider",
+        "ar": "اتصل ببنكك أو محفظتك"
+      },
+      "body": {
+        "en": "Use the number printed on your card or the official app — never a number from a message. Ask to freeze the card and to stop or recall the transfer.",
+        "ar": "استخدم الرقم المطبوع على بطاقتك أو التطبيق الرسمي — لا رقمًا من رسالة. اطلب تجميد البطاقة وإيقاف التحويل أو استرداده."
+      },
+      "verified": true
+    },
+    {
+      "id": "keep_evidence",
+      "title": {
+        "en": "Save the evidence before you delete",
+        "ar": "احفظ الأدلة قبل أن تحذف"
+      },
+      "body": {
+        "en": "Screenshot the messages, the account or number you paid, the amount and the time. Do not block anyone until you have.",
+        "ar": "صوّر الرسائل، والحساب أو الرقم الذي دفعت له، والمبلغ والوقت. لا تحجب أحدًا قبل ذلك."
+      },
+      "verified": true
+    },
+    {
+      "id": "change_passwords",
+      "title": {
+        "en": "Change the passwords they may have",
+        "ar": "غيّر كلمات المرور التي قد تكون معهم"
+      },
+      "body": {
+        "en": "If you entered anything on a page they sent, change that password from another device and end every active session.",
+        "ar": "إذا أدخلت شيئًا في صفحة أرسلوها لك، غيّر كلمة المرور من جهاز آخر وأنهِ كل الجلسات النشطة."
+      },
+      "verified": true
+    },
+    {
+      "id": "watch_accounts",
+      "title": {
+        "en": "Watch the account for a few days",
+        "ar": "راقب الحساب أيامًا"
+      },
+      "body": {
+        "en": "A first successful payment is often followed by a second attempt. Check your statement daily this week.",
+        "ar": "الدفعة الأولى الناجحة يتبعها غالبًا محاولة ثانية. راجع كشف حسابك يوميًا هذا الأسبوع."
+      },
+      "verified": true
+    },
+    {
+      "id": "official_report",
+      "title": {
+        "en": "Ask for an official case reference",
+        "ar": "اطلب رقمًا مرجعيًا رسميًا"
+      },
+      "body": {
+        "en": "File a report with the relevant body and ask for a reference number. Keep it with the evidence you saved.",
+        "ar": "قدّم بلاغًا لدى الجهة المعنية واطلب رقمًا مرجعيًا. احتفظ به مع الأدلة التي حفظتها."
+      },
+      "verified": false,
+      "note": "Names a procedure at an institution. Needs the correct body, the correct wording and what a person actually receives, from an official source, before it renders."
+    },
+    {
+      "id": "report_dara",
+      "title": {
+        "en": "File a report in DARA'",
+        "ar": "أبلغ في درع"
+      },
+      "body": {
+        "en": "It takes a minute and stays anonymous — no account, no name. You get a case number to follow it with.",
+        "ar": "تستغرق دقيقة وتبقى مجهولة — بلا حساب وبلا اسم. وتحصل على رقم بلاغ تتابع به."
+      },
+      "verified": true
+    }
+  ]
+}

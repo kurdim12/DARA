@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "situation": "device_compromised",
+    "purpose": "A recovery plan on the Recover screen, ordered by urgency. Reviewed, fixed text — no AI.",
+    "rule": "A step that names an institution's specific procedure or a number ships verified: false and does not render until someone has checked it."
+  },
+  "title": {
+    "en": "My device was compromised",
+    "ar": "جهازي اختُرق"
+  },
+  "summary": {
+    "en": "You installed something, or it is behaving strangely",
+    "ar": "ثبّت شيئًا، أو يتصرّف بغرابة"
+  },
+  "steps": [
+    {
+      "id": "disconnect",
+      "title": {
+        "en": "Take it off the network",
+        "ar": "افصله عن الشبكة"
+      },
+      "body": {
+        "en": "Turn off Wi-Fi and mobile data. Whatever is on it cannot send anything while it is offline.",
+        "ar": "أطفئ الواي فاي وبيانات الهاتف. ما عليه لا يستطيع إرسال شيء وهو غير متصل."
+      },
+      "verified": true
+    },
+    {
+      "id": "other_device",
+      "title": {
+        "en": "Do the rest from a different device",
+        "ar": "افعل الباقي من جهاز آخر"
+      },
+      "body": {
+        "en": "Do not change passwords on the device you suspect — you would be typing them where they can be read.",
+        "ar": "لا تغيّر كلمات المرور على الجهاز المشكوك فيه — ستكتبها حيث يمكن قراءتها."
+      },
+      "verified": true
+    },
+    {
+      "id": "remove_apps",
+      "title": {
+        "en": "Remove what you installed last",
+        "ar": "احذف ما ثبّتّه أخيرًا"
+      },
+      "body": {
+        "en": "Uninstall anything added around the time it started, especially anything installed from a link rather than the app store.",
+        "ar": "احذف كل ما أُضيف قرب بداية المشكلة، خاصة ما ثُبّت من رابط لا من متجر التطبيقات."
+      },
+      "verified": true
+    },
+    {
+      "id": "update",
+      "title": {
+        "en": "Install the pending updates",
+        "ar": "ثبّت التحديثات المعلّقة"
+      },
+      "body": {
+        "en": "Most of what gets onto a phone gets in through something that was already fixed months ago.",
+        "ar": "أغلب ما يدخل الهاتف يدخل عبر ثغرة أُصلحت قبل أشهر."
+      },
+      "verified": true
+    },
+    {
+      "id": "reset",
+      "title": {
+        "en": "Reset it if it still behaves oddly",
+        "ar": "أعد ضبطه إن بقي غريبًا"
+      },
+      "body": {
+        "en": "Back up your photos and documents first, then reset to factory settings and sign in again from scratch.",
+        "ar": "خذ نسخة من صورك ووثائقك أولًا، ثم أعد ضبط المصنع وسجّل الدخول من جديد."
+      },
+      "verified": true
+    },
+    {
+      "id": "report_dara",
+      "title": {
+        "en": "File a report in DARA'",
+        "ar": "أبلغ في درع"
+      },
+      "body": {
+        "en": "It takes a minute and stays anonymous — no account, no name. You get a case number to follow it with.",
+        "ar": "تستغرق دقيقة وتبقى مجهولة — بلا حساب وبلا اسم. وتحصل على رقم بلاغ تتابع به."
+      },
+      "verified": true
+    }
+  ]
+}

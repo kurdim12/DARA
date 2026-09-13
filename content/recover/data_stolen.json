@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "situation": "data_stolen",
+    "purpose": "A recovery plan on the Recover screen, ordered by urgency. Reviewed, fixed text — no AI.",
+    "rule": "A step that names an institution's specific procedure or a number ships verified: false and does not render until someone has checked it."
+  },
+  "title": {
+    "en": "My personal data was stolen",
+    "ar": "بياناتي الشخصية سُرقت"
+  },
+  "summary": {
+    "en": "Documents, ID details, or account information",
+    "ar": "وثائق أو بيانات هوية أو معلومات حسابات"
+  },
+  "steps": [
+    {
+      "id": "change_passwords",
+      "title": {
+        "en": "Change your passwords, email first",
+        "ar": "غيّر كلمات المرور، والبريد أولًا"
+      },
+      "body": {
+        "en": "Stolen details are used to answer security questions. Close that door before anything else.",
+        "ar": "البيانات المسروقة تُستخدم للإجابة عن أسئلة الأمان. أغلق هذا الباب أولًا."
+      },
+      "verified": true
+    },
+    {
+      "id": "two_factor",
+      "title": {
+        "en": "Turn on two-step verification everywhere",
+        "ar": "فعّل التحقق بخطوتين في كل مكان"
+      },
+      "body": {
+        "en": "Where it is offered, take it. A password on its own is no longer the thing protecting you.",
+        "ar": "حيثما أتيح، فعّله. كلمة المرور وحدها لم تعد ما يحميك."
+      },
+      "verified": true
+    },
+    {
+      "id": "expect_convincing",
+      "title": {
+        "en": "Expect the next message to be convincing",
+        "ar": "توقّع رسالة تالية مقنعة"
+      },
+      "body": {
+        "en": "Someone quoting your own details back to you has proven nothing. Knowing them is exactly what was stolen.",
+        "ar": "من يذكر بياناتك أمامك لم يثبت شيئًا. معرفتها هي بالضبط ما سُرق."
+      },
+      "verified": true
+    },
+    {
+      "id": "watch_money",
+      "title": {
+        "en": "Watch anything that can move money",
+        "ar": "راقب كل ما يمكنه تحريك المال"
+      },
+      "body": {
+        "en": "Check your accounts and wallets this week and stop anything you did not do yourself.",
+        "ar": "راجع حساباتك ومحافظك هذا الأسبوع وأوقف أي عملية لم تقم بها بنفسك."
+      },
+      "verified": true
+    },
+    {
+      "id": "keep_record",
+      "title": {
+        "en": "Write down what was taken and when",
+        "ar": "دوّن ما أُخذ ومتى"
+      },
+      "body": {
+        "en": "What was exposed, when you noticed, and everything that has arrived since. You will be asked.",
+        "ar": "ما الذي انكشف، ومتى لاحظت، وكل ما وصلك بعدها. ستُسأل عنها."
+      },
+      "verified": true
+    },
+    {
+      "id": "report_dara",
+      "title": {
+        "en": "File a report in DARA'",
+        "ar": "أبلغ في درع"
+      },
+      "body": {
+        "en": "It takes a minute and stays anonymous — no account, no name. You get a case number to follow it with.",
+        "ar": "تستغرق دقيقة وتبقى مجهولة — بلا حساب وبلا اسم. وتحصل على رقم بلاغ تتابع به."
+      },
+      "verified": true
+    }
+  ]
+}

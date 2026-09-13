@@ -9,12 +9,6 @@ export type Route =
   | "threats"
   | "protect"
   | "learn"
-  // Screens from the previous build, still mounted until their phase
-  // replaces them.
-  | "detect"
-  | "reports"
-  | "protection"
-  | "educate"
   | "lab";
 
 const PATHS: Record<Route, string> = {
@@ -24,10 +18,6 @@ const PATHS: Record<Route, string> = {
   threats: "/threats",
   protect: "/protect",
   learn: "/learn",
-  detect: "/detect",
-  reports: "/reports",
-  protection: "/protection",
-  educate: "/educate",
   recover: "/recover",
   shield: "/shield",
   lab: "/lab",

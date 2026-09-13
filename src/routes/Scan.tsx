@@ -56,8 +56,11 @@ export function Scan({
   onSeedUsed,
 }: {
   navigate: (route: Route) => void;
-  /** Text carried over from Home, and whether to check it straight away. */
-  seed: { text: string; run: boolean } | null;
+  /**
+   * Text carried over from Home or Protect, the chip it should land on, and
+   * whether to check it straight away.
+   */
+  seed: { text: string; run: boolean; type?: AnalysisType } | null;
   onSeedUsed: () => void;
 }) {
   const { t, lang } = useI18n();
@@ -71,19 +74,20 @@ export function Scan({
     if (!seed || ran.current) return;
     ran.current = true;
     setText(seed.text);
+    if (seed.type) setType(seed.type);
     onSeedUsed();
-    if (seed.run) void run(seed.text);
+    if (seed.run) void run(seed.text, seed.type);
     // run() is stable for this purpose; re-running on every render would loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seed]);
 
-  async function run(value: string) {
+  async function run(value: string, forced?: AnalysisType) {
     const trimmed = value.trim();
     if (trimmed.length < MIN_INPUT) return;
     setErrorKey(null);
     setStage({ name: "loading" });
     try {
-      const result = await analyze(trimmed, lang, undefined, undefined, type);
+      const result = await analyze(trimmed, lang, undefined, undefined, forced ?? type);
       setStage({ name: "result", result, input: trimmed });
     } catch (error) {
       setErrorKey(error instanceof AppError ? error.key : "error.generic");

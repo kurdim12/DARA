@@ -1,0 +1,97 @@
+{
+  "_meta": {
+    "purpose": "The ten-minute protection checklist on the Protect screen. Eight things a person in Jordan can do right now.",
+    "rule": "General, practical guidance only. Anything that is a number, a law, or a procedure at a named institution does not belong in this file — it belongs in content/verified.json.",
+    "state": "The toggles are for this session only. Nothing is written to the device and nothing is sent anywhere."
+  },
+  "items": [
+    {
+      "id": "two_factor",
+      "title": {
+        "en": "Turn on two-step verification",
+        "ar": "فعّل التحقق بخطوتين"
+      },
+      "body": {
+        "en": "Start with the email account the others are recovered through, then your messaging and social accounts.",
+        "ar": "ابدأ بالبريد الذي تُستعاد منه بقية الحسابات، ثم حسابات المراسلة والتواصل."
+      }
+    },
+    {
+      "id": "active_sessions",
+      "title": {
+        "en": "Check which devices are signed in",
+        "ar": "افحص الأجهزة المتصلة بحساباتك"
+      },
+      "body": {
+        "en": "Security settings list the active sessions. End any you do not recognise, then change that password.",
+        "ar": "إعدادات الأمان تعرض الجلسات النشطة. أنهِ ما لا تعرفه، ثم غيّر كلمة المرور."
+      }
+    },
+    {
+      "id": "unique_passwords",
+      "title": {
+        "en": "Use a different password for your email",
+        "ar": "اجعل كلمة مرور بريدك مختلفة"
+      },
+      "body": {
+        "en": "If one password opens several accounts, one leak opens all of them. The email account is the one that matters most.",
+        "ar": "إذا فتحت كلمة واحدة عدة حسابات، فتسريب واحد يفتحها كلها. والبريد هو الأهم."
+      }
+    },
+    {
+      "id": "sim_swap",
+      "title": {
+        "en": "Know the signs of a SIM swap",
+        "ar": "اعرف علامات سحب شريحتك"
+      },
+      "body": {
+        "en": "If your phone loses the network for no reason while others around you keep it, call your operator from another phone at once.",
+        "ar": "إذا فقد هاتفك الشبكة بلا سبب بينما تعمل هواتف من حولك، اتصل بمشغّلك من هاتف آخر فورًا."
+      }
+    },
+    {
+      "id": "never_asks",
+      "title": {
+        "en": "Know what a bank never asks for",
+        "ar": "اعرف ما لا يطلبه أي بنك"
+      },
+      "body": {
+        "en": "No bank or wallet asks for the code that just arrived, your password, or your full card number — not by message, not by call.",
+        "ar": "لا بنك ولا محفظة يطلب الرمز الذي وصلك للتو، ولا كلمة مرورك، ولا رقم بطاقتك كاملًا — لا برسالة ولا بمكالمة."
+      }
+    },
+    {
+      "id": "fines",
+      "title": {
+        "en": "Never pay a fine from a link in a message",
+        "ar": "لا تدفع مخالفة من رابط في رسالة"
+      },
+      "body": {
+        "en": "Close the message and open the official channel you already know. If the fine is real it is there too.",
+        "ar": "أغلق الرسالة وافتح القناة الرسمية التي تعرفها. إن كانت المخالفة حقيقية ستجدها هناك أيضًا."
+      }
+    },
+    {
+      "id": "delivery",
+      "title": {
+        "en": "Ask yourself whether you are expecting a parcel",
+        "ar": "اسأل نفسك: هل تنتظر شحنة أصلًا؟"
+      },
+      "body": {
+        "en": "If you are not, the notice is not yours. If you are, track it from where you ordered, not from the link you were sent.",
+        "ar": "إن لم تكن تنتظر، فالإشعار ليس لك. وإن كنت، تتبّعها من حيث طلبت، لا من الرابط الذي وصلك."
+      }
+    },
+    {
+      "id": "unknown_link",
+      "title": {
+        "en": "Check an unknown link instead of opening it",
+        "ar": "افحص الرابط المجهول بدل أن تفتحه"
+      },
+      "body": {
+        "en": "Long-press to copy it and paste it into Scan. Checking a link does not open it — DARA' reads the address only.",
+        "ar": "اضغط مطوّلًا لنسخه والصقه في الفحص. فحص الرابط لا يفتحه — درع يقرأ العنوان فقط."
+      }
+    }
+  ]
+}

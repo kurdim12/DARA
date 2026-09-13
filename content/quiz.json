@@ -1,0 +1,85 @@
+{
+  "_meta": {
+    "purpose": "Six questions on the Learn screen. Each shows a realistic message and asks whether it is a scam.",
+    "rule": "The messages come from the same families as content/eval-cases.json. No statistics, no real phone numbers, no real institution asked to play the villain beyond the impersonation the scam itself performs.",
+    "balance": "Three scams and three legitimate messages, on purpose. A quiz that is mostly scams teaches people to answer scam.",
+    "specimens": [
+      "message"
+    ],
+    "specimens_note": "The `message` field of each question is a quoted specimen — an invented example of what a message of this family looks like. It is not the app speaking, so the numbers inside it (a verification code, an order number) are deliberately fake and are exempt from the sourcing rule. Every other string in this file is the app's own words and is not exempt."
+  },
+  "questions": [
+    {
+      "id": "q_fine",
+      "answer": "scam",
+      "message": {
+        "en": "Greater Amman Municipality: you have an unpaid traffic fine. Pay within 24 hours to avoid the amount doubling: amanat-pay-now.com/fine",
+        "ar": "أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة. ادفع خلال 24 ساعة لتجنب مضاعفة المبلغ: amanat-pay-now.com/fine"
+      },
+      "tell": {
+        "en": "Official bodies do not collect fines through a link in a message, and the link is not on a government domain.",
+        "ar": "الجهات الرسمية لا تحصّل المخالفات عبر رابط في رسالة، والرابط ليس على نطاق حكومي."
+      }
+    },
+    {
+      "id": "q_otp_real",
+      "answer": "legitimate",
+      "message": {
+        "en": "Your verification code is 482913. Do not share this code with anyone. Bank staff will never ask you for it.",
+        "ar": "رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبدًا."
+      },
+      "tell": {
+        "en": "It asks for nothing and warns you not to share the code. A real code message is a dead end for an attacker.",
+        "ar": "لا تطلب منك شيئًا، وتحذّرك من مشاركة الرمز. رسالة الرمز الحقيقية طريق مسدود أمام المهاجم."
+      }
+    },
+    {
+      "id": "q_otp_call",
+      "answer": "scam",
+      "message": {
+        "en": "This is the bank's fraud department. We stopped a suspicious transfer. A code is arriving on your phone now — read it to me so we can block it.",
+        "ar": "معك قسم الاحتيال في البنك. أوقفنا تحويلًا مشبوهًا. رح يوصلك رمز على هاتفك الآن، اقرأه لي حتى نوقفه."
+      },
+      "tell": {
+        "en": "The code is the key to your account, not proof of who you are. Whoever asks for it is logging in while you read it out.",
+        "ar": "الرمز مفتاح حسابك، لا إثبات لهويتك. من يطلبه يدخل بينما أنت تقرأه له."
+      }
+    },
+    {
+      "id": "q_delivery",
+      "answer": "legitimate",
+      "message": {
+        "en": "Your order 5521 is out for delivery today. The driver will call you before arriving. Payment on delivery.",
+        "ar": "طلبك رقم 5521 خرج للتوصيل اليوم. سيتصل بك المندوب قبل الوصول. الدفع عند الاستلام."
+      },
+      "tell": {
+        "en": "It tells you something and asks for nothing — no link, no fee, no urgency.",
+        "ar": "تخبرك بشيء ولا تطلب شيئًا — بلا رابط ولا رسوم ولا استعجال."
+      }
+    },
+    {
+      "id": "q_job",
+      "answer": "scam",
+      "message": {
+        "en": "Hiring now! Work from home, good monthly salary, no experience needed. Send a small registration fee to start immediately.",
+        "ar": "نستقطب الآن! عمل من المنزل، راتب شهري جيد، لا خبرة مطلوبة. أرسل رسوم تسجيل بسيطة للبدء فورًا."
+      },
+      "tell": {
+        "en": "Work pays you. Anyone asking for a fee before you have worked is not an employer.",
+        "ar": "العمل يدفع لك. من يطلب رسومًا قبل أن تعمل ليس صاحب عمل."
+      }
+    },
+    {
+      "id": "q_promo",
+      "answer": "legitimate",
+      "message": {
+        "en": "Enjoy 10% off restaurant purchases with your card until the end of the month. Details in the bank app.",
+        "ar": "استمتع بخصم 10% على مشترياتك بالبطاقة في المطاعم المشاركة حتى نهاية الشهر. التفاصيل في تطبيق البنك."
+      },
+      "tell": {
+        "en": "It points you back into the app you already have rather than to a link, and there is nothing to act on today.",
+        "ar": "تعيدك إلى التطبيق الذي تملكه أصلًا بدل رابط، ولا شيء يستدعي التصرّف اليوم."
+      }
+    }
+  ]
+}

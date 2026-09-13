@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { AnalyzeResponse, Lang } from "../../shared/types";
 import { HighlightedMessage } from "../components/HighlightedMessage";
-import { VerdictBand } from "../components/VerdictBand";
 import { Page, PrimaryButton, SectionTitle } from "../components/Layout";
 import { useI18n } from "../i18n";
 
@@ -77,7 +76,7 @@ export function Lab() {
 
       {result && (
         <div className="mt-8">
-          <VerdictBand verdict={result.verdict} />
+          <p className="text-[22px] font-bold">{result.verdict}</p>
           <p className="mt-4 text-xl">{result.headline}</p>
           <p className="mt-2 text-sm text-ink-2">
             <bdi>

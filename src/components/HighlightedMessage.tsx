@@ -1,6 +1,4 @@
 import type { RedFlag } from "../../shared/types";
-import { useI18n } from "../i18n";
-import { stepNumeral } from "../lib/numerals";
 
 /**
  * The original message with each red flag underlined in place and numbered,
@@ -16,7 +14,6 @@ export function HighlightedMessage({
   text: string;
   flags: RedFlag[];
 }) {
-  const { lang } = useI18n();
   const pieces: React.ReactNode[] = [];
   let cursor = 0;
 
@@ -32,7 +29,7 @@ export function HighlightedMessage({
     pieces.push(
       <mark className="flag" key={`f${index}`}>
         {text.slice(flag.start, flag.end)}
-        <sup>{stepNumeral(index + 1, lang)}</sup>
+        <sup>{index + 1}</sup>
       </mark>,
     );
     cursor = flag.end;

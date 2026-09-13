@@ -1,0 +1,89 @@
+{
+  "_meta": {
+    "situation": "account_hacked",
+    "purpose": "A recovery plan on the Recover screen, ordered by urgency. Reviewed, fixed text — no AI.",
+    "rule": "A step that names an institution's specific procedure or a number ships verified: false and does not render until someone has checked it."
+  },
+  "title": {
+    "en": "My account was hacked",
+    "ar": "حسابي اختُرق"
+  },
+  "summary": {
+    "en": "You lost access, or someone else is using it",
+    "ar": "فقدت الوصول، أو أحدهم يستخدمه"
+  },
+  "steps": [
+    {
+      "id": "change_password",
+      "title": {
+        "en": "Change the password from another device",
+        "ar": "غيّر كلمة المرور من جهاز آخر"
+      },
+      "body": {
+        "en": "Start with the email account the others are recovered through. Use a device you do not suspect.",
+        "ar": "ابدأ بالبريد الذي تُستعاد منه بقية الحسابات. استخدم جهازًا لا تشك فيه."
+      },
+      "verified": true
+    },
+    {
+      "id": "end_sessions",
+      "title": {
+        "en": "End every session you do not recognise",
+        "ar": "أنهِ كل جلسة لا تعرفها"
+      },
+      "body": {
+        "en": "Security settings list active devices and sessions. Sign them all out, then set the password again.",
+        "ar": "إعدادات الأمان تعرض الأجهزة والجلسات النشطة. سجّل خروجها كلها، ثم اضبط كلمة المرور من جديد."
+      },
+      "verified": true
+    },
+    {
+      "id": "two_factor",
+      "title": {
+        "en": "Turn on two-step verification",
+        "ar": "فعّل التحقق بخطوتين"
+      },
+      "body": {
+        "en": "Do it before anything else, so a password alone is no longer enough to get back in.",
+        "ar": "افعلها قبل أي شيء آخر، حتى لا تكفي كلمة المرور وحدها للدخول."
+      },
+      "verified": true
+    },
+    {
+      "id": "recovery_details",
+      "title": {
+        "en": "Check the recovery email and phone",
+        "ar": "تحقّق من بريد ورقم الاسترداد"
+      },
+      "body": {
+        "en": "An attacker changes these first so you cannot take the account back. Put yours in again.",
+        "ar": "المهاجم يغيّرها أولًا حتى لا تستعيد الحساب. أعد وضع بياناتك."
+      },
+      "verified": true
+    },
+    {
+      "id": "warn_contacts",
+      "title": {
+        "en": "Tell the people who might be messaged",
+        "ar": "أخبر من قد تصلهم رسائل"
+      },
+      "body": {
+        "en": "Anything sent from your account while it was not yours can be the next person's scam.",
+        "ar": "ما أُرسل من حسابك وهو ليس لك قد يكون احتيال الشخص التالي."
+      },
+      "verified": true
+    },
+    {
+      "id": "report_dara",
+      "title": {
+        "en": "File a report in DARA'",
+        "ar": "أبلغ في درع"
+      },
+      "body": {
+        "en": "It takes a minute and stays anonymous — no account, no name. You get a case number to follow it with.",
+        "ar": "تستغرق دقيقة وتبقى مجهولة — بلا حساب وبلا اسم. وتحصل على رقم بلاغ تتابع به."
+      },
+      "verified": true
+    }
+  ]
+}

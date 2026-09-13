@@ -1,16 +1,14 @@
 import { useCallback, useState } from "react";
+import type { AnalysisType } from "../shared/types";
 import { LangProvider } from "./i18n";
 import { ThemeProvider } from "./lib/theme";
 import { useRouter } from "./lib/router";
 import { Home } from "./routes/Home";
 import { Scan } from "./routes/Scan";
 import { Threats } from "./routes/Threats";
-import { Placeholder } from "./routes/Placeholder";
 import { Report } from "./routes/Report";
-import { Detect } from "./routes/Detect";
-import { Reports } from "./routes/Reports";
-import { Protection } from "./routes/Protection";
-import { Educate } from "./routes/Educate";
+import { Protect } from "./routes/Protect";
+import { Learn } from "./routes/Learn";
 import { Recover } from "./routes/Recover";
 import { Shield } from "./routes/Shield";
 import { Lab } from "./routes/Lab";
@@ -27,13 +25,17 @@ export default function App() {
 
 function Screens() {
   const { route, navigate, quickExit } = useRouter();
-  /** Text handed from Home to Scan, and whether Scan should check it at once. */
-  const [seed, setSeed] = useState<{ text: string; run: boolean } | null>(null);
+  /** Text handed to Scan, the chip to land on, and whether to run it at once. */
+  const [seed, setSeed] = useState<{
+    text: string;
+    run: boolean;
+    type?: AnalysisType;
+  } | null>(null);
   const clearSeed = useCallback(() => setSeed(null), []);
 
   const handOff = useCallback(
-    (text: string, run: boolean) => {
-      setSeed({ text, run });
+    (text: string, run: boolean, type?: AnalysisType) => {
+      setSeed({ text, run, type });
       navigate("scan");
     },
     [navigate],
@@ -48,28 +50,14 @@ function Screens() {
       return <Report navigate={navigate} />;
     case "protect":
       return (
-        <Placeholder
+        <Protect
           navigate={navigate}
-          active="home"
-          title="tool.protect"
-          sub="tool.protect_sub"
+          onCheck={(text, type) => handOff(text, true, type)}
         />
       );
     case "learn":
-      return (
-        <Placeholder navigate={navigate} active="home" title="tool.learn" sub="tool.learn_sub" />
-      );
+      return <Learn navigate={navigate} />;
 
-    // Screens from the previous build, still mounted until their phase
-    // replaces them.
-    case "detect":
-      return <Detect navigate={navigate} seedText={seed?.text ?? null} onSeedUsed={clearSeed} />;
-    case "reports":
-      return <Reports navigate={navigate} />;
-    case "protection":
-      return <Protection navigate={navigate} />;
-    case "educate":
-      return <Educate navigate={navigate} />;
     case "recover":
       return <Recover navigate={navigate} />;
     case "shield":

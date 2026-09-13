@@ -1,0 +1,102 @@
+{
+  "_meta": {
+    "situation": "identity_theft",
+    "purpose": "A recovery plan on the Recover screen, ordered by urgency. Reviewed, fixed text — no AI.",
+    "rule": "A step that names an institution's specific procedure or a number ships verified: false and does not render until someone has checked it."
+  },
+  "title": {
+    "en": "Identity theft",
+    "ar": "انتحال هويتي"
+  },
+  "summary": {
+    "en": "Someone is using your name or your documents",
+    "ar": "أحدهم يستخدم اسمك أو وثائقك"
+  },
+  "steps": [
+    {
+      "id": "document",
+      "title": {
+        "en": "Collect what you can see",
+        "ar": "اجمع ما تستطيع رؤيته"
+      },
+      "body": {
+        "en": "Screenshot the account, the profile or the message using your name, with the date and the address it sits at.",
+        "ar": "صوّر الحساب أو الملف أو الرسالة التي تستخدم اسمك، مع التاريخ والعنوان الذي توجد فيه."
+      },
+      "verified": true
+    },
+    {
+      "id": "report_platform",
+      "title": {
+        "en": "Report it to the platform itself",
+        "ar": "أبلغ المنصة نفسها"
+      },
+      "body": {
+        "en": "Every major platform has an impersonation report. It is the fastest route to taking the account down.",
+        "ar": "كل منصة كبيرة لديها بلاغ انتحال. هو أسرع طريق لإزالة الحساب."
+      },
+      "verified": true
+    },
+    {
+      "id": "tell_people",
+      "title": {
+        "en": "Tell the people it is aimed at",
+        "ar": "أخبر من يستهدفهم"
+      },
+      "body": {
+        "en": "Impersonation works on the people who trust you. A short message to them removes most of its value.",
+        "ar": "الانتحال ينجح مع من يثقون بك. رسالة قصيرة لهم تُفقده أغلب قيمته."
+      },
+      "verified": true
+    },
+    {
+      "id": "secure_accounts",
+      "title": {
+        "en": "Secure the accounts that carry your name",
+        "ar": "أمّن الحسابات التي تحمل اسمك"
+      },
+      "body": {
+        "en": "Change the passwords, turn on two-step verification, and check that nothing has been added to your profiles.",
+        "ar": "غيّر كلمات المرور، وفعّل التحقق بخطوتين، وتأكد أن شيئًا لم يُضف إلى ملفاتك."
+      },
+      "verified": true
+    },
+    {
+      "id": "watch_credit",
+      "title": {
+        "en": "Watch for accounts you did not open",
+        "ar": "انتبه لحسابات لم تفتحها"
+      },
+      "body": {
+        "en": "Anything opened in your name will produce messages you did not expect. Do not ignore them.",
+        "ar": "أي حساب يُفتح باسمك سينتج رسائل لم تتوقعها. لا تتجاهلها."
+      },
+      "verified": true
+    },
+    {
+      "id": "official_report",
+      "title": {
+        "en": "Ask for an official case reference",
+        "ar": "اطلب رقمًا مرجعيًا رسميًا"
+      },
+      "body": {
+        "en": "File a report with the relevant body and ask for a reference number. Keep it with the evidence you saved.",
+        "ar": "قدّم بلاغًا لدى الجهة المعنية واطلب رقمًا مرجعيًا. احتفظ به مع الأدلة التي حفظتها."
+      },
+      "verified": false,
+      "note": "Names a procedure at an institution. Needs the correct body, the correct wording and what a person actually receives, from an official source, before it renders."
+    },
+    {
+      "id": "report_dara",
+      "title": {
+        "en": "File a report in DARA'",
+        "ar": "أبلغ في درع"
+      },
+      "body": {
+        "en": "It takes a minute and stays anonymous — no account, no name. You get a case number to follow it with.",
+        "ar": "تستغرق دقيقة وتبقى مجهولة — بلا حساب وبلا اسم. وتحصل على رقم بلاغ تتابع به."
+      },
+      "verified": true
+    }
+  ]
+}
