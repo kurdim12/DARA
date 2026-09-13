@@ -172,10 +172,17 @@
       }
     ],
     "reassurance": {
-      "ar": "لست وحدك في هذا. الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.",
-      "en": "You are not alone in this. Cyber extortion is a crime under Jordanian law.",
+      "ar": "لست وحدك في هذا.",
+      "en": "You are not alone in this.",
       "origin": "new",
       "note": "Replaces v1's 'thousands of Jordanians have faced this', which had no source."
+    },
+    "legal_note": {
+      "ar": "الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.",
+      "en": "Cyber extortion is a crime under Jordanian law.",
+      "origin": "new",
+      "verified": false,
+      "note": "A statement about the law, so it follows the same rule as every other law in this file: it does not render until Abdelrahman has read the official text of the cybercrime law and cited the article. Split out of `reassurance` so the human half of that sentence can still render."
     },
     "report_cta": {
       "ar": "أبلغ بشكل مجهول",

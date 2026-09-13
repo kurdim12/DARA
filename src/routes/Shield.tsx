@@ -163,6 +163,14 @@ export function Shield({ onExit, onHome }: { onExit: () => void; onHome: () => v
       </section>
 
       <p className="mt-9 text-lg leading-snug">{shieldContent.reassurance(lang)}</p>
+      {shieldContent.legalNote(lang) && (
+        <p className="mt-2 text-lg leading-snug">
+          {shieldContent.legalNote(lang)}
+          {shieldContent.legalNoteNeedsVerification && import.meta.env.DEV && (
+            <span className="ms-2 border border-threat px-1.5 text-xs text-threat">VERIFY</span>
+          )}
+        </p>
+      )}
 
       {failed && (
         <p role="alert" className="mt-6 border-s-4 border-threat ps-3">
