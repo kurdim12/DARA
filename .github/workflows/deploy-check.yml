@@ -1,0 +1,57 @@
+# Is what is deployed the same thing as what is in this repository?
+#
+# The machine this repo is edited from cannot reach the workers.dev URL — the
+# egress proxy refuses it — so every claim about "the live site" has to be made
+# from somewhere that can. This job is that somewhere. It takes seconds and
+# answers one question: which build is answering.
+name: deploy-check
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The deployed URL to check
+        default: https://dara.abdalrhmankurdi12.workers.dev
+  push:
+    branches: ["**"]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: What is live
+        env:
+          TARGET: ${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}
+        run: |
+          echo "=== COMMIT IN THIS REPO ==="
+          git rev-parse --short HEAD
+
+          echo "=== /api/health ==="
+          curl -sS --max-time 20 "$TARGET/api/health" || echo "(unreachable)"
+          echo
+
+          # Added in the rebuild. On the previous build this path falls through
+          # to the catch-all and answers {"error":"not_found"}.
+          echo "=== /api/threats (exists only in the rebuild) ==="
+          curl -sS --max-time 20 -o /tmp/threats.txt -w "http=%{http_code}\n" "$TARGET/api/threats" || echo "(unreachable)"
+          cat /tmp/threats.txt; echo
+
+          # Added in phase 2 of the rebuild.
+          echo "=== /api/reports/community (exists only in the rebuild) ==="
+          curl -sS --max-time 20 -o /tmp/community.txt -w "http=%{http_code}\n" "$TARGET/api/reports/community" || echo "(unreachable)"
+          cat /tmp/community.txt; echo
+
+          # The rebuild opens in English and LTR; every earlier build shipped
+          # <html lang="ar" dir="rtl">.
+          echo "=== root <html> tag ==="
+          curl -sS --max-time 20 "$TARGET/" | head -c 400 | tr -d '\n' | grep -o '<html[^>]*>' || echo "(no html tag found)"
+          echo
+
+          echo "=== VERDICT ==="
+          if grep -q '"counts"' /tmp/threats.txt 2>/dev/null; then
+            echo "LIVE BUILD INCLUDES THE REBUILD"
+          else
+            echo "LIVE BUILD IS OLDER THAN THE REBUILD — /api/threats does not exist on it"
+          fi
