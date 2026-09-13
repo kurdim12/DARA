@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "situation": "account_hacked",
+    "purpose": "Reviewed, fixed guidance shown when someone picks this situation on the Shield screen. Deliberately not AI.",
+    "rule": "Second person, short sentences, no fear language, no statistics. Anything naming a number, a law or an institution's procedure lives in content/verified.json instead."
+  },
+  "title": {
+    "en": "Account hacked or taken over",
+    "ar": "حساب مخترق أو مسروق"
+  },
+  "summary": {
+    "en": "You lost access, or someone else is posting",
+    "ar": "فقدت الوصول، أو أحدهم ينشر باسمك"
+  },
+  "intro": {
+    "en": "Move fast and in this order. The email account comes first, because everything else is recovered through it.",
+    "ar": "تحرّك بسرعة وبهذا الترتيب. البريد الإلكتروني أولًا، لأن بقية الحسابات تُستعاد منه."
+  },
+  "steps": [
+    {
+      "en": "Change the password from a different device, starting with your email.",
+      "ar": "غيّر كلمة المرور من جهاز آخر، وابدأ ببريدك الإلكتروني."
+    },
+    {
+      "en": "In security settings, end every active session and remove devices you do not recognise.",
+      "ar": "في إعدادات الأمان، أنهِ كل الجلسات النشطة واحذف الأجهزة التي لا تعرفها."
+    },
+    {
+      "en": "Turn on two-step verification before you do anything else.",
+      "ar": "فعّل التحقق بخطوتين قبل أي شيء آخر."
+    },
+    {
+      "en": "Check whether the recovery email or phone number was changed, and change it back.",
+      "ar": "تحقّق إن كان بريد الاسترداد أو رقم الهاتف قد تغيّر، وأعده."
+    },
+    {
+      "en": "Tell the people who might receive a message that looks like it came from you.",
+      "ar": "أخبر من قد تصلهم رسالة تبدو وكأنها منك."
+    },
+    {
+      "en": "If you have lost access completely, use the platform's own account-recovery flow. Do not use a link someone sent you.",
+      "ar": "إذا فقدت الوصول تمامًا، استخدم مسار استرداد الحساب في المنصة نفسها. لا تستخدم رابطًا أرسله لك أحد."
+    }
+  ],
+  "verified": true
+}

@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "purpose": "Every phone number and legal line the app could show. Nothing here renders in a production build until someone has checked it against an official source and set verified to true.",
+    "rule": "Only Abdelrahman flips a flag, after reading the official source. Until then the Shield screen shows the card, the name and a 'pending verification' line — never an invented number, and never a tel: link.",
+    "origin": "The numbers were carried over from the v1 app and have never been confirmed."
+  },
+  "contacts": [
+    {
+      "id": "emergency",
+      "tone": "danger",
+      "label": { "en": "Jordan Police", "ar": "الأمن العام" },
+      "number": "911",
+      "verified": false
+    },
+    {
+      "id": "family_protection",
+      "tone": "primary",
+      "label": { "en": "Family Protection Dept.", "ar": "إدارة حماية الأسرة" },
+      "number": "110",
+      "verified": false
+    },
+    {
+      "id": "cybercrime_unit",
+      "tone": "warn",
+      "label": { "en": "Cybercrime Unit", "ar": "وحدة الجرائم الإلكترونية" },
+      "number": "+962 6 465 5660",
+      "verified": false
+    }
+  ],
+  "legal": [
+    {
+      "id": "cybercrime_law",
+      "text": {
+        "en": "Cybercrime Law No. 17 of 2023 protects you.",
+        "ar": "قانون الجرائم الإلكترونية رقم 17 لسنة 2023 يحميك."
+      },
+      "verified": false,
+      "note": "A statement about the law. It needs the official text and the article cited before it renders."
+    }
+  ]
+}

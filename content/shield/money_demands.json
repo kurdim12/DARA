@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "situation": "money_demands",
+    "purpose": "Reviewed, fixed guidance shown when someone picks this situation on the Shield screen. Deliberately not AI.",
+    "rule": "Second person, short sentences, no fear language, no statistics. Anything naming a number, a law or an institution's procedure lives in content/verified.json instead."
+  },
+  "title": {
+    "en": "Demands for money",
+    "ar": "مطالبات بالمال"
+  },
+  "summary": {
+    "en": "Someone is demanding payment to stay quiet",
+    "ar": "أحدهم يطلب مالًا مقابل الصمت"
+  },
+  "intro": {
+    "en": "The demand will not stop because you meet it. Start here.",
+    "ar": "الطلب لا يتوقف لأنك لبّيته. ابدأ من هنا."
+  },
+  "steps": [
+    {
+      "en": "Do not pay anything. Paying does not make it stop, and it tells them you pay.",
+      "ar": "لا تدفع أي مبلغ. الدفع لا يوقفهم، ويخبرهم أنك تدفع."
+    },
+    {
+      "en": "Do not delete any message, photo or clip. They are the evidence.",
+      "ar": "لا تحذف أي رسالة أو صورة أو مقطع. هي الأدلة."
+    },
+    {
+      "en": "Screenshot everything before you block — blocking hides what you will need.",
+      "ar": "صوّر كل شيء قبل الحجب — الحجب يخفي ما ستحتاجه."
+    },
+    {
+      "en": "Set your social accounts to private for now.",
+      "ar": "اجعل حساباتك على وسائل التواصل خاصة مؤقتًا."
+    },
+    {
+      "en": "Block them on every platform, once you have documented it.",
+      "ar": "احجبهم على كل المنصات، بعد أن توثّق."
+    },
+    {
+      "en": "Do not post about this publicly before you have taken advice.",
+      "ar": "لا تنشر عن هذا علنًا قبل أن تأخذ مشورة."
+    }
+  ],
+  "verified": true
+}

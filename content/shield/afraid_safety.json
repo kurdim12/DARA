@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "situation": "afraid_safety",
+    "purpose": "Reviewed, fixed guidance shown when someone picks this situation on the Shield screen. Deliberately not AI.",
+    "rule": "Second person, short sentences, no fear language, no statistics. Anything naming a number, a law or an institution's procedure lives in content/verified.json instead."
+  },
+  "title": {
+    "en": "Afraid for my safety",
+    "ar": "أخاف على سلامتي"
+  },
+  "summary": {
+    "en": "The threats have moved beyond the screen",
+    "ar": "التهديد تجاوز الشاشة"
+  },
+  "intro": {
+    "en": "Your physical safety comes before anything on a phone.",
+    "ar": "سلامتك الجسدية قبل أي شيء على الهاتف."
+  },
+  "steps": [
+    {
+      "en": "Move somewhere you feel safe, and stay there for now.",
+      "ar": "انتقل إلى مكان تشعر فيه بالأمان، وابقَ فيه الآن."
+    },
+    {
+      "en": "Tell someone you trust where you are, today.",
+      "ar": "أخبر شخصًا تثق به بمكانك، اليوم."
+    },
+    {
+      "en": "Do not meet the person threatening you, alone or otherwise.",
+      "ar": "لا تقابل من يهددك، لا وحدك ولا بصحبة أحد."
+    },
+    {
+      "en": "Document every threat before you block, including the time each one arrived.",
+      "ar": "وثّق كل تهديد قبل الحجب، ومعه وقت وصوله."
+    },
+    {
+      "en": "If the danger is immediate, use the emergency card at the top of this screen.",
+      "ar": "إذا كان الخطر مباشرًا، استخدم بطاقة الطوارئ أعلى هذه الشاشة."
+    }
+  ],
+  "verified": true
+}

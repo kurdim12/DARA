@@ -6,6 +6,7 @@ import { Home } from "./routes/Home";
 import { Scan } from "./routes/Scan";
 import { Threats } from "./routes/Threats";
 import { Placeholder } from "./routes/Placeholder";
+import { Report } from "./routes/Report";
 import { Detect } from "./routes/Detect";
 import { Reports } from "./routes/Reports";
 import { Protection } from "./routes/Protection";
@@ -44,14 +45,7 @@ function Screens() {
     case "threats":
       return <Threats navigate={navigate} />;
     case "report":
-      return (
-        <Placeholder
-          navigate={navigate}
-          active="report"
-          title="report.title"
-          sub="layer.report_sub"
-        />
-      );
+      return <Report navigate={navigate} />;
     case "protect":
       return (
         <Placeholder
@@ -79,7 +73,7 @@ function Screens() {
     case "recover":
       return <Recover navigate={navigate} />;
     case "shield":
-      return <Shield onExit={quickExit} onHome={() => navigate("home")} />;
+      return <Shield navigate={navigate} quickExit={quickExit} />;
     case "lab":
       return import.meta.env.DEV ? <Lab /> : null;
 

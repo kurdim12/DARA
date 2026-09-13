@@ -204,6 +204,37 @@ export const MAX_INPUT_CHARS = 2000;
 
 export type ReportSource = "detect" | "shield";
 
+/** The Report screen's threat chips. */
+export type ThreatType =
+  | "phishing"
+  | "financial_scam"
+  | "fake_job"
+  | "cyber_extortion"
+  | "account_takeover"
+  | "other";
+
+export const THREAT_TYPES: ThreatType[] = [
+  "phishing",
+  "financial_scam",
+  "fake_job",
+  "cyber_extortion",
+  "account_takeover",
+  "other",
+];
+
+/**
+ * Recorded for the reporter's own reference. DARA' does not contact anyone,
+ * and no screen may say otherwise.
+ */
+export type RelevantAuthority = "cybercrime_unit" | "tra" | "bank_fraud" | "other";
+
+export const RELEVANT_AUTHORITIES: RelevantAuthority[] = [
+  "cybercrime_unit",
+  "tra",
+  "bank_fraud",
+  "other",
+];
+
 export interface ReportRequest {
   source: ReportSource;
   category: Category;
@@ -213,6 +244,20 @@ export interface ReportRequest {
   channel?: Channel;
   message_text?: string;
   is_test?: boolean;
+  threat_type?: ThreatType;
+  relevant_authority?: RelevantAuthority;
+  /** Defaults to true. When true, `contact` is dropped rather than stored. */
+  anonymous?: boolean;
+  contact?: string;
+  /** What the person says happened, in their own words. */
+  description?: string;
+}
+
+/** One row of the Community Reports feed. Never carries contact details. */
+export interface CommunityReport {
+  case_number: string;
+  threat_type: ThreatType;
+  description: string;
 }
 
 export interface ReportResponse {

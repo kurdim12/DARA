@@ -36,18 +36,18 @@ export function CaseNumber({ value }: { value: string }) {
   }
 
   return (
-    <div className="mt-10 border-y border-rule bg-paper-2 py-8 text-center">
-      <span className="block text-[13px] uppercase tracking-widest text-ink-2">
+    <div className="mt-8 rounded-card border border-line bg-card py-7 text-center">
+      <span className="block text-[13px] font-medium uppercase tracking-wider text-text-2">
         {t("report.case")}
       </span>
-      <bdi ref={numberRef} className="mt-3 block font-kufi text-[32px] font-bold tracking-tight">
+      <bdi ref={numberRef} className="mt-2 block text-[30px] font-bold tracking-tight">
         {value}
       </bdi>
       <button
         type="button"
         onClick={copy}
         aria-live="polite"
-        className="mt-4 min-h-11 border-2 border-ink px-5 text-base font-semibold"
+        className="mt-4 min-h-11 rounded-full border border-line px-5 text-[15px] font-semibold"
       >
         {copied ? t("report.copied") : t("report.copy")}
       </button>

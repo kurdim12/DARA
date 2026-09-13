@@ -66,6 +66,36 @@ const SOURCED_TERMS = [
 /** Four digits or more, or an international prefix: a number to be sourced. */
 const NUMBER_LIKE = /(\+\d{3}|\d[\d\s-]{3,})/;
 
+/**
+ * Copy a person has read and approved, by i18n key. A term on any OTHER line
+ * still fails the build — this list is the record of what was approved and
+ * why, not a way to turn the check off.
+ */
+const APPROVED = {
+  "authority.cybercrime_unit":
+    "A label in the 'relevant authority (for your reference)' list. Naming a body is not a claim that anything was sent to it, and the confirmation screen says in so many words that nothing was.",
+  "report.pilot_note":
+    "The confirmation sentence. It contains 'authority' and 'forwarded' because it is the denial: the report is stored on DARA' and has NOT been forwarded.",
+};
+
+/**
+ * A term inside an identifier is not copy. `cybercrime_unit` and
+ * `RELEVANT_AUTHORITIES` are symbols the compiler reads, not sentences anyone
+ * sees, and flagging them trains people to ignore this check.
+ */
+function insideIdentifier(line, term) {
+  const at = line.toLowerCase().indexOf(term.toLowerCase());
+  if (at === -1) return false;
+  const before = line[at - 1] ?? "";
+  const after = line[at + term.length] ?? "";
+  return before === "_" || after === "_";
+}
+
+function approvedKeyOn(line) {
+  const match = line.match(/"([a-z0-9_.]+)"\s*:/i);
+  return match && match[1] in APPROVED ? match[1] : null;
+}
+
 let hits = 0;
 
 function report(where, why, line) {
@@ -77,9 +107,10 @@ async function scanLines(file) {
   const text = await readFile(new URL(file, ROOT), "utf8");
   text.split("\n").forEach((line, index) => {
     for (const term of CLAIM_TERMS) {
-      if (line.toLowerCase().includes(term.toLowerCase())) {
-        report(`${file}:${index + 1}`, term, line.trim());
-      }
+      if (!line.toLowerCase().includes(term.toLowerCase())) continue;
+      if (insideIdentifier(line, term)) continue;
+      if (approvedKeyOn(line)) continue;
+      report(`${file}:${index + 1}`, term, line.trim());
     }
   });
 }
@@ -114,7 +145,17 @@ function walkContent(node, path, out) {
   }
 
   for (const [key, value] of Object.entries(node)) {
-    if (key === "note" || key === "origin" || key === "problem" || key === "why_not_ai") continue;
+    if (
+      key === "note" ||
+      key === "origin" ||
+      key === "problem" ||
+      key === "why_not_ai" ||
+      key === "rule" ||
+      key === "purpose" ||
+      key === "titles"
+    ) {
+      continue;
+    }
     if (typeof value === "string") {
       out.push({ path: `${path}.${key}`, value, gated: "verified" in node });
     } else {
@@ -132,6 +173,14 @@ const CONTENT_FILES = [
   "content/layers/protect.json",
   "content/layers/educate.json",
   "content/layers/recover.json",
+  "content/threats.json",
+  "content/community-seed.json",
+  "content/verified.json",
+  "content/shield/private_photos.json",
+  "content/shield/money_demands.json",
+  "content/shield/account_hacked.json",
+  "content/shield/afraid_safety.json",
+  "content/shield/data_stolen.json",
 ];
 
 const strings = [];

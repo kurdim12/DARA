@@ -1,0 +1,24 @@
+{
+  "_meta": {
+    "purpose": "Four reports inserted at migration time so the Community Reports section is never empty. They carry seed = 1 and public = 1, and they describe message shapes the engine already models — the same families as content/threats.json.",
+    "rule": "No names, no numbers, no institutions, no contact details. A seeded report reads exactly like a real anonymous one, because a real anonymous one holds nothing else either."
+  },
+  "reports": [
+    {
+      "threat_type": "phishing",
+      "description": "Got an SMS saying I had an unpaid fine and had 24 hours to settle it through a link. The link was not on a government domain."
+    },
+    {
+      "threat_type": "fake_job",
+      "description": "A work-from-home offer on WhatsApp, good salary, no interview, then they asked for a registration fee before anything started."
+    },
+    {
+      "threat_type": "financial_scam",
+      "description": "Someone called saying they were the bank's fraud department and asked me to read out the code that had just arrived on my phone."
+    },
+    {
+      "threat_type": "phishing",
+      "description": "A message said my account was suspended and one link would restore it. The sender was not a number I have ever had a message from."
+    }
+  ]
+}

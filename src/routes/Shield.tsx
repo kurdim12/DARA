@@ -1,191 +1,211 @@
 import { useState } from "react";
-import { resolveContact, shieldContent } from "../lib/content";
-import { sendReport } from "../lib/api";
-import { CaseNumber } from "../components/CaseNumber";
-import { sectionNumeral } from "../lib/numerals";
-import { isTestMode, rememberCase } from "../lib/storage";
-import {
-  Page,
-  PrimaryButton,
-  QuietButton,
-  SectionTitle,
-} from "../components/Layout";
+import { EyeOff, FileText, Phone } from "lucide-react";
+import { BottomNav } from "../components/BottomNav";
+import { Card, Header, Page, PrimaryButton, SectionLabel } from "../components/Shell";
 import { useI18n } from "../i18n";
+import { contact, contacts, legalLine } from "../lib/verified";
+import { situations, type Situation } from "../lib/shield";
+import type { Route } from "../lib/router";
 
-type Answer = "unanswered" | "yes" | "safe_now";
+const HELP_LINE_IDS = ["family_protection", "cybercrime_unit", "emergency"];
 
-/**
- * Guided, reviewed content — deliberately not AI. A victim of blackmail gets
- * fixed steps that a person wrote and checked, never generated text.
- */
-export function Shield({ onExit, onHome }: { onExit: () => void; onHome: () => void }) {
+const TONE: Record<"primary" | "warn" | "danger", string> = {
+  primary: "bg-primary",
+  warn: "bg-warn",
+  danger: "bg-danger",
+};
+
+export function Shield({
+  navigate,
+  quickExit,
+}: {
+  navigate: (route: Route) => void;
+  quickExit: () => void;
+}) {
   const { t, lang } = useI18n();
-  const [answer, setAnswer] = useState<Answer>("unanswered");
-  const [stage, setStage] = useState<"steps" | "report" | "done">("steps");
-  const [caseNumber, setCaseNumber] = useState<string | null>(null);
-  const [sending, setSending] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [chosen, setChosen] = useState<Situation | null>(null);
+  const [open, setOpen] = useState<Situation | null>(null);
 
-  async function report() {
-    setSending(true);
-    setFailed(false);
-    try {
-      const response = await sendReport({
-        source: "shield",
-        category: "extortion",
-        is_test: isTestMode(),
-      });
-      rememberCase(response.case_number, response.status);
-      setCaseNumber(response.case_number);
-      setStage("done");
-    } catch {
-      setFailed(true);
-    } finally {
-      setSending(false);
-    }
-  }
+  if (open) return <Steps situation={open} onBack={() => setOpen(null)} onExit={quickExit} navigate={navigate} />;
 
-  // Quick exit stays reachable on every Shield screen, not just at the top.
-  const exitBar = (
-    <div
-      className="sticky top-0 z-10 flex justify-between border-t-2 border-threat bg-paper py-3"
-      style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
-    >
-      <button type="button" onClick={onHome} className="tap text-ink-2">
-        {t("shield.back")}
-      </button>
-      <button
-        type="button"
-        onClick={onExit}
-        className="inline-flex min-h-11 items-center border-2 border-ink px-3 text-base font-semibold"
-      >
-        {t("shield.exit")}
-      </button>
-    </div>
-  );
-
-  if (stage === "done" && caseNumber) {
-    return (
-      <Page>
-        {exitBar}
-        <p className="fade-in mt-14 font-kufi text-[22px] font-semibold leading-snug">{t("report.done")}</p>
-        <CaseNumber value={caseNumber} />
-        <p className="mt-5 text-lg">{t("report.keep")}</p>
-        <p className="mt-2 text-lg">{t("report.status")}</p>
-        <p className="mt-8 text-sm text-ink-2">{t("report.pilot")}</p>
-        <div className="mt-10">
-          <QuietButton onClick={onHome}>{t("report.close")}</QuietButton>
-        </div>
-      </Page>
-    );
-  }
+  const emergency = contact("emergency", lang);
+  const law = legalLine("cybercrime_law", lang);
+  // Ordered by this list, not by the file: Family Protection first, the
+  // police last, which is the order the screen was designed in.
+  const byId = new Map(contacts(lang).map((entry) => [entry.id, entry]));
+  const lines = HELP_LINE_IDS.map((id) => byId.get(id)).filter((entry) => entry !== undefined);
 
   return (
-    <Page>
-      {exitBar}
+    <>
+      <Page>
+        <Header title={t("shield.title")} />
 
-      <h1 className="mt-6">{t("shield.title")}</h1>
-      <p className="mt-5 text-lg leading-snug">{shieldContent.intro(lang)}</p>
+        <Card className="mt-4 border-danger/30 bg-danger-soft p-4">
+          <p className="flex items-center gap-2 text-[13px] font-semibold uppercase tracking-wider text-danger">
+            <span aria-hidden="true" className="size-2 rounded-full bg-danger" />
+            {t("shield.danger_title")}
+          </p>
+          <p className="mt-2 text-[15px] leading-snug">{t("shield.danger_line")}</p>
+          <div className="mt-4">
+            {emergency?.number ? (
+              <a
+                href={`tel:${emergency.number.replace(/\s/g, "")}`}
+                className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-danger px-5 text-[16px] font-semibold text-white"
+              >
+                <Phone size={18} aria-hidden="true" />
+                {t("shield.call_now")}
+              </a>
+            ) : (
+              // No number has been checked against an official source, so there
+              // is nothing to dial. The card still says what it is for.
+              <p className="flex min-h-12 w-full items-center justify-center rounded-full border border-warn px-5 text-[15px] font-semibold text-warn">
+                {t("shield.pending_emergency")}
+              </p>
+            )}
+          </div>
+        </Card>
 
-      <section className="mt-10">
-        <p className="font-kufi text-[22px] font-semibold leading-snug">
-          {shieldContent.question(lang)}
+        <div className="mt-8">
+          <SectionLabel>{t("shield.helplines")}</SectionLabel>
+        </div>
+        <div className="mt-3 space-y-3">
+          {lines.map((line) => (
+            <div
+              key={line.id}
+              className={`flex items-center gap-3 rounded-card p-4 text-white ${TONE[line.tone]}`}
+            >
+              <span className="flex-1">
+                <span className="block font-semibold">{line.label}</span>
+                <span className="mt-0.5 block text-[13px] opacity-90">
+                  {line.number ? <bdi>{line.number}</bdi> : t("shield.pending_number")}
+                </span>
+              </span>
+              {line.number && (
+                <a
+                  href={`tel:${line.number.replace(/\s/g, "")}`}
+                  className="rounded-full bg-white px-4 py-2 text-[14px] font-semibold text-text"
+                >
+                  {t("shield.call")}
+                </a>
+              )}
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-8 text-center text-[13px] text-text-2">{t("shield.or_guidance")}</p>
+
+        <div className="mt-6">
+          <SectionLabel>{t("shield.what_happened")}</SectionLabel>
+          <p className="mt-1 text-[13px] text-text-2">{t("shield.what_sub")}</p>
+        </div>
+        <div className="mt-3 space-y-3">
+          {situations(lang).map((situation) => {
+            const selected = chosen?.id === situation.id;
+            return (
+              <button
+                key={situation.id}
+                type="button"
+                aria-pressed={selected}
+                onClick={() => setChosen(situation)}
+                className={`w-full rounded-card border p-4 text-start ${
+                  selected ? "border-primary bg-primary-soft" : "border-line bg-card"
+                }`}
+              >
+                <span className="block font-semibold">{situation.title}</span>
+                <span className="mt-0.5 block text-[13px] leading-snug text-text-2">
+                  {situation.summary}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <div className="mt-6">
+          <PrimaryButton disabled={!chosen} onClick={() => setOpen(chosen)}>
+            {t("shield.get_help")}
+          </PrimaryButton>
+        </div>
+
+        <p className="mt-4 flex items-center justify-center gap-2 text-center text-[13px] text-success">
+          <EyeOff size={16} aria-hidden="true" />
+          {t("shield.anon_note")}
         </p>
-        <div className="mt-4 flex gap-3">
-          <button
-            type="button"
-            onClick={() => setAnswer("yes")}
-            className={`flex-1 border-2 px-4 py-3 text-lg font-semibold ${
-              answer === "yes" ? "border-threat bg-threat text-paper" : "border-threat text-threat"
-            }`}
-          >
-            {t("shield.yes")}
+
+        {law && (
+          <Card className="mt-8 flex items-start gap-3 p-4">
+            <FileText size={20} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
+            <p className="text-[14px] leading-snug text-text-2">{law}</p>
+          </Card>
+        )}
+      </Page>
+      <BottomNav active="shield" navigate={navigate} />
+    </>
+  );
+}
+
+/**
+ * The guided steps for one situation. Reviewed, fixed text — deliberately not
+ * AI, because the person reading it is in no position to judge generated text.
+ *
+ * Quick exit is kept from the previous build: it replaces the page rather than
+ * pushing, so Back cannot return here.
+ */
+function Steps({
+  situation,
+  onBack,
+  onExit,
+  navigate,
+}: {
+  situation: Situation;
+  onBack: () => void;
+  onExit: () => void;
+  navigate: (route: Route) => void;
+}) {
+  const { t } = useI18n();
+
+  return (
+    <>
+      <Page>
+        <div className="flex items-center justify-between py-3">
+          <button type="button" onClick={onBack} className="tap text-[15px] text-text-2">
+            {t("shield.back")}
           </button>
           <button
             type="button"
-            onClick={() => setAnswer("safe_now")}
-            className={`flex-1 border-2 px-4 py-3 text-lg font-semibold ${
-              answer === "safe_now" ? "border-ink bg-ink text-paper" : "border-ink text-ink"
-            }`}
+            onClick={onExit}
+            className="min-h-9 rounded-full border border-line px-3 text-[14px] font-semibold"
           >
-            {t("shield.no")}
+            {t("shield.exit")}
           </button>
         </div>
 
-        {answer === "yes" && (
-          <div className="fade-in mt-5 bg-paper-2 px-4 py-4">
-            <p className="text-lg">{shieldContent.ifYes(lang)}</p>
-            {shieldContent.yesContacts.map((id) => {
-              const contact = resolveContact(id, lang);
-              if (!contact) return null;
-              return (
-                <p key={id} className="mt-2 text-lg font-semibold">
-                  {contact.label}
-                  {contact.number && (
-                    <>
-                      {" "}
-                      <bdi>{contact.number}</bdi>
-                    </>
-                  )}
-                  {contact.needsVerification && import.meta.env.DEV && (
-                    <span className="ms-2 border border-threat px-1.5 text-xs text-threat">
-                      VERIFY
-                    </span>
-                  )}
-                </p>
-              );
-            })}
-          </div>
-        )}
+        <h1 className="mt-2 text-[22px] font-semibold">{situation.title}</h1>
+        <p className="mt-2 leading-snug text-text-2">{situation.intro}</p>
 
-        {answer === "safe_now" && (
-          <ul className="fade-in mt-5 space-y-2 bg-paper-2 px-4 py-4 text-lg">
-            {shieldContent.ifSafeNow(lang).map((line, index) => (
-              <li key={index}>{line}</li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <section className="mt-11">
-        <SectionTitle>{t("shield.steps_title")}</SectionTitle>
-        <ol className="border-t border-rule">
-          {shieldContent.steps(lang).map((step, index) => (
-            <li key={step.id} className="flex gap-4 border-b border-rule py-5">
-              <span className="font-kufi text-[13px] font-semibold text-threat">
-                <bdi>{sectionNumeral(index + 1, lang)}</bdi>
+        <div className="mt-7">
+          <SectionLabel>{t("shield.steps_label")}</SectionLabel>
+        </div>
+        <Card className="mt-3 divide-y divide-line">
+          {situation.steps.map((step, index) => (
+            <div key={index} className="flex gap-3 p-4">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[13px] font-semibold text-primary">
+                <bdi>{index + 1}</bdi>
               </span>
-              <span className="flex-1 leading-relaxed">{step.text}</span>
-            </li>
+              <p className="text-[15px] leading-snug">{step}</p>
+            </div>
           ))}
-        </ol>
-      </section>
+        </Card>
 
-      <p className="mt-9 font-kufi text-[22px] font-semibold leading-snug">
-        {shieldContent.reassurance(lang)}
-      </p>
-      {shieldContent.legalNote(lang) && (
-        <p className="mt-2 text-lg leading-snug">
-          {shieldContent.legalNote(lang)}
-          {shieldContent.legalNoteNeedsVerification && import.meta.env.DEV && (
-            <span className="ms-2 border border-threat px-1.5 text-xs text-threat">VERIFY</span>
-          )}
+        <p className="mt-6 flex items-center justify-center gap-2 text-center text-[13px] text-success">
+          <EyeOff size={16} aria-hidden="true" />
+          {t("shield.anon_note")}
         </p>
-      )}
 
-      {failed && (
-        <p role="alert" className="mt-6 border-s-4 border-threat ps-3">
-          {t("error.generic")}
-        </p>
-      )}
-
-      <div className="mt-8">
-        <PrimaryButton onClick={report} disabled={sending || stage === "report"}>
-          {sending ? t("report.sending") : t("report.cta")}
-        </PrimaryButton>
-      </div>
-      <p className="mt-4 text-sm text-ink-2">{t("report.privacy")}</p>
-      <p className="mt-1 text-sm text-ink-2">{t("report.pilot")}</p>
-    </Page>
+        <div className="mt-6">
+          <PrimaryButton onClick={() => navigate("report")}>{t("report.title")}</PrimaryButton>
+        </div>
+      </Page>
+      <BottomNav active="shield" navigate={navigate} />
+    </>
   );
 }

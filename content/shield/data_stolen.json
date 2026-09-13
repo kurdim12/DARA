@@ -1,0 +1,42 @@
+{
+  "_meta": {
+    "situation": "data_stolen",
+    "purpose": "Reviewed, fixed guidance shown when someone picks this situation on the Shield screen. Deliberately not AI.",
+    "rule": "Second person, short sentences, no fear language, no statistics. Anything naming a number, a law or an institution's procedure lives in content/verified.json instead."
+  },
+  "title": {
+    "en": "Personal data stolen",
+    "ar": "بيانات شخصية مسروقة"
+  },
+  "summary": {
+    "en": "Your documents or details are in someone else's hands",
+    "ar": "وثائقك أو بياناتك بيد شخص آخر"
+  },
+  "intro": {
+    "en": "Stolen details are used to make the next message look real. Close the doors first.",
+    "ar": "البيانات المسروقة تُستخدم لجعل الرسالة التالية تبدو حقيقية. أغلق الأبواب أولًا."
+  },
+  "steps": [
+    {
+      "en": "Change your passwords, starting with the email account the others are recovered through.",
+      "ar": "غيّر كلمات المرور، وابدأ بالبريد الذي تُستعاد منه بقية الحسابات."
+    },
+    {
+      "en": "Turn on two-step verification everywhere it is offered.",
+      "ar": "فعّل التحقق بخطوتين في كل مكان يتيحه."
+    },
+    {
+      "en": "Watch your payment accounts, and stop anything you did not do yourself.",
+      "ar": "راقب حساباتك المالية، وأوقف أي عملية لم تقم بها بنفسك."
+    },
+    {
+      "en": "Expect messages that quote your own details back to you. Knowing them proves nothing.",
+      "ar": "توقّع رسائل تذكر بياناتك أمامك. معرفتها لا تثبت شيئًا."
+    },
+    {
+      "en": "Keep the evidence: what was taken, when you noticed, and anything you were sent since.",
+      "ar": "احتفظ بالأدلة: ما الذي أُخذ، ومتى لاحظت، وكل ما وصلك بعدها."
+    }
+  ],
+  "verified": true
+}

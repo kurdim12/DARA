@@ -4,6 +4,8 @@ import {
   ANALYSIS_TYPES,
   CATEGORIES,
   CHANNELS,
+  RELEVANT_AUTHORITIES,
+  THREAT_TYPES,
   MAX_IMAGE_BYTES,
   MAX_INPUT_CHARS,
   type AnalysisType,
@@ -11,6 +13,9 @@ import {
   type AnalyzeResponse,
   type Category,
   type Channel,
+  type CommunityReport,
+  type RelevantAuthority,
+  type ThreatType,
   type Lang,
   type ReportResponse,
 } from "../shared/types";
@@ -275,15 +280,56 @@ app.post("/api/report", async (c) => {
       : null;
   const isTest = payload.is_test === true ? 1 : 0;
 
+  const threatType = (THREAT_TYPES as readonly string[]).includes(payload.threat_type as string)
+    ? (payload.threat_type as ThreatType)
+    : null;
+  const authority = (RELEVANT_AUTHORITIES as readonly string[]).includes(
+    payload.relevant_authority as string,
+  )
+    ? (payload.relevant_authority as RelevantAuthority)
+    : null;
+  const description =
+    typeof payload.description === "string" && payload.description.trim()
+      ? payload.description.trim().slice(0, MAX_INPUT_CHARS)
+      : null;
+
+  // Anonymous unless the person turned it off themselves. While it is on, a
+  // contact that was typed and then hidden is dropped here rather than stored:
+  // the column stays empty, not "empty as far as the screen knows".
+  const anonymous = payload.anonymous === false ? 0 : 1;
+  const contact =
+    anonymous === 0 && typeof payload.contact === "string" && payload.contact.trim()
+      ? payload.contact.trim().slice(0, 200)
+      : null;
+
   try {
     // No IP, user agent or device column exists to write to. See migrations/.
+    //
+    // is_public is deliberately not settable from here. Nothing a visitor
+    // submits joins the community feed; only the seeded rows are public until
+    // someone marks a row by hand.
     const row = await c.env.DB.prepare(
       `INSERT INTO reports
-         (source, category, verdict, confidence, impersonated_entity, channel, message_text, is_test)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+         (source, category, verdict, confidence, impersonated_entity, channel, message_text,
+          is_test, threat_type, description, relevant_authority, anonymous, contact)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
        RETURNING id, status`,
     )
-      .bind(source, category, verdict, confidence, entity, channel, messageText, isTest)
+      .bind(
+        source,
+        category,
+        verdict,
+        confidence,
+        entity,
+        channel,
+        messageText,
+        isTest,
+        threatType,
+        description,
+        authority,
+        anonymous,
+        contact,
+      )
       .first<{ id: number; status: string }>();
 
     if (!row) return c.json({ error: "server_error" }, 500);
@@ -318,6 +364,34 @@ app.get("/api/report/:case_number", async (c) => {
   if (!row) return c.json({ error: "not_found" }, 404);
   // Status only — the report's contents are never read back over the API.
   return c.json({ status: row.status });
+});
+
+/**
+ * The Community Reports feed: the last four reports explicitly marked public.
+ *
+ * It selects the type and the description and nothing else — never a contact,
+ * never the analysed message, never whether the reporter stayed anonymous.
+ */
+app.get("/api/reports/community", async (c) => {
+  try {
+    const rows = await c.env.DB.prepare(
+      `SELECT id, threat_type, description
+         FROM reports
+        WHERE is_public = 1 AND is_test = 0 AND description IS NOT NULL
+        ORDER BY id DESC
+        LIMIT 4`,
+    ).all<{ id: number; threat_type: string | null; description: string }>();
+
+    const reports: CommunityReport[] = (rows.results ?? []).map((row) => ({
+      case_number: caseNumberFor(row.id),
+      threat_type: (row.threat_type ?? "other") as CommunityReport["threat_type"],
+      description: row.description,
+    }));
+    return c.json({ reports });
+  } catch (error) {
+    console.error("community feed failed:", (error as Error).message);
+    return c.json({ reports: [] });
+  }
 });
 
 /**
