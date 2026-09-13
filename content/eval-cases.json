@@ -101,7 +101,9 @@
       "text": "معك قسم الاحتيال في البنك. رصدنا حركة مشبوهة على حسابك. رح يوصلك رمز على هاتفك، اقرأه لي حتى نوقف العملية فوراً.",
       "accept_attack_goal": [
         "steal_otp"
-      ]
+      ],
+      "demo": true,
+      "note": "Staged for the demo: the subtle scam, a call with no link at all — the pressure is the whole attack."
     },
     {
       "id": "customs_parcel",
@@ -205,7 +207,9 @@
       "text": "رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبداً.",
       "accept_attack_goal": [
         "none"
-      ]
+      ],
+      "demo": true,
+      "note": "Staged for the demo: the control. Same subject as the call above, opposite verdict — this is what stops the app looking like it shouts scam at everything."
     },
     {
       "id": "legit_delivery",

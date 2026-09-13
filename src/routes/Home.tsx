@@ -10,15 +10,17 @@ import { sectionNumeral } from "../lib/numerals";
 import type { Route } from "../lib/router";
 
 /**
- * The layers, as the deck sets them out: a numbered editorial list, not a grid
- * of cards. Only the three that are live are here. حماية، توعية and تعافي are
- * Phase 3 screens; until they have content they are not on this page at all,
- * because a row that says "coming soon" is a row that says "unfinished".
+ * The six layers, as the deck sets them out: a numbered editorial list, not a
+ * grid of cards. All six are live now — the last three are reviewed content
+ * screens, written and checked by a person, with no AI behind them.
  */
 const LAYERS: { route: Route; title: TextKey; sub: TextKey }[] = [
   { route: "detect", title: "layer.detect", sub: "layer.detect_sub" },
   { route: "reports", title: "layer.report", sub: "layer.report_sub" },
   { route: "shield", title: "layer.shield", sub: "layer.shield_sub" },
+  { route: "protection", title: "layer.protect", sub: "layer.protect_sub" },
+  { route: "educate", title: "layer.educate", sub: "layer.educate_sub" },
+  { route: "recover", title: "layer.recover", sub: "layer.recover_sub" },
 ];
 
 export function Home({

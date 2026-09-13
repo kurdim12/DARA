@@ -29,6 +29,7 @@ const FILES = [
 const CLAIM_TERMS = [
   "السلطات",
   "الجهات المختصة",
+  "الجهة المختصة",
   "الجرائم الإلكترونية",
   "تم إرسال",
   "تم إبلاغ",
@@ -126,36 +127,39 @@ for (const file of FILES) await scanLines(file);
 for (const file of await tsxFiles("src/routes/")) await scanLines(file);
 for (const file of await tsxFiles("src/components/")) await scanLines(file);
 
-const content = JSON.parse(await readFile(new URL("content/v1-content.json", ROOT), "utf8"));
-const strings = [];
-walkContent(content, "", strings);
+const CONTENT_FILES = [
+  "content/v1-content.json",
+  "content/layers/protect.json",
+  "content/layers/educate.json",
+  "content/layers/recover.json",
+];
 
-for (const { path, value } of strings) {
+const strings = [];
+for (const file of CONTENT_FILES) {
+  const content = JSON.parse(await readFile(new URL(file, ROOT), "utf8"));
+  const found = [];
+  walkContent(content, "", found);
+  for (const entry of found) strings.push({ ...entry, file });
+}
+
+for (const { file, path, value } of strings) {
   for (const term of CLAIM_TERMS) {
     if (value.toLowerCase().includes(term.toLowerCase())) {
-      report(`content/v1-content.json ${path}`, term, value.slice(0, 90));
+      report(`${file} ${path}`, term, value.slice(0, 90));
     }
   }
   const sourced = SOURCED_TERMS.find((term) => value.includes(term));
   if (sourced) {
-    report(
-      `content/v1-content.json ${path}`,
-      `${sourced} — renders with no verified flag`,
-      value.slice(0, 90),
-    );
+    report(`${file} ${path}`, `${sourced} — renders with no verified flag`, value.slice(0, 90));
   }
   if (NUMBER_LIKE.test(value)) {
-    report(
-      `content/v1-content.json ${path}`,
-      "number renders with no verified flag",
-      value.slice(0, 90),
-    );
+    report(`${file} ${path}`, "number renders with no verified flag", value.slice(0, 90));
   }
 }
 
 if (hits === 0) {
   console.log(
-    `No authority, encryption or retention claims in the UI copy, and nothing in ${strings.length} renderable content strings states a law, a penalty or a number without a verified flag.`,
+    `No authority, encryption or retention claims in the UI copy, and nothing in ${strings.length} renderable content strings across ${CONTENT_FILES.length} content files states a law, a penalty or a number without a verified flag.`,
   );
   process.exit(0);
 }

@@ -1,77 +1,114 @@
 # DEMO-RUNBOOK.md
 
-One page. Keep it open on a second device during the run.
+For Wednesday 16 September 2026, in front of the Crown Prince Award jury.
+Everything here has been checked against the built app, not from memory.
 
-## Pre-stage checklist
+---
 
-- [ ] Phone charged above 80%, plugged in until the moment you stand up.
-- [ ] Do-not-disturb on. Notifications off. No banner can appear mid-demo.
-- [ ] Brightness at maximum. Auto-brightness off. Auto-lock set to Never.
-- [ ] App installed to the home screen, opened once, and confirmed working.
-- [ ] Hotspot on from a **second** team phone; the demo phone joined to it, venue Wi-Fi forgotten.
-- [ ] Demo tray tested: long-press the mark for 1.2 s, all staged messages listed.
-- [ ] Rehearsal mode toggled **off** in the tray before the real run, so the report is not marked as a test.
-- [ ] Screen recording of a full clean run saved on the phone **and** on a USB stick.
-- [ ] `https://<url>/api/health` opened once: `key_present: true` **and** `db_ready: true`.
+## Before you leave the house
 
-## The click path
+**1. The key.** `https://dara.abdalrhmankurdi12.workers.dev/api/health` must say
+`"key_present": true`. Today it says **false**, and while it does, every check
+returns an error. Cloudflare dashboard → Workers & Pages → `dara` → Settings →
+Variables and Secrets → `ANTHROPIC_API_KEY`, type **Secret** → redeploy. Never
+paste that key into a chat or a file.
 
-1. Open DARA' from the home screen. The mark is on paper.
-   > Narration: _________________________________________________
-2. Tap **افحص رسالة**.
-3. Long-press the mark instead if you want the staged message: press 1.2 s, pick
-   `gam_parking_fine`, and it lands in the box. Otherwise paste it.
-   > Narration: _________________________________________________
-4. Leave the channel on **رسالة نصية**.
-5. Tap **افحص الرسالة**. One status line shows while it works.
-   > Narration while it runs: ____________________________________
-6. The verdict lands: red band, one-line reason, the message with the red flags
-   underlined in place and numbered.
-   > Narration — point at flag 1 and flag 2: ____________________
-7. Read one line from **ماذا تفعل الآن**.
-8. Tap **أبلغ بشكل مجهول**. Read the line "لا نطلب اسمك أو رقم هاتفك."
-9. Tap **أرسل البلاغ**. The case number appears.
-   > Narration: _________________________________________________
-10. If a judge asks about extortion: back to home, tap **تتعرّض للابتزاز؟**,
-    show the steps and the **خروج سريع** button.
+**2. Warm the phone.** On good wifi, open the app and run all three demo
+messages once. A staged message checked live once leaves its real verdict on
+that device, so if the venue's network is bad the same message still answers —
+tagged `نتيجة محفوظة`, never silently.
 
-## If something goes wrong
+**3. Add it to the home screen.** It opens without a browser bar and shows the
+mark, not a screenshot.
 
-**The check is slow (over 8 seconds).**
-It falls back to the saved verdict for that staged message and tags it
-"نتيجة محفوظة" on screen.
-> Your line: "This is the result we recorded earlier — same engine, saved so the
-> demo doesn't depend on the room's connection."
+---
 
-**No connection at all.**
-The app shell still opens. Staged messages still return their saved verdict with
-the same tag. Anything else says the check needs a connection.
-> Your line: same as above.
+## The three messages, in order
 
-**The engine is down or returns an error.**
-Stop tapping. Switch to the recording on the phone.
-> Your line: "Let me show you the recorded run while that comes back."
+Long-press the درع mark on Home for about a second to open the staged tray, and
+tap them from there — no typing, no autocorrect. They are also below if you
+would rather paste.
 
-**The phone locks or the app closes.**
-Re-open from the home screen. It starts on Home; nothing is lost, because
-nothing is stored on the device except case numbers.
+**١ — The obvious one. Expect: `احتيال`.**
 
-## Numbers to have ready
+> أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة بقيمة 45 ديناراً. ادفع خلال 24 ساعة لتجنب مضاعفة الغرامة: http://amanat-amman-pay.com/fine
 
-| What | Where it comes from |
-|---|---|
-| Time to verdict over the hotspot | `EVAL-REPORT.md`, p50 and p90 |
-| Model in use | `/api/health` |
-| What a report stores | `migrations/0001_reports.sql` — no IP, no user agent, no device |
+This is the slide-2 family. Watch for the link and the deadline underlined in
+red inside the message itself, numbered to match the reasons below. **Say that
+this is a reconstruction of that family, not the real SMS** — the real text is
+still waiting on you (`gam_parking_fine` in the golden set).
 
-## Questions a judge may ask
+**٢ — The subtle one. Expect: `احتيال`.**
 
-- **"Where does the report go?"** To the DARA' platform. It is a pilot. The
-  screens say so. No claim is made that any authority receives it.
-- **"Is it encrypted?"** It is sent over HTTPS. Nothing beyond that is claimed.
-- **"Do you store personal data?"** The app never asks for a name or a phone
-  number, and the reports table has no IP, user agent or device column.
-- **"Is the AI real?"** Yes — the Worker calls Claude for every live check. A
-  saved result is labelled "نتيجة محفوظة" on screen whenever one is shown.
-- **"What if the message tries to trick the AI?"** An instruction inside a
-  message is treated as a red flag, never obeyed; there is an eval case for it.
+> معك قسم الاحتيال في البنك. رصدنا حركة مشبوهة على حسابك. رح يوصلك رمز على هاتفك، اقرأه لي حتى نوقف العملية فوراً.
+
+No link at all. The attack is entirely social, and the app still has to name it.
+
+**٣ — The control. Expect: `تبدو سليمة`.**
+
+> رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبداً.
+
+Same subject as ٢, opposite verdict. Run this one. It is the answer to the
+question a jury always asks: *does it just say scam to everything?*
+
+---
+
+## If the network is bad
+
+Nothing to do — a staged message you warmed up falls back to its saved verdict
+automatically after 12 seconds and shows `نتيجة محفوظة` next to
+`مدعوم بتقنية Claude`. Read the tag out loud rather than hiding it.
+
+A message you have not warmed up has no fallback and will show an error. Do not
+improvise a fourth message on stage.
+
+---
+
+## The report
+
+From the verdict screen of message ١, tap **أبلغ بشكل مجهول**. The confirmation
+shows the case number large, with a **نسخ** button. That number is derived from
+a real row in D1 — `db_ready` is true on the deployment today.
+
+Then open **بلاغاتي** from the bottom nav: the number is listed with its status.
+That is the whole loop, live.
+
+---
+
+## Shield
+
+Home → **٠٣ درع الابتزاز**, or the verdict screen's red entry when the message
+is extortion. Read step **٠١** aloud:
+
+> لا تدفع أي أموال — الدفع لا يضمن توقف المهاجم
+
+Show **خروج سريع** at the top and press it once. It replaces the page, so Back
+cannot return to it. That detail matters to this audience.
+
+---
+
+## The six layers
+
+Home lists all six: كشف، إبلاغ، درع الابتزاز، حماية، توعية، تعافي. The last
+three are reviewed written content — say so. They are deliberately not AI.
+
+---
+
+## The hard rule for the presenter
+
+**Never claim anything the app does not literally do.** Specifically:
+
+- Reports go to **منصة درع**, a pilot. Not to the Cybercrime Unit, not to PSD,
+  not to Family Protection, not to any ministry. The app never says they do,
+  and neither do you.
+- It is **HTTPS**, and it does not ask for a name or a phone number. It is not
+  "fully encrypted" and it does not "store nothing".
+- **مدعوم بتقنية Claude** is true — the verdict really is a Claude call. A
+  result tagged `نتيجة محفوظة` is a real earlier Claude verdict replayed from
+  the device, and you should say that when it appears.
+- Anything the app does not show you — an emergency number, the article of the
+  cybercrime law — is hidden on purpose, because nobody has checked it against
+  an official source yet. If a judge asks, that is the answer, and it is a good
+  one.
+
+If something fails on stage, say what failed. This jury has seen polished demos.

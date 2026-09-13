@@ -5,6 +5,8 @@ import { Home } from "./routes/Home";
 import { Detect } from "./routes/Detect";
 import { Reports } from "./routes/Reports";
 import { Protection } from "./routes/Protection";
+import { Educate } from "./routes/Educate";
+import { Recover } from "./routes/Recover";
 import { Shield } from "./routes/Shield";
 import { Lab } from "./routes/Lab";
 
@@ -28,6 +30,10 @@ function Screens() {
       return <Reports navigate={navigate} />;
     case "protection":
       return <Protection navigate={navigate} />;
+    case "educate":
+      return <Educate navigate={navigate} />;
+    case "recover":
+      return <Recover navigate={navigate} />;
     case "shield":
       return <Shield onExit={quickExit} onHome={() => navigate("home")} />;
     case "lab":

@@ -442,3 +442,81 @@ flags arrive in document order. `worker/engine/postvalidate.ts:165` does sort
 them, so the deployed path was never wrong — but a verdict that reached the
 screen any other way would have duplicated half the message on the one screen
 the whole demo is built around. It now sorts defensively before rendering.
+
+---
+
+# Phase 3 results — Protect, Educate, Recover
+
+Three reviewed content screens. No AI, no forms, no external calls, same design
+system as Phase 2. Content lives in `content/layers/{protect,educate,recover}.json`
+and is gated by `src/lib/layers.ts` on the same rule as the rest of the app: a
+section marked `verified: false` does not render in a production build, and
+renders in dev with the VERIFY tag.
+
+| Layer | Route | Sections | Hidden in production |
+|---|---|---|---|
+| حماية | `/protection` | 8 | 0 |
+| توعية | `/educate` | 6 | 0 |
+| تعافي | `/recover` | 7 | **1** |
+
+## Every `verified: false` item, and what it needs
+
+| Where | Text | What it would take |
+|---|---|---|
+| `content/layers/recover.json` → `official_report` | «قدّم بلاغًا لدى الجهة المختصة واطلب رقمًا مرجعيًا للقضية، واحتفظ به مع الأدلة التي وثّقتها.» | Confirm from an official source which body takes the report, the correct name for it, and what a person actually receives. Then flip to `true`. |
+
+Still hidden from the earlier phases, unchanged:
+
+| Where | What | What it would take |
+|---|---|---|
+| `content/v1-content.json` → `contacts` (7) | 911, 110, +962 6 4655660, 1700, 5008080, 06-5600000, 06-5007777 | Check each against an official source. 911 alone would put a number back into Shield's `نعم` branch. |
+| `content/v1-content.json` → `legal` (2) | The cybercrime law's number and its penalties | An official text, with the article cited |
+| `content/v1-content.json` → `shield.legal_note` | «الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.» | Same |
+| `content/v1-content.json` → `recover_stretch.money_sent` | An unverified bank number and a claim about cross-border recovery | Same — or leave it hidden; `/recover` now covers this ground without naming anyone |
+
+## What the content deliberately does not do
+
+No statistics anywhere in the three files. No phone numbers. No invented URLs —
+the government-domain anatomy describes the check rather than printing a fake
+domain. No institution is named in anything that renders. The tone is second
+person, short sentences, no fear language.
+
+## The honesty gate now reads these files too
+
+`scripts/honesty-check.mjs` walks all four content files — 143 renderable
+strings — skipping `verified: false` subtrees, and fails the build on any
+renderable string that states a law, a penalty, a number, or names an authority
+without a flag. Flipping `official_report` to `true` makes it fail, which is
+the check working:
+
+```
+content/layers/recover.json sections[5].body  «الجهة المختصة»  قدّم بلاغًا لدى الجهة المختصة…
+```
+
+## QA, re-run
+
+| Check | Result |
+|---|---|
+| Horizontal overflow, all routes incl. the three new ones | 0 |
+| Console errors / warnings / failed requests | 0 |
+| External hosts | 0 |
+| `VERIFY` visible in the production build | none |
+| `npm run verify` | typecheck + 77 tests + honesty + build, green |
+
+## Screenshots
+
+`docs/screens/phase3/` — 390 wide, 2×, full page:
+
+- `01-home.png` — all six layers, ٠١ … ٠٦
+- `02-protect.png`
+- `03-educate.png`
+- `04-recover.png`
+
+## Two changes outside the content
+
+- The staged demo set went from 4 to 6: `bank_otp_call` (a scam with no link at
+  all) and `legit_otp` (the control, same subject, opposite verdict). The demo
+  needed a legitimate message, and `DEMO-RUNBOOK.md` is built around those three.
+- `src/components/RecoverPaths.tsx` is deleted. It was a dev-only listing of v1's
+  unreviewed recovery text; `/recover` replaces it with content that has been
+  written and checked.
