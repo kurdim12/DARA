@@ -1,0 +1,45 @@
+# Runs the golden set against the deployed DARA' and prints the report.
+#
+# It exists because the engine's accuracy had never been measured: no machine
+# that could reach the deployment also had a way to run the harness (AUDIT.md,
+# A1). This one can. No API key is needed anywhere — the harness talks to the
+# Worker, and the key stays a Worker secret.
+name: eval
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The deployed URL to run the golden set against
+        default: https://dara.abdalrhmankurdi12.workers.dev
+  push:
+    branches: ["claude/**"]
+    paths:
+      - content/eval-cases.json
+      - worker/**
+      - scripts/eval.mjs
+      - .github/workflows/eval.yml
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run the golden set
+        id: run
+        continue-on-error: true
+        run: npm run eval -- --target "${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}"
+      - name: Print the report
+        if: always()
+        run: cat EVAL-REPORT.md || echo "no report was written"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-report
+          path: EVAL-REPORT.md
+          if-no-files-found: warn
