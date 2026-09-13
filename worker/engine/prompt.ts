@@ -120,9 +120,10 @@ export function buildUserContent(
   text: string,
   lang: "ar" | "en",
   channel?: string,
-  options?: { hasImage?: boolean; linkFacts?: string },
+  options?: { hasImage?: boolean; linkFacts?: string; type?: string },
 ): string {
   const lines = [`LANG: ${lang}`];
+  if (options?.type) lines.push(`TYPE: ${options.type}`);
   if (channel) lines.push(`CHANNEL: ${channel}`);
   if (options?.linkFacts) lines.push("LINK FACTS:", options.linkFacts);
   if (options?.hasImage) {

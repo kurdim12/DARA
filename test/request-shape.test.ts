@@ -146,3 +146,27 @@ describe("buildRequestBody", () => {
     expect(blocks.every((b) => b.type !== "image")).toBe(true);
   });
 });
+
+/**
+ * The Scan chips send a `type`. It is a hint, and it reaches the model as one
+ * more line of framing — nothing in post-validation keys off it.
+ */
+describe("the analysis type hint", () => {
+  it("carries TYPE into the instructions when the caller sent one", () => {
+    const body = buildRequestBody({ ...base, model: "claude-sonnet-5", type: "call" });
+    expect(instructions(body)).toContain("TYPE: call");
+  });
+
+  it("says nothing about a type when the caller did not send one", () => {
+    const body = buildRequestBody({ ...base, model: "claude-sonnet-5" });
+    expect(instructions(body)).not.toContain("TYPE:");
+  });
+
+  it("keeps CHANNEL and TYPE as separate lines — they are different questions", () => {
+    const text = instructions(
+      buildRequestBody({ ...base, model: "claude-sonnet-5", type: "message" }),
+    );
+    expect(text).toContain("CHANNEL: sms");
+    expect(text).toContain("TYPE: message");
+  });
+});

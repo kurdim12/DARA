@@ -1,10 +1,12 @@
 import { Hono } from "hono";
 import {
   ALLOWED_IMAGE_TYPES,
+  ANALYSIS_TYPES,
   CATEGORIES,
   CHANNELS,
   MAX_IMAGE_BYTES,
   MAX_INPUT_CHARS,
+  type AnalysisType,
   type AnalyzeImage,
   type AnalyzeResponse,
   type Category,
@@ -94,6 +96,7 @@ app.post("/api/analyze", async (c) => {
     text?: unknown;
     lang?: unknown;
     channel?: unknown;
+    type?: unknown;
     image?: unknown;
   };
   const text = typeof payload.text === "string" ? payload.text.trim() : "";
@@ -101,6 +104,13 @@ app.post("/api/analyze", async (c) => {
   const channel =
     typeof payload.channel === "string" && CHANNELS.includes(payload.channel as Channel)
       ? (payload.channel as Channel)
+      : undefined;
+  // A hint from the Scan chips. Anything not on the list is dropped rather
+  // than passed through: this string ends up inside the prompt.
+  const analysisType =
+    typeof payload.type === "string" &&
+    (ANALYSIS_TYPES as readonly string[]).includes(payload.type)
+      ? (payload.type as AnalysisType)
       : undefined;
 
   // A screenshot is accepted only as one of three raster types, under a size
@@ -151,6 +161,7 @@ app.post("/api/analyze", async (c) => {
       text,
       lang,
       channel,
+      type: analysisType,
       image,
       linkFacts,
     });
@@ -307,6 +318,27 @@ app.get("/api/report/:case_number", async (c) => {
   if (!row) return c.json({ error: "not_found" }, 404);
   // Status only — the report's contents are never read back over the API.
   return c.json({ status: row.status });
+});
+
+/**
+ * Report counts per category, for the "Known Threats in Jordan" list. An
+ * aggregate only: no report's contents are ever read back over the API, and
+ * rehearsal rows are excluded. On any failure this answers with no counts,
+ * which the UI renders as "Known pattern" rather than a number.
+ */
+app.get("/api/threats", async (c) => {
+  try {
+    const rows = await c.env.DB.prepare(
+      `SELECT category, COUNT(*) AS n FROM reports WHERE is_test = 0 GROUP BY category`,
+    ).all<{ category: string; n: number }>();
+
+    const counts: Record<string, number> = {};
+    for (const row of rows.results ?? []) counts[row.category] = row.n;
+    return c.json({ counts });
+  } catch (error) {
+    console.error("threat counts failed:", (error as Error).message);
+    return c.json({ counts: {} });
+  }
 });
 
 // The bare path too: "/api/*" does not match "/api", which would otherwise

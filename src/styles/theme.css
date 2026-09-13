@@ -1,21 +1,51 @@
 /*
- * The deck's palette, exactly. Cream paper, black ink, one red that only ever
- * means threat. Nothing else: no green, no blue, no gradient, no shadow.
- *
- * `npm run brand:sample` can replace --paper with the colour sampled from the
- * mark's background, but DARA's mark is white on the threat red, so it leaves
- * this alone and says why. See DECISIONS.md.
+ * The submitted app's palette. Light and dark, blue primary, one red for
+ * danger, one amber for warning, and green used for exactly one thing: a Safe
+ * verdict. Nothing else is coloured.
  */
 :root {
-  --paper: #f4efe6; /* page */
-  --paper-2: #ede6d8; /* cards, inputs, quoted message blocks */
-  --rule: #d9d2c4; /* hairlines, dividers, input borders */
-  --ink: #111111; /* all primary text, primary buttons */
-  --ink-2: #5c574e; /* secondary text, labels, meta */
-  --threat: #c40b29; /* danger verdicts, flagged spans, Shield, destructive */
-
-  /* The flagged span's wash. Only ever used behind a red flag. */
-  --threat-wash: color-mix(in srgb, var(--threat) 12%, transparent);
+  --bg: #f7f8fa;
+  --card: #ffffff;
+  --border: #e5e7eb;
+  --text: #111827;
+  --text-2: #4b5563;
+  --primary: #1d5bd6;
+  --primary-soft: #dce8fb;
+  --danger: #e53935;
+  --danger-soft: #fdecec;
+  --warn: #f5a623;
+  --success: #16a34a;
 
   color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1115;
+  --card: #181b22;
+  --border: #2a2f3a;
+  --text: #f3f4f6;
+  --text-2: #a1a7b5;
+  --primary: #4f86f0;
+  --primary-soft: #1b2a45;
+  --danger: #f05b57;
+  --danger-soft: #3a1e1e;
+  --warn: #f5a623;
+  --success: #34c26a;
+
+  color-scheme: dark;
+}
+
+/*
+ * Names the screens that have not been rebuilt yet still use. They resolve
+ * through the tokens above, so those screens follow the theme for free until
+ * their own phase replaces them.
+ */
+:root {
+  --paper: var(--bg);
+  --paper-2: var(--card);
+  --rule: var(--border);
+  --ink: var(--text);
+  --ink-2: var(--text-2);
+  --threat: var(--danger);
+  --threat-wash: color-mix(in srgb, var(--danger) 12%, transparent);
 }

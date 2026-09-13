@@ -2,16 +2,28 @@ import { useCallback, useEffect, useState } from "react";
 
 export type Route =
   | "home"
+  | "scan"
+  | "report"
+  | "recover"
+  | "shield"
+  | "threats"
+  | "protect"
+  | "learn"
+  // Screens from the previous build, still mounted until their phase
+  // replaces them.
   | "detect"
   | "reports"
   | "protection"
   | "educate"
-  | "recover"
-  | "shield"
   | "lab";
 
 const PATHS: Record<Route, string> = {
   home: "/",
+  scan: "/scan",
+  report: "/report",
+  threats: "/threats",
+  protect: "/protect",
+  learn: "/learn",
   detect: "/detect",
   reports: "/reports",
   protection: "/protection",
@@ -21,17 +33,23 @@ const PATHS: Record<Route, string> = {
   lab: "/lab",
 };
 
+/**
+ * Longest prefix wins, so "/reports" is never read as "/report" and
+ * "/protection" is never read as "/protect".
+ */
 function routeFor(pathname: string): Route {
-  if (pathname.startsWith("/detect")) return "detect";
-  if (pathname.startsWith("/reports")) return "reports";
-  if (pathname.startsWith("/protection")) return "protection";
-  if (pathname.startsWith("/educate")) return "educate";
-  if (pathname.startsWith("/recover")) return "recover";
-  if (pathname.startsWith("/shield")) return "shield";
-  // The engine console is a development tool: it renders the raw API response
-  // next to the verdict. Nothing links to it, but the URL worked in production
-  // until now, and the demo is on a phone someone else may be holding.
-  if (pathname.startsWith("/lab") && import.meta.env.DEV) return "lab";
+  const candidates = (Object.entries(PATHS) as [Route, string][])
+    .filter(([, path]) => path !== "/")
+    .sort((a, b) => b[1].length - a[1].length);
+
+  for (const [route, path] of candidates) {
+    if (!pathname.startsWith(path)) continue;
+    // The engine console is a development tool: it renders the raw API
+    // response next to the verdict, and the URL answered in production until
+    // the audit caught it.
+    if (route === "lab" && !import.meta.env.DEV) return "home";
+    return route;
+  }
   return "home";
 }
 

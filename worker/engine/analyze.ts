@@ -44,6 +44,8 @@ export interface AnalyzeArgs {
   text: string;
   lang: Lang;
   channel?: string;
+  /** What the person says they are looking at. A hint only. */
+  type?: string;
   /** A screenshot to read. Held for this request only; never written anywhere. */
   image?: AnalyzeImage;
   /** Deterministic link facts computed before the call, passed as context. */
@@ -65,6 +67,7 @@ export function buildRequestBody(
   const instructions = buildUserContent(args.text, args.lang, args.channel, {
     hasImage: Boolean(args.image),
     linkFacts: args.linkFacts,
+    type: args.type,
   });
 
   // The image goes first: the model reads the screenshot, then the framing that

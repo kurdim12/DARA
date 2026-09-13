@@ -1,104 +1,152 @@
-import { useState } from "react";
-import { Mark } from "../components/Mark";
+import { useEffect, useState } from "react";
+import {
+  Briefcase,
+  ChevronRight,
+  GraduationCap,
+  LifeBuoy,
+  Link2,
+  MessageSquare,
+  Phone,
+  Shield,
+  ShieldCheck,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
-import { LangToggle, Page } from "../components/Layout";
 import { DemoTray } from "../components/DemoTray";
+import { ThreatRow } from "../components/ThreatRow";
+import { Card, Header, Page, PrimaryButton, SectionHeading } from "../components/Shell";
 import { useI18n, type TextKey } from "../i18n";
-import { listCases } from "../lib/storage";
-import { statusLabel } from "../lib/status";
-import { sectionNumeral } from "../lib/numerals";
+import { allThreats, reportCounts } from "../lib/threats";
 import type { Route } from "../lib/router";
 
-/**
- * The six layers, as the deck sets them out: a numbered editorial list, not a
- * grid of cards. All six are live now — the last three are reviewed content
- * screens, written and checked by a person, with no AI behind them.
- */
-const LAYERS: { route: Route; title: TextKey; sub: TextKey }[] = [
-  { route: "detect", title: "layer.detect", sub: "layer.detect_sub" },
-  { route: "reports", title: "layer.report", sub: "layer.report_sub" },
-  { route: "shield", title: "layer.shield", sub: "layer.shield_sub" },
-  { route: "protection", title: "layer.protect", sub: "layer.protect_sub" },
-  { route: "educate", title: "layer.educate", sub: "layer.educate_sub" },
-  { route: "recover", title: "layer.recover", sub: "layer.recover_sub" },
+const CAN_ANALYZE: { key: TextKey; Icon: LucideIcon }[] = [
+  { key: "home.can_1", Icon: MessageSquare },
+  { key: "home.can_2", Icon: Link2 },
+  { key: "home.can_3", Icon: Phone },
+  { key: "home.can_4", Icon: Briefcase },
+];
+
+const TOOLS: { route: Route; title: TextKey; sub: TextKey; Icon: LucideIcon }[] = [
+  { route: "protect", title: "tool.protect", sub: "tool.protect_sub", Icon: ShieldCheck },
+  { route: "learn", title: "tool.learn", sub: "tool.learn_sub", Icon: GraduationCap },
+  { route: "recover", title: "tool.recover", sub: "tool.recover_sub", Icon: LifeBuoy },
+  { route: "shield", title: "tool.shield", sub: "tool.shield_sub", Icon: Shield },
 ];
 
 export function Home({
   navigate,
   onStaged,
+  onSubmit,
 }: {
   navigate: (route: Route) => void;
   onStaged: (text: string) => void;
+  /** Carries the pasted text into Scan and runs it there. */
+  onSubmit: (text: string) => void;
 }) {
-  const { t, lang } = useI18n();
+  const { t } = useI18n();
+  const [text, setText] = useState("");
   const [trayOpen, setTrayOpen] = useState(false);
-  // Only what this device actually has. No reports means no section at all.
-  const [latest] = useState(() => listCases()[0] ?? null);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    let live = true;
+    void reportCounts().then((next) => live && setCounts(next));
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const threats = allThreats().slice(0, 3);
 
   return (
     <>
-      <Page withNav>
-        <header className="flex items-start justify-between">
-          <Mark size={76} onLongPress={() => setTrayOpen(true)} />
-          <LangToggle />
-        </header>
+      <Page>
+        <Header onLogoLongPress={() => setTrayOpen(true)} />
 
-        <p className="mt-6 font-kufi text-[22px] font-semibold leading-snug">
-          {t("home.tagline")}
-        </p>
+        <p className="mt-4 text-[14px] font-semibold text-primary">{t("home.eyebrow")}</p>
+        <h1 className="mt-1 text-[34px] font-bold leading-tight">{t("home.h1")}</h1>
+        <p className="mt-3 text-text-2">{t("home.sub")}</p>
 
-        <nav className="mt-10 border-t border-rule">
-          {LAYERS.map(({ route, title, sub }, index) => (
+        <Card className="mt-6 p-4">
+          <textarea
+            dir={text.length > 0 ? "auto" : undefined}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={t("home.placeholder")}
+            rows={4}
+            className="w-full resize-none bg-transparent text-[16px] leading-relaxed outline-none placeholder:text-text-2"
+          />
+          <ul className="mt-3 space-y-2.5 border-t border-line pt-3">
+            {CAN_ANALYZE.map(({ key, Icon }) => (
+              <li key={key} className="flex items-center gap-3 text-[14px] text-text-2">
+                <Icon size={20} className="shrink-0 text-primary" aria-hidden="true" />
+                {t(key)}
+              </li>
+            ))}
+          </ul>
+        </Card>
+
+        <div className="mt-4">
+          <PrimaryButton disabled={text.trim().length === 0} onClick={() => onSubmit(text.trim())}>
+            {t("home.analyze")}
+          </PrimaryButton>
+        </div>
+
+        <SectionHeading>
+          <span className="mt-9 block">{t("home.tools")}</span>
+        </SectionHeading>
+        <div className="mt-3 grid grid-cols-2 gap-3">
+          {TOOLS.map(({ route, title, sub, Icon }) => (
             <button
               key={route}
               type="button"
               onClick={() => navigate(route)}
-              className="flex w-full items-baseline gap-4 border-b border-rule py-5 text-start"
+              className="rounded-card border border-line bg-card p-4 text-start"
             >
-              <span className="font-kufi text-[13px] text-ink-2">
-                <bdi>{sectionNumeral(index + 1, lang)}</bdi>
-              </span>
-              <span className="flex-1">
-                <span className="block font-kufi text-[22px] font-semibold leading-snug">
-                  {t(title)}
-                </span>
-                <span className="mt-1 block text-[13px] leading-snug text-ink-2">
-                  {t(sub)}
-                </span>
-              </span>
+              <Icon size={20} className="text-primary" aria-hidden="true" />
+              <span className="mt-2.5 block font-semibold">{t(title)}</span>
+              <span className="mt-0.5 block text-[13px] leading-snug text-text-2">{t(sub)}</span>
             </button>
           ))}
-        </nav>
+        </div>
 
-        {latest && (
-          <section className="mt-10">
-            <h2 className="text-[13px] font-semibold uppercase tracking-widest text-ink-2">
-              {t("home.last_report")}
-            </h2>
-            <p className="mt-2 font-kufi text-[22px] font-bold tracking-tight">
-              <bdi>{latest.case_number}</bdi>
-            </p>
-            {latest.status && (
-              <p className="mt-1 text-[13px] text-ink-2">
-                {t("status.label")}: {statusLabel(latest.status, t)}
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => navigate("reports")}
-              className="tap mt-3 border-b border-ink pb-0.5 text-[13px]"
-            >
-              {t("home.view_reports")}
-            </button>
-          </section>
-        )}
+        <SectionHeading>
+          <span className="mt-9 block">{t("home.threats")}</span>
+        </SectionHeading>
+        <div className="mt-3 space-y-3">
+          {threats.map((threat) => (
+            <ThreatRow key={threat.id} threat={threat} count={counts[threat.category] ?? 0} />
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate("threats")}
+          className="tap mt-3 flex items-center gap-1 text-[14px] font-semibold text-primary"
+        >
+          {t("home.threats_all")}
+          <ChevronRight size={16} className="rtl:rotate-180" aria-hidden="true" />
+        </button>
+
+        <SectionHeading>
+          <span className="mt-9 block">{t("home.how")}</span>
+        </SectionHeading>
+        <Card className="mt-3 divide-y divide-line">
+          {(["how.1", "how.2", "how.3"] as TextKey[]).map((key, index) => (
+            <div key={key} className="flex gap-3 p-4">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[13px] font-semibold text-primary">
+                <bdi>{index + 1}</bdi>
+              </span>
+              <p className="text-[15px] leading-snug">{t(key)}</p>
+            </div>
+          ))}
+        </Card>
 
         {trayOpen && (
           <DemoTray
             onClose={() => setTrayOpen(false)}
-            onPick={(text) => {
+            onPick={(staged) => {
               setTrayOpen(false);
-              onStaged(text);
+              onStaged(staged);
             }}
           />
         )}

@@ -1,4 +1,5 @@
 import type {
+  AnalysisType,
   AnalyzeImage,
   AnalyzeResponse,
   Channel,
@@ -33,11 +34,12 @@ async function postAnalyze(
   channel: Channel | undefined,
   signal: AbortSignal,
   image?: AnalyzeImage,
+  type?: AnalysisType,
 ): Promise<AnalyzeResponse> {
   const res = await fetch("/api/analyze", {
     method: "POST",
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ text, lang, channel, image }),
+    body: JSON.stringify({ text, lang, channel, type, image }),
     signal,
   });
 
@@ -64,13 +66,14 @@ export async function analyze(
   lang: Lang,
   channel?: Channel,
   image?: AnalyzeImage,
+  type?: AnalysisType,
 ): Promise<AnalyzeResponse> {
   // A screenshot has no saved verdict behind it and takes longer to read, so
   // it goes straight through with no race against the slow mark.
   if (image) {
     const controller = new AbortController();
     try {
-      return await postAnalyze(text, lang, channel, controller.signal, image);
+      return await postAnalyze(text, lang, channel, controller.signal, image, type);
     } catch (error) {
       if (error instanceof AppError) throw error;
       throw new AppError(
@@ -89,7 +92,7 @@ export async function analyze(
   }
 
   const controller = new AbortController();
-  const live = postAnalyze(text, lang, channel, controller.signal).then((value) => {
+  const live = postAnalyze(text, lang, channel, controller.signal, undefined, type).then((value) => {
     // A staged message that has just been checked live leaves its verdict on
     // this device, so the same message survives a bad network later. Nothing
     // a person pastes themselves is ever written down — see rememberVerdict.

@@ -12,7 +12,7 @@ import ar from "./ar.json";
 import en from "./en.json";
 
 const DICTS: Record<Lang, Record<string, string>> = { ar, en };
-const STORAGE_KEY = "dara.lang";
+const KEY = "dara.lang";
 
 interface I18n {
   lang: Lang;
@@ -24,14 +24,20 @@ interface I18n {
 
 const Ctx = createContext<I18n | null>(null);
 
+/**
+ * English by default, as the submitted app opens.
+ *
+ * The choice is kept for this browsing session only — sessionStorage, not
+ * localStorage — so a reload mid-demo does not switch the language back under
+ * the presenter, and closing the tab forgets it. No copy anywhere claims
+ * anything about storage.
+ */
 function initialLang(): Lang {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "ar" || stored === "en") return stored;
+    return sessionStorage.getItem(KEY) === "ar" ? "ar" : "en";
   } catch {
-    // Private mode or storage disabled: Arabic is the default anyway.
+    return "en";
   }
-  return "ar";
 }
 
 export function LangProvider({ children }: { children: ReactNode }) {
@@ -42,9 +48,9 @@ export function LangProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = lang;
     document.documentElement.dir = dir;
     try {
-      localStorage.setItem(STORAGE_KEY, lang);
+      sessionStorage.setItem(KEY, lang);
     } catch {
-      // Not worth interrupting anyone over.
+      // Private mode: the toggle still works for this page.
     }
   }, [lang, dir]);
 
@@ -54,7 +60,7 @@ export function LangProvider({ children }: { children: ReactNode }) {
     [],
   );
   const t = useCallback(
-    (key: keyof typeof ar) => DICTS[lang][key] ?? DICTS.ar[key] ?? String(key),
+    (key: keyof typeof ar) => DICTS[lang][key] ?? DICTS.en[key] ?? String(key),
     [lang],
   );
 

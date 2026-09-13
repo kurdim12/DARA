@@ -1,18 +1,17 @@
+import { Flag, Home, LifeBuoy, ScanLine, Shield } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
-const TABS: { route: Extract<Route, "home" | "detect" | "reports" | "protection">; label: TextKey }[] = [
-  { route: "home", label: "nav.home" },
-  { route: "detect", label: "nav.detect" },
-  { route: "reports", label: "nav.reports" },
-  { route: "protection", label: "nav.protection" },
+const TABS: { route: Route; label: TextKey; Icon: LucideIcon }[] = [
+  { route: "home", label: "nav.home", Icon: Home },
+  { route: "scan", label: "nav.scan", Icon: ScanLine },
+  { route: "report", label: "nav.report", Icon: Flag },
+  { route: "recover", label: "nav.recover", Icon: LifeBuoy },
+  { route: "shield", label: "nav.shield", Icon: Shield },
 ];
 
-/**
- * The app's permanent structure: four destinations, words only. No icons to
- * decode, no colour to misread — red means threat everywhere else in DARA',
- * so it cannot mean "you are here".
- */
+/** Five destinations, fixed, safe-area padded. Order mirrors with `dir`. */
 export function BottomNav({
   active,
   navigate,
@@ -24,11 +23,11 @@ export function BottomNav({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-paper"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul className="mx-auto flex w-full max-w-[30rem]">
-        {TABS.map(({ route, label }) => {
+        {TABS.map(({ route, label, Icon }) => {
           const current = active === route;
           return (
             <li key={route} className="flex-1">
@@ -36,15 +35,12 @@ export function BottomNav({
                 type="button"
                 onClick={() => navigate(route)}
                 aria-current={current ? "page" : undefined}
-                className={`flex min-h-11 w-full flex-col items-center justify-center gap-1.5 px-1 pb-2.5 pt-2 text-sm ${
-                  current ? "font-semibold text-ink" : "text-ink-2"
+                className={`flex min-h-14 w-full flex-col items-center justify-center gap-1 px-1 py-2 ${
+                  current ? "text-primary" : "text-text-2"
                 }`}
               >
-                <span
-                  aria-hidden="true"
-                  className={`h-0.5 w-6 ${current ? "bg-ink" : "bg-transparent"}`}
-                />
-                <span className="leading-none">{t(label)}</span>
+                <Icon size={20} aria-hidden="true" />
+                <span className="text-[12px] leading-none">{t(label)}</span>
               </button>
             </li>
           );
@@ -55,4 +51,4 @@ export function BottomNav({
 }
 
 /** Height the nav occupies, so a page can keep its last line clear of it. */
-export const NAV_CLEARANCE = "calc(4.5rem + env(safe-area-inset-bottom))";
+export const NAV_CLEARANCE = "calc(5rem + env(safe-area-inset-bottom))";

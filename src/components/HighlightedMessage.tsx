@@ -45,7 +45,7 @@ export function HighlightedMessage({
   return (
     <p
       dir="auto"
-      className="whitespace-pre-wrap break-words bg-paper-2 p-4 text-ink"
+      className="whitespace-pre-wrap break-words rounded-card bg-bg p-4 text-[15px] leading-relaxed text-text"
     >
       {pieces}
     </p>

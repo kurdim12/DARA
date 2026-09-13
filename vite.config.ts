@@ -6,7 +6,7 @@ import { VitePWA } from "vite-plugin-pwa";
 
 // paper / ink are the two brand colours the install prompt and splash use.
 // Keep them in step with src/styles/theme.css.
-const PAPER = "#F4EFE6";
+const PAPER = "#F7F8FA";
 
 export default defineConfig({
   plugins: [

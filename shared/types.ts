@@ -139,6 +139,21 @@ export interface AnalyzeImage {
   data: string;
 }
 
+/**
+ * What the person says they are looking at. A hint for the engine only — it
+ * still decides for itself, and nothing in post-validation keys off this.
+ * Distinct from `channel`, which is how the thing reached them.
+ */
+export type AnalysisType = "message" | "link" | "call" | "job" | "website";
+
+export const ANALYSIS_TYPES: AnalysisType[] = [
+  "message",
+  "link",
+  "call",
+  "job",
+  "website",
+];
+
 export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 
 /** Conservative: comfortably inside both the Worker and the API's limits. */

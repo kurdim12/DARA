@@ -1,0 +1,87 @@
+{
+  "_meta": {
+    "purpose": "The 'Known Threats in Jordan' list. These describe the SHAPE of messages the engine is built to recognise — the same families as content/eval-cases.json. They are pattern descriptions, not incident reports.",
+    "rule": "No statistics, no phone numbers, no URLs, no claim about how widespread anything is. The only number that may appear beside one of these is the live count of reports filed on DARA' for that category, read from D1 at request time. When that count is zero the UI shows 'Known pattern' and no number.",
+    "titles": "A title names the institution a scam impersonates, not an institution that did anything. That is what the message claims to be."
+  },
+  "threats": [
+    {
+      "id": "fake_mof_sms",
+      "category": "impersonation_government",
+      "channel": "sms",
+      "title": {
+        "en": "Fake Ministry of Finance SMS",
+        "ar": "رسالة تنتحل صفة وزارة المالية"
+      },
+      "description": {
+        "en": "An SMS claiming you are owed a tax refund, or that you owe an unpaid amount, with a link to settle it. The link does not sit on a Jordanian government domain.",
+        "ar": "رسالة نصية تقول إن لك مبلغًا مستردًا أو عليك مبلغًا غير مدفوع، ومعها رابط للتسوية. الرابط ليس على نطاق حكومي أردني."
+      }
+    },
+    {
+      "id": "fake_customs_parcel",
+      "category": "parcel_customs",
+      "channel": "sms",
+      "title": {
+        "en": "Fake Jordan Customs Parcel Scam",
+        "ar": "احتيال الطرد الجمركي"
+      },
+      "description": {
+        "en": "A notice that a parcel addressed to you is held at customs and needs a small fee before release. The amount is deliberately small enough that people pay without checking.",
+        "ar": "إشعار بأن طردًا باسمك محتجز في الجمارك ويحتاج رسمًا بسيطًا قبل تسليمه. المبلغ صغير عمدًا حتى تدفعه دون أن تتحقق."
+      }
+    },
+    {
+      "id": "fake_bank_suspension",
+      "category": "impersonation_bank",
+      "channel": "whatsapp",
+      "title": {
+        "en": "Fake Arab Bank Account Suspension",
+        "ar": "رسالة تنتحل صفة البنك العربي"
+      },
+      "description": {
+        "en": "A message claiming your account has been suspended or shows suspicious activity, and that one link will restore it. A bank does not resolve this over a link.",
+        "ar": "رسالة تقول إن حسابك عُلّق أو أن عليه حركة مشبوهة، وإن رابطًا واحدًا سيعيده. البنك لا يعالج هذا عبر رابط."
+      }
+    },
+    {
+      "id": "otp_fraud_call",
+      "category": "otp_theft",
+      "channel": "call",
+      "title": {
+        "en": "Fraud-Department Call Asking for Your Code",
+        "ar": "مكالمة باسم قسم الاحتيال تطلب رمزك"
+      },
+      "description": {
+        "en": "Someone calls saying they are your bank's fraud team, that they have stopped a suspicious transfer, and that they need the code just sent to your phone.",
+        "ar": "شخص يتصل ويقول إنه من قسم الاحتيال في بنكك، وإنه أوقف تحويلًا مشبوهًا، ويحتاج الرمز الذي وصل هاتفك للتو."
+      }
+    },
+    {
+      "id": "advance_fee_job",
+      "category": "fake_job",
+      "channel": "whatsapp",
+      "title": {
+        "en": "Work-From-Home Offer With a Registration Fee",
+        "ar": "عرض عمل من المنزل برسوم تسجيل"
+      },
+      "description": {
+        "en": "A comfortable salary for work from home, no experience and no interview, and a small registration fee to start immediately. Work pays you, not the other way round.",
+        "ar": "راتب مريح مقابل عمل من المنزل، بلا خبرة وبلا مقابلة، ورسوم تسجيل صغيرة للبدء فورًا. العمل يدفع لك، لا العكس."
+      }
+    },
+    {
+      "id": "sextortion_threat",
+      "category": "extortion",
+      "channel": "whatsapp",
+      "title": {
+        "en": "Threat to Publish Private Photos",
+        "ar": "تهديد بنشر صور خاصة"
+      },
+      "description": {
+        "en": "A message claiming to hold private photos or chats, demanding money inside a short deadline. Paying does not end it and shows the sender that you pay.",
+        "ar": "رسالة تدّعي أن لديها صورًا أو محادثات خاصة، وتطلب مبلغًا خلال مهلة قصيرة. الدفع لا ينهي الأمر ويثبت للمُرسِل أنك تدفع."
+      }
+    }
+  ]
+}

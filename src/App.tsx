@@ -1,7 +1,11 @@
 import { useCallback, useState } from "react";
 import { LangProvider } from "./i18n";
+import { ThemeProvider } from "./lib/theme";
 import { useRouter } from "./lib/router";
 import { Home } from "./routes/Home";
+import { Scan } from "./routes/Scan";
+import { Threats } from "./routes/Threats";
+import { Placeholder } from "./routes/Placeholder";
 import { Detect } from "./routes/Detect";
 import { Reports } from "./routes/Reports";
 import { Protection } from "./routes/Protection";
@@ -12,20 +16,60 @@ import { Lab } from "./routes/Lab";
 
 export default function App() {
   return (
-    <LangProvider>
-      <Screens />
-    </LangProvider>
+    <ThemeProvider>
+      <LangProvider>
+        <Screens />
+      </LangProvider>
+    </ThemeProvider>
   );
 }
 
 function Screens() {
   const { route, navigate, quickExit } = useRouter();
-  const [seedText, setSeedText] = useState<string | null>(null);
-  const clearSeed = useCallback(() => setSeedText(null), []);
+  /** Text handed from Home to Scan, and whether Scan should check it at once. */
+  const [seed, setSeed] = useState<{ text: string; run: boolean } | null>(null);
+  const clearSeed = useCallback(() => setSeed(null), []);
+
+  const handOff = useCallback(
+    (text: string, run: boolean) => {
+      setSeed({ text, run });
+      navigate("scan");
+    },
+    [navigate],
+  );
 
   switch (route) {
+    case "scan":
+      return <Scan navigate={navigate} seed={seed} onSeedUsed={clearSeed} />;
+    case "threats":
+      return <Threats navigate={navigate} />;
+    case "report":
+      return (
+        <Placeholder
+          navigate={navigate}
+          active="report"
+          title="report.title"
+          sub="layer.report_sub"
+        />
+      );
+    case "protect":
+      return (
+        <Placeholder
+          navigate={navigate}
+          active="home"
+          title="tool.protect"
+          sub="tool.protect_sub"
+        />
+      );
+    case "learn":
+      return (
+        <Placeholder navigate={navigate} active="home" title="tool.learn" sub="tool.learn_sub" />
+      );
+
+    // Screens from the previous build, still mounted until their phase
+    // replaces them.
     case "detect":
-      return <Detect navigate={navigate} seedText={seedText} onSeedUsed={clearSeed} />;
+      return <Detect navigate={navigate} seedText={seed?.text ?? null} onSeedUsed={clearSeed} />;
     case "reports":
       return <Reports navigate={navigate} />;
     case "protection":
@@ -38,14 +82,13 @@ function Screens() {
       return <Shield onExit={quickExit} onHome={() => navigate("home")} />;
     case "lab":
       return import.meta.env.DEV ? <Lab /> : null;
+
     default:
       return (
         <Home
           navigate={navigate}
-          onStaged={(text) => {
-            setSeedText(text);
-            navigate("detect");
-          }}
+          onStaged={(text) => handOff(text, false)}
+          onSubmit={(text) => handOff(text, true)}
         />
       );
   }
