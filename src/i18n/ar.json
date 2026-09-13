@@ -39,6 +39,8 @@
   "report.keep": "احتفظ بهذا الرقم للمتابعة",
   "report.status": "الحالة: مُستلَم",
   "report.pilot": "نسخة تجريبية — البلاغات تُحفظ في منصة درع.",
+  "report.copy": "نسخ",
+  "report.copied": "تم النسخ",
   "report.close": "إغلاق",
   "shield.entry": "تتعرّض للابتزاز؟",
   "shield.entry_sub": "خطوات سرية تساعدك الآن، دون تسجيل.",

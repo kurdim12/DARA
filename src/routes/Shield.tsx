@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { resolveContact, shieldContent } from "../lib/content";
 import { sendReport } from "../lib/api";
+import { CaseNumber } from "../components/CaseNumber";
 import { isTestMode, rememberCase } from "../lib/storage";
 import {
   Page,
@@ -49,13 +50,13 @@ export function Shield({ onExit, onHome }: { onExit: () => void; onHome: () => v
       className="sticky top-0 z-10 flex justify-between bg-paper py-3"
       style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
     >
-      <button type="button" onClick={onHome} className="text-ink-70">
+      <button type="button" onClick={onHome} className="tap text-ink-70">
         {t("shield.back")}
       </button>
       <button
         type="button"
         onClick={onExit}
-        className="border-2 border-ink px-3 py-1.5 text-base font-semibold"
+        className="inline-flex min-h-11 items-center border-2 border-ink px-3 text-base font-semibold"
       >
         {t("shield.exit")}
       </button>
@@ -67,12 +68,7 @@ export function Shield({ onExit, onHome }: { onExit: () => void; onHome: () => v
       <Page>
         {exitBar}
         <p className="mt-14 text-2xl leading-snug">{t("report.done")}</p>
-        <div className="mt-10 border-y-2 border-ink py-8 text-center">
-          <span className="block text-sm uppercase tracking-widest text-ink-55">
-            {t("report.case")}
-          </span>
-          <bdi className="mt-3 block text-4xl font-bold tracking-tight">{caseNumber}</bdi>
-        </div>
+        <CaseNumber value={caseNumber} />
         <p className="mt-5 text-lg">{t("report.keep")}</p>
         <p className="mt-2 text-lg">{t("report.status")}</p>
         <p className="mt-8 text-sm text-ink-55">{t("report.pilot")}</p>

@@ -11,6 +11,7 @@ import { analyze, AppError, sendReport } from "../lib/api";
 import { prepareImage, previewUrl } from "../lib/image";
 import { isTestMode, rememberCase } from "../lib/storage";
 import { BottomNav } from "../components/BottomNav";
+import { CaseNumber } from "../components/CaseNumber";
 import { HighlightedMessage } from "../components/HighlightedMessage";
 import { VerdictBand } from "../components/VerdictBand";
 import {
@@ -142,7 +143,7 @@ export function Detect({
     <>
       <Page withNav>
       <header className="flex items-center justify-between">
-        <button type="button" onClick={() => navigate("home")} className="text-ink-70">
+        <button type="button" onClick={() => navigate("home")} className="tap text-ink-70">
           {t("shield.back")}
         </button>
         <LangToggle />
@@ -169,14 +170,14 @@ export function Detect({
       />
 
       <div className="mt-2.5 flex items-center justify-between text-sm">
-        <div className="flex gap-4">
-          <button type="button" onClick={onPaste} className="border-b border-ink pb-0.5">
+        <div className="flex gap-6">
+          <button type="button" onClick={onPaste} className="tap border-b border-ink pb-0.5">
             {t("detect.paste")}
           </button>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
-            className="border-b border-ink pb-0.5"
+            className="tap border-b border-ink pb-0.5"
           >
             {t("detect.image")}
           </button>
@@ -208,7 +209,7 @@ export function Detect({
           <button
             type="button"
             onClick={() => setImage(null)}
-            className="border-b border-ink pb-0.5 text-sm"
+            className="tap border-b border-ink pb-0.5 text-sm"
           >
             {t("detect.image_remove")}
           </button>
@@ -221,13 +222,13 @@ export function Detect({
         <p className="text-xs font-semibold uppercase tracking-widest text-ink-55">
           {t("detect.channel")}
         </p>
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <div className="mt-2.5 flex flex-wrap gap-2">
           {CHANNELS.map((option) => (
             <button
               key={option}
               type="button"
               onClick={() => setChannel(option)}
-              className={`border px-2 py-0.5 text-sm ${
+              className={`inline-flex min-h-11 items-center border px-3 text-sm ${
                 channel === option
                   ? "border-ink bg-ink text-paper"
                   : "border-ink-20 text-ink-70"
@@ -568,12 +569,7 @@ function ReportDone({
     <Page>
       <p className="mt-16 text-2xl leading-snug">{t("report.done")}</p>
 
-      <div className="mt-10 border-y-2 border-ink py-8 text-center">
-        <span className="block text-sm uppercase tracking-widest text-ink-55">
-          {t("report.case")}
-        </span>
-        <bdi className="mt-3 block text-4xl font-bold tracking-tight">{caseNumber}</bdi>
-      </div>
+      <CaseNumber value={caseNumber} />
 
       <p className="mt-5 text-lg">{t("report.keep")}</p>
       <p className="mt-2 text-lg">{t("report.status")}</p>

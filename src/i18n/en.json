@@ -39,6 +39,8 @@
   "report.keep": "Keep this number to follow up",
   "report.status": "Status: Received",
   "report.pilot": "Pilot — reports are stored on the DARA' platform.",
+  "report.copy": "Copy",
+  "report.copied": "Copied",
   "report.close": "Close",
   "shield.entry": "Being blackmailed?",
   "shield.entry_sub": "Private steps that help right now. No sign-up.",

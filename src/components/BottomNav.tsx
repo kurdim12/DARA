@@ -36,7 +36,7 @@ export function BottomNav({
                 type="button"
                 onClick={() => navigate(route)}
                 aria-current={current ? "page" : undefined}
-                className={`flex w-full flex-col items-center gap-1.5 px-1 pb-2.5 pt-2 text-sm ${
+                className={`flex min-h-11 w-full flex-col items-center justify-center gap-1.5 px-1 pb-2.5 pt-2 text-sm ${
                   current ? "font-semibold text-ink" : "text-ink-55"
                 }`}
               >

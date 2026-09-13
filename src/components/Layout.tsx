@@ -38,7 +38,7 @@ export function LangToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="border-b border-ink-20 pb-0.5 text-base text-ink-70"
+      className="tap border-b border-ink-20 pb-0.5 text-base text-ink-70"
     >
       {t("app.lang_toggle")}
     </button>

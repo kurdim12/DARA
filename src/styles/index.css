@@ -58,6 +58,26 @@
   }
 }
 
+/*
+ * A 44px hit area on a control that is deliberately small. The audit found 32
+ * targets under 44px (AUDIT.md, A7); most of them are quiet text buttons whose
+ * size is the point, so they keep their look and grow only where a thumb lands.
+ * The pseudo-element sits inside the button, so a tap on it still hits it.
+ */
+.tap {
+  position: relative;
+}
+
+.tap::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: max(100%, 44px);
+  height: max(100%, 44px);
+  transform: translate(-50%, -50%);
+}
+
 /* The one memorable moment: a red flag marked inside the original message. */
 mark.flag {
   background: transparent;
