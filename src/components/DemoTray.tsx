@@ -31,6 +31,15 @@ export function DemoTray({
           </button>
         </div>
 
+        {/*
+          Which build this phone is actually running. If it does not match the
+          latest commit, the phone is holding a cached copy — close the tab or
+          the installed app and open it again.
+        */}
+        <p className="mt-1 text-[12px] text-ink-2">
+          build <bdi>{__BUILD_ID__}</bdi>
+        </p>
+
         {staged.length === 0 ? (
           <p className="mt-4 text-base text-ink-2">
             No staged messages — every case marked <code>demo: true</code> in
