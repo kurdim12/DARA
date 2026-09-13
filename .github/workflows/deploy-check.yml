@@ -21,6 +21,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
       - name: What is live
         env:
           TARGET: ${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}
@@ -49,9 +55,21 @@ jobs:
           curl -sS --max-time 20 "$TARGET/" | head -c 400 | tr -d '\n' | grep -o '<html[^>]*>' || echo "(no html tag found)"
           echo
 
+          # Vite's asset hash is content-addressed, so building this commit
+          # here and comparing the hash to the one the live site serves says
+          # whether THIS EXACT commit is deployed — not just "something recent".
+          echo "=== asset hash, live vs this commit ==="
+          npm run build >/dev/null 2>&1 || echo "(build failed — see below)"
+          LOCAL=$(grep -o 'src="/assets/[^"]*"' dist/client/index.html | head -1)
+          LIVE=$(curl -sS --max-time 20 "$TARGET/" | grep -o 'src="/assets/[^"]*"' | head -1)
+          echo "this commit: $LOCAL"
+          echo "live:        $LIVE"
+
           echo "=== VERDICT ==="
-          if grep -q '"counts"' /tmp/threats.txt 2>/dev/null; then
-            echo "LIVE BUILD INCLUDES THE REBUILD"
+          if ! grep -q '"counts"' /tmp/threats.txt 2>/dev/null; then
+            echo "STALE: the live build predates the rebuild — /api/threats does not exist on it"
+          elif [ -n "$LOCAL" ] && [ "$LOCAL" = "$LIVE" ]; then
+            echo "CURRENT: the live site is serving this exact commit"
           else
-            echo "LIVE BUILD IS OLDER THAN THE REBUILD — /api/threats does not exist on it"
+            echo "BEHIND: the rebuild is live, but not this commit's build"
           fi
