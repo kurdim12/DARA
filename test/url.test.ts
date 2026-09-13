@@ -1,12 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  extractUrls,
-  governmentImpersonationSignal,
-  inspectText,
-  inspectUrl,
-  isJordanGovernmentHost,
-  registrableName,
-} from "../worker/engine/url";
+import { extractUrls, governmentImpersonationSignal, inspectText, inspectUrl, isJordanGovernmentHost, registrableName } from "../worker/engine/url";
 
 describe("extractUrls", () => {
   it("finds a link in an Arabic sentence without swallowing the comma", () => {
@@ -124,5 +117,31 @@ describe("inspectText", () => {
 
   it("returns null when there is no link", () => {
     expect(inspectText("رمز التحقق الخاص بك هو 482913.")).toBeNull();
+  });
+});
+
+/**
+ * The demo's headline family. Until the real SMS text arrives, the golden set
+ * carries a reconstruction (AUDIT.md, A3) and the eval asserts the government
+ * signal on it, so the deterministic half of that assertion is pinned here.
+ */
+describe("the parking-fine family", () => {
+  const link = "http://amanat-amman-pay.com/fine";
+
+  it("does not link to a Jordanian government host", () => {
+    const facts = inspectText(link)!;
+    expect(isJordanGovernmentHost(facts.hostname)).toBe(false);
+  });
+
+  it("raises the government signal once the engine calls it government impersonation", () => {
+    const facts = inspectText(link)!;
+    expect(governmentImpersonationSignal(facts, "impersonation_government")).toBe(
+      "claimed_government_non_gov_jo",
+    );
+  });
+
+  it("stays quiet when the message is not claiming to be the government", () => {
+    const facts = inspectText(link)!;
+    expect(governmentImpersonationSignal(facts, "phishing_link")).toBeNull();
   });
 });

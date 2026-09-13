@@ -1,5 +1,10 @@
 [
   {
+    "id": "parking_fine_reconstructed",
+    "lang": "ar",
+    "text": "أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة بقيمة 45 ديناراً. ادفع خلال 24 ساعة لتجنب مضاعفة الغرامة: http://amanat-amman-pay.com/fine"
+  },
+  {
     "id": "arab_bank_link",
     "lang": "ar",
     "text": "عزيزي العميل، تم تعليق حساب البنك العربي مؤقتاً. انقر هنا للتحقق: http://arabbank-secure.verify-now.com"

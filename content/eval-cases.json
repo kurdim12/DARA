@@ -27,7 +27,23 @@
       "expect": "scam",
       "source": "real",
       "text": "REPLACE_WITH_EXACT_SMS_TEXT",
-      "note": "Transcribe the SMS exactly from reference/gam-fake-fine.png (the Greater Amman Municipality warning used on slide 2). If the image shows only the warning and not the SMS text, ask Abdelrahman for the text. This is the demo's main message."
+      "note": "Transcribe the SMS exactly from the real message (the Greater Amman Municipality warning used on slide 2 of the deck). reference/gam-fake-fine.png is not in the repo, so this still needs Abdelrahman. Until it arrives, parking_fine_reconstructed below stands in for the family so the demo has a working message — but it is a reconstruction and must never be presented as the real SMS."
+    },
+    {
+      "id": "parking_fine_reconstructed",
+      "demo": true,
+      "lang": "ar",
+      "channel": "sms",
+      "expect": "scam",
+      "source": "synthetic",
+      "text": "أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة بقيمة 45 ديناراً. ادفع خلال 24 ساعة لتجنب مضاعفة الغرامة: http://amanat-amman-pay.com/fine",
+      "accept_attack_goal": [
+        "steal_payment",
+        "steal_credentials",
+        "redirect_to_fake_service"
+      ],
+      "expect_url_signal": "claimed_government_non_gov_jo",
+      "note": "A reconstruction of the parking-fine family, not a transcription of any real message. It exists so the demo's main scam type can be checked and cached before the real text arrives; gam_parking_fine above is the slot for that text."
     },
     {
       "id": "arab_bank_link",
