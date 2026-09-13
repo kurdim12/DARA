@@ -207,3 +207,77 @@ Not a finding, recorded for completeness: the brand mark, the four-destination
 architecture, RTL, the no-store headers, the absence of any IP/user-agent column,
 the 2000-character cap, the 30/60 s rate limit and the image type and size
 validation were all checked and are as specified.
+
+---
+
+# Phase 1 results
+
+Scope: every DEMO-BREAKING and VISIBLE finding above. One commit per item.
+
+| # | Severity | State | Commit |
+|---|---|---|---|
+| A1 | DEMO-BREAKING | Engine now measurable — see the eval below | `d53f9a6` |
+| A2 | DEMO-BREAKING | Fixed | `1fe1199` |
+| A3 | DEMO-BREAKING | Stand-in shipped; the real SMS text is still Abdelrahman's to supply | `34a73cd` |
+| A4 | DEMO-BREAKING | Fixed | `ffedc63` |
+| A5 | DEMO-BREAKING | Fixed | `ffedc63` |
+| A6 | DEMO-BREAKING | Fixed, and it found a second ungated claim on its first run | `86c4325` |
+| A7 | VISIBLE | Fixed | `49b16a1` |
+| A8 | VISIBLE | Fixed | `fd6055b` |
+| A9 | VISIBLE | Fixed | `489963d` |
+| A10 | VISIBLE | Fixed | `49b16a1` |
+| A11 | VISIBLE | Fixed | `1fe1199` |
+| A12–A14 | COSMETIC | Untouched, by the phase's scope | — |
+
+## What each fix actually does
+
+- **A4** — an unverified contact now hides its label as well as its number, in
+  `src/lib/content.ts`. Tapping `نعم` used to print `الطوارئ` with nothing after it.
+- **A5** — the reassurance line is split. `لست وحدك في هذا.` still renders;
+  `الابتزاز الإلكتروني جريمة يعاقب عليها القانون الأردني.` moved to a
+  `verified: false` field and renders only in dev, with the VERIFY tag.
+- **A6** — the honesty gate reads every route and component plus the content file,
+  skipping subtrees marked `verified: false` because they cannot reach production.
+  Run against the pre-fix commit it reports 6 problems including both halves of A5;
+  against this one, none. Its first run found `recover_stretch.money_sent`, which
+  carries an unverified Arab Bank number and the claim that the Cybercrime Unit
+  recovers funds across borders — recorded in its own note, but with no flag, so
+  Phase 3 would have shipped it. Flagged now.
+- **A2/A11** — the slow mark is 12 s, and a staged message checked live once leaves
+  its real verdict on that device, so the same message survives a bad network later
+  and is tagged `نتيجة محفوظة`. Only the four staged messages are ever written down;
+  anything a person pastes is not. The file cache still works and still wins.
+- **A3** — `parking_fine_reconstructed` joins the golden set, marked synthetic and
+  marked in its own note as a reconstruction. `gam_parking_fine` keeps its slot for
+  the real text. Staged messages: 3 → 4.
+- **A7** — the quiet text buttons keep their size and gain a 44px hit area from a
+  pseudo-element; the nav tabs, the Shield quick exit and the channel chips take a
+  real min-height. **The chips are the one visual change in this phase.**
+- **A8** — a 180×180 `apple-touch-icon` rendered from the same mark, plus the iOS
+  standalone meta tags.
+- **A9** — `/lab` resolves to Home unless the build is a development one.
+- **A10** — a copy button on the case number, on both confirmation screens, falling
+  back to selecting the number when the clipboard is refused.
+
+## Re-run of the Phase 0 checks, before and after
+
+Same method as Phase 0: production build, served by the Worker runtime, Chromium at
+390×844 with an iPhone user agent.
+
+| Check | Before | After |
+|---|---|---|
+| Tap targets under 44px of reach | 32 | **0** — every remaining small control answers `elementFromPoint` 21px out in all four directions |
+| Horizontal overflow, 6 routes | 0 | 0 |
+| Console errors / warnings / failed requests | 0 | 0 |
+| External hosts requested | 0 | 0 |
+| `apple-touch-icon` | absent | `/icons/apple-touch-icon-180.png` |
+| `/lab` in production | renders raw engine JSON | renders Home |
+| Shield `نعم` | `الطوارئ` with no number | the sentence alone, no dangling label |
+| Unsourced legal claim in Shield | renders | gone from production, VERIFY-tagged in dev |
+| Case number | read-only | copied; clipboard held `DR-2026-00004`, label turned `تم النسخ` |
+| `npm run verify` | typecheck + 69 tests + honesty + build | typecheck + **77 tests** + a stricter honesty gate + build |
+| Service worker precache | 18 entries, 0 under `/api/` | 23 entries, 0 under `/api/` |
+
+Report submitted again end to end through Shield: `201`, row landed, case
+`DR-2026-00004`, `cache-control: no-store`. Row deleted after; `SELECT COUNT(*)`
+returns 0.

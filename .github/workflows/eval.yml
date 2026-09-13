@@ -30,6 +30,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Printed first, because the first run of this job found every case
+      # returning 503 "engine not configured" — the Worker had no key.
+      - name: Check the deployment
+        run: |
+          curl -sS --max-time 20 \
+            "${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}/api/health"
+          echo
+
       - name: Run the golden set
         id: run
         continue-on-error: true
