@@ -36,11 +36,11 @@ export function CaseNumber({ value }: { value: string }) {
   }
 
   return (
-    <div className="mt-10 border-y-2 border-ink py-8 text-center">
-      <span className="block text-sm uppercase tracking-widest text-ink-55">
+    <div className="mt-10 border-y border-rule bg-paper-2 py-8 text-center">
+      <span className="block text-[13px] uppercase tracking-widest text-ink-2">
         {t("report.case")}
       </span>
-      <bdi ref={numberRef} className="mt-3 block text-4xl font-bold tracking-tight">
+      <bdi ref={numberRef} className="mt-3 block font-kufi text-[32px] font-bold tracking-tight">
         {value}
       </bdi>
       <button

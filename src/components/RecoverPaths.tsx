@@ -39,10 +39,10 @@ export function RecoverPaths() {
   if (approved.length === 0) {
     if (!import.meta.env.DEV) return null;
     return (
-      <section className="mt-10 border-t border-ink-12 pt-5">
-        <h2 className="text-xl font-semibold">{t("protection.recover_title")}</h2>
-        <p className="mt-1 text-base text-ink-70">{t("protection.recover_sub")}</p>
-        <p className="mt-3 text-sm text-ink-55">
+      <section className="mt-10 border-t border-rule pt-5">
+        <h2>{t("protection.recover_title")}</h2>
+        <p className="mt-1 text-base text-ink-2">{t("protection.recover_sub")}</p>
+        <p className="mt-3 text-sm text-ink-2">
           <span className="me-2 border border-threat px-1.5 text-xs text-threat">VERIFY</span>
           <bdi>{pending}</bdi> recovery paths are written but unverified, so this
           section is hidden in production.
@@ -52,10 +52,10 @@ export function RecoverPaths() {
   }
 
   return (
-    <section className="mt-10 border-t border-ink-12 pt-5">
-      <h2 className="text-xl font-semibold">{t("protection.recover_title")}</h2>
-      <p className="mt-1 text-base text-ink-70">{t("protection.recover_sub")}</p>
-      <ul className="mt-4 divide-y divide-ink-12 border-y border-ink-12">
+    <section className="mt-10 border-t border-rule pt-5">
+      <h2>{t("protection.recover_title")}</h2>
+      <p className="mt-1 text-base text-ink-2">{t("protection.recover_sub")}</p>
+      <ul className="mt-4 divide-y divide-rule border-y border-rule">
         {approved.map((entry) => (
           <li key={entry.id} className="py-4">
             <p dir="auto" className="text-base leading-snug">

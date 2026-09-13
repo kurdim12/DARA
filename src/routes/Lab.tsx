@@ -61,7 +61,7 @@ export function Lab() {
               setLang(option);
             }}
             className={`border px-3 py-1.5 ${
-              lang === option ? "border-ink bg-ink text-paper" : "border-ink-20"
+              lang === option ? "border-ink bg-ink text-paper" : "border-rule"
             }`}
           >
             {option}
@@ -79,7 +79,7 @@ export function Lab() {
         <div className="mt-8">
           <VerdictBand verdict={result.verdict} />
           <p className="mt-4 text-xl">{result.headline}</p>
-          <p className="mt-2 text-sm text-ink-70">
+          <p className="mt-2 text-sm text-ink-2">
             <bdi>
               {result.confidence}% · {result.category} · {result.model} ·{" "}
               {result.latency_ms} ms
@@ -108,7 +108,7 @@ export function Lab() {
       {raw && (
         <div className="mt-8">
           <SectionTitle>Raw</SectionTitle>
-          <pre dir="ltr" className="overflow-x-auto border border-ink-20 p-3 text-xs">
+          <pre dir="ltr" className="overflow-x-auto border border-rule p-3 text-xs">
             {raw}
           </pre>
         </div>

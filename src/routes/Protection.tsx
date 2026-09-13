@@ -19,12 +19,12 @@ export function Protection({ navigate }: { navigate: (route: Route) => void }) {
           <LangToggle />
         </header>
 
-        <h1 className="mt-6 text-3xl font-bold">{t("protection.title")}</h1>
-        <p className="mt-2 text-base text-ink-70">{t("protection.subtitle")}</p>
+        <h1 className="mt-6">{t("protection.title")}</h1>
+        <p className="mt-2 text-[13px] text-ink-2">{t("protection.subtitle")}</p>
 
         <section className="mt-9">
-          <h2 className="text-xl font-semibold text-threat">{t("shield.entry")}</h2>
-          <p className="mt-1 text-base text-ink-70">{t("shield.entry_sub")}</p>
+          <h2 className="text-threat">{t("shield.entry")}</h2>
+          <p className="mt-1 text-[13px] text-ink-2">{t("shield.entry_sub")}</p>
           <div className="mt-5">
             {/* Red here is a threat action, which is what this is. */}
             <PrimaryButton threat onClick={() => navigate("shield")}>

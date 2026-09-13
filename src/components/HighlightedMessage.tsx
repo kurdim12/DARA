@@ -1,4 +1,6 @@
 import type { RedFlag } from "../../shared/types";
+import { useI18n } from "../i18n";
+import { stepNumeral } from "../lib/numerals";
 
 /**
  * The original message with each red flag underlined in place and numbered,
@@ -14,17 +16,23 @@ export function HighlightedMessage({
   text: string;
   flags: RedFlag[];
 }) {
+  const { lang } = useI18n();
   const pieces: React.ReactNode[] = [];
   let cursor = 0;
 
-  flags.forEach((flag, index) => {
+  // postValidate already sorts and de-overlaps these, but this walk has one
+  // cursor and no way to go backwards: a flag out of document order would
+  // duplicate half the message on the one screen the demo is built around.
+  const ordered = [...flags].sort((a, b) => a.start - b.start);
+
+  ordered.forEach((flag, index) => {
     if (flag.start > cursor) {
       pieces.push(<span key={`t${index}`}>{text.slice(cursor, flag.start)}</span>);
     }
     pieces.push(
       <mark className="flag" key={`f${index}`}>
         {text.slice(flag.start, flag.end)}
-        <sup>{index + 1}</sup>
+        <sup>{stepNumeral(index + 1, lang)}</sup>
       </mark>,
     );
     cursor = flag.end;
@@ -37,7 +45,7 @@ export function HighlightedMessage({
   return (
     <p
       dir="auto"
-      className="whitespace-pre-wrap break-words border-s-2 border-ink-20 ps-4 text-ink"
+      className="whitespace-pre-wrap break-words bg-paper-2 p-4 text-ink"
     >
       {pieces}
     </p>

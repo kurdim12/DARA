@@ -1,20 +1,21 @@
 /*
- * The deck's identity. Three colours, nothing else.
+ * The deck's palette, exactly. Cream paper, black ink, one red that only ever
+ * means threat. Nothing else: no green, no blue, no gradient, no shadow.
  *
- * --paper is a PLACEHOLDER cream until reference/brand/dara-mark.png is in the
- * repo: run `npm run brand:sample` and it is replaced with the exact colour
- * sampled from the mark's background, so the mark sits on the page with no
- * visible box. See DECISIONS.md.
+ * `npm run brand:sample` can replace --paper with the colour sampled from the
+ * mark's background, but DARA's mark is white on the threat red, so it leaves
+ * this alone and says why. See DECISIONS.md.
  */
 :root {
-  --paper: #f4efe6; /* PLACEHOLDER — npm run brand:sample */
-  --ink: #000000;
-  --threat: #c40b29;
+  --paper: #f4efe6; /* page */
+  --paper-2: #ede6d8; /* cards, inputs, quoted message blocks */
+  --rule: #d9d2c4; /* hairlines, dividers, input borders */
+  --ink: #111111; /* all primary text, primary buttons */
+  --ink-2: #5c574e; /* secondary text, labels, meta */
+  --threat: #c40b29; /* danger verdicts, flagged spans, Shield, destructive */
 
-  --ink-70: color-mix(in srgb, var(--ink) 70%, var(--paper));
-  --ink-55: color-mix(in srgb, var(--ink) 55%, var(--paper));
-  --ink-20: color-mix(in srgb, var(--ink) 20%, var(--paper));
-  --ink-12: color-mix(in srgb, var(--ink) 12%, var(--paper));
+  /* The flagged span's wash. Only ever used behind a red flag. */
+  --threat-wash: color-mix(in srgb, var(--threat) 12%, transparent);
 
   color-scheme: light;
 }

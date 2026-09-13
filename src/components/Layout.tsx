@@ -15,7 +15,7 @@ export function Page({
       // A flex column so a screen can hand its spare height to a child with
       // `my-auto` instead of leaving it all in one gap above the nav. Auto
       // margins collapse when content is tall, so nothing can be clipped.
-      className="mx-auto flex min-h-dvh w-full max-w-[46rem] flex-col"
+      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col"
       // index.html asks for viewport-fit=cover, so the layout runs under the
       // status bar and the notch. Nothing may sit there.
       style={{
@@ -38,7 +38,7 @@ export function LangToggle() {
     <button
       type="button"
       onClick={toggle}
-      className="tap border-b border-ink-20 pb-0.5 text-base text-ink-70"
+      className="tap border-b border-rule pb-0.5 text-base text-ink-2"
     >
       {t("app.lang_toggle")}
     </button>
@@ -60,7 +60,7 @@ export function PrimaryButton({
   type?: "button" | "submit";
 }) {
   const base =
-    "w-full px-5 py-4 text-xl font-semibold disabled:opacity-35 disabled:cursor-not-allowed";
+    "w-full px-5 py-4 text-lg font-semibold disabled:opacity-35 disabled:cursor-not-allowed";
   const skin = threat ? "bg-threat text-paper" : "bg-ink text-paper";
   return (
     <button type={type} onClick={onClick} disabled={disabled} className={`${base} ${skin}`}>
@@ -80,7 +80,7 @@ export function QuietButton({
     <button
       type="button"
       onClick={onClick}
-      className="w-full border-2 border-ink px-5 py-3 text-lg font-semibold text-ink"
+      className="w-full border border-ink px-5 py-3.5 text-lg font-semibold text-ink"
     >
       {children}
     </button>
@@ -89,8 +89,8 @@ export function QuietButton({
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-2 text-sm font-semibold uppercase tracking-widest text-ink-55">
+    <p className="mb-2 text-[13px] font-semibold uppercase tracking-widest text-ink-2">
       {children}
-    </h2>
+    </p>
   );
 }

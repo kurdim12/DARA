@@ -10,6 +10,7 @@ import {
 import { analyze, AppError, sendReport } from "../lib/api";
 import { prepareImage, previewUrl } from "../lib/image";
 import { isTestMode, rememberCase } from "../lib/storage";
+import { stepNumeral } from "../lib/numerals";
 import { BottomNav } from "../components/BottomNav";
 import { CaseNumber } from "../components/CaseNumber";
 import { HighlightedMessage } from "../components/HighlightedMessage";
@@ -143,14 +144,23 @@ export function Detect({
     <>
       <Page withNav>
       <header className="flex items-center justify-between">
-        <button type="button" onClick={() => navigate("home")} className="tap text-ink-70">
+        <button type="button" onClick={() => navigate("home")} className="tap text-ink-2">
           {t("shield.back")}
         </button>
         <LangToggle />
       </header>
 
-      <h1 className="mt-6 text-3xl font-bold">{t("detect.title")}</h1>
-      <p className="mt-2 text-base text-ink-70">{t("detect.subtitle")}</p>
+      {busy && (
+        <div className="mt-4 fade-in" role="status" aria-live="polite">
+          <div className="h-px w-full bg-rule">
+            <div className="scan-line h-px bg-ink" />
+          </div>
+          <p className="mt-2 text-[13px] text-ink-2">{t("detect.loading")}</p>
+        </div>
+      )}
+
+      <h1 className="mt-6">{t("detect.title")}</h1>
+      <p className="mt-2 text-base text-ink-2">{t("detect.subtitle")}</p>
 
       {/* One input for everything. A link is text, a number is text, and what
           a caller said is text — so the person is never asked to file it
@@ -166,7 +176,7 @@ export function Detect({
         maxLength={MAX_INPUT_CHARS}
         onChange={(e) => setText(e.target.value)}
         placeholder={t("detect.placeholder")}
-        className="mt-7 h-[248px] w-full resize-none border-[1.5px] border-ink bg-paper p-4 text-lg leading-relaxed placeholder:text-ink-55"
+        className="mt-7 h-[248px] w-full resize-none border border-rule bg-paper-2 p-4 text-base leading-relaxed placeholder:text-ink-2"
       />
 
       <div className="mt-2.5 flex items-center justify-between text-sm">
@@ -192,7 +202,7 @@ export function Detect({
             }}
           />
         </div>
-        <span className="text-ink-55">
+        <span className="text-ink-2">
           <bdi>
             {text.length} / {MAX_INPUT_CHARS}
           </bdi>
@@ -204,7 +214,7 @@ export function Detect({
           <img
             src={previewUrl(image)}
             alt=""
-            className="h-16 w-16 border border-ink-20 object-cover"
+            className="h-16 w-16 border border-rule object-cover"
           />
           <button
             type="button"
@@ -219,7 +229,7 @@ export function Detect({
       {/* Useful to the engine, not a decision the person has to make: it is
           already answered, and it stays quiet enough to skip. */}
       <div className="mt-7">
-        <p className="text-xs font-semibold uppercase tracking-widest text-ink-55">
+        <p className="text-xs font-semibold uppercase tracking-widest text-ink-2">
           {t("detect.channel")}
         </p>
         <div className="mt-2.5 flex flex-wrap gap-2">
@@ -231,7 +241,7 @@ export function Detect({
               className={`inline-flex min-h-11 items-center border px-3 text-sm ${
                 channel === option
                   ? "border-ink bg-ink text-paper"
-                  : "border-ink-20 text-ink-70"
+                  : "border-rule text-ink-2"
               }`}
             >
               {t(`channel.${option}` as TextKey)}
@@ -251,11 +261,9 @@ export function Detect({
           onClick={onCheck}
           disabled={busy || (text.trim().length === 0 && !image)}
         >
-          {busy
-            ? t(image ? "detect.loading_image" : "detect.loading")
-            : t("detect.cta")}
+          {t("detect.cta")}
         </PrimaryButton>
-        <p className="mt-3 text-center text-sm text-ink-55">{t("report.privacy")}</p>
+        <p className="mt-3 text-center text-sm text-ink-2">{t("report.privacy")}</p>
       </div>
       </Page>
       <BottomNav active="detect" navigate={navigate} />
@@ -268,7 +276,7 @@ function Fact({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return (
     <div className="py-2.5">
-      <dt className="text-xs font-semibold uppercase tracking-widest text-ink-55">
+      <dt className="text-xs font-semibold uppercase tracking-widest text-ink-2">
         {label}
       </dt>
       <dd dir="auto" className="mt-1 text-base leading-snug">
@@ -318,28 +326,22 @@ function VerdictScreen({
         <LangToggle />
       </header>
 
-      <div className="mt-4">
+      <div className="mt-6 fade-in">
         <VerdictBand verdict={result.verdict} />
       </div>
 
-      <p dir="auto" className="mt-5 text-2xl leading-snug">
+      <p dir="auto" className="mt-5 text-lg leading-snug">
         {result.headline}
       </p>
 
-      <p className="mt-3 text-base text-ink-70">
-        {t("verdict.confidence")}{" "}
-        <bdi>{result.confidence}%</bdi>
-        {result.cached && (
-          <span className="ms-3 border border-ink-20 px-2 py-0.5 text-sm">
-            {t("verdict.saved_tag")}
-          </span>
-        )}
+      <p className="mt-3 text-[13px] text-ink-2">
+        {t("verdict.confidence")} <bdi>{result.confidence}%</bdi>
       </p>
 
       {hasBreakdown && (
         <section className="mt-9">
           <SectionTitle>{t("verdict.whats_happening")}</SectionTitle>
-          <dl className="divide-y divide-ink-12 border-y border-ink-12">
+          <dl className="divide-y divide-rule border-y border-rule">
             <Fact label={t("verdict.threat_type")} value={category} />
             <Fact
               label={t("verdict.impersonated")}
@@ -362,7 +364,7 @@ function VerdictScreen({
           </p>
           <ul className="mt-3 space-y-2">
             {result.url_analysis.signals.map((code) => (
-              <li key={code} className="border-s-2 border-ink-20 ps-4 text-base">
+              <li key={code} className="border-s-2 border-rule ps-4 text-base">
                 {t(`url.${code}` as TextKey)}
               </li>
             ))}
@@ -386,7 +388,7 @@ function VerdictScreen({
           <SectionTitle>{t("verdict.read_from_image")}</SectionTitle>
           <p
             dir="auto"
-            className="whitespace-pre-wrap break-words border-s-2 border-ink-20 ps-4"
+            className="whitespace-pre-wrap break-words border-s-2 border-rule ps-4"
           >
             {result.extracted_text}
           </p>
@@ -396,16 +398,16 @@ function VerdictScreen({
       {image && result.evidence_items && result.evidence_items.length > 0 && (
         <section className="mt-9">
           <SectionTitle>{t("verdict.seen_in_image")}</SectionTitle>
-          <ul className="divide-y divide-ink-12 border-y border-ink-12">
+          <ul className="divide-y divide-rule border-y border-rule">
             {result.evidence_items.map((item, index) => (
               <li key={index} className="py-3">
-                <span className="text-xs font-semibold uppercase tracking-widest text-ink-55">
+                <span className="text-xs font-semibold uppercase tracking-widest text-ink-2">
                   {t(`evidence.${item.type}` as TextKey)}
                 </span>
                 <p dir="auto" className="mt-1 text-base leading-snug">
                   {item.value}
                 </p>
-                <p dir="auto" className="mt-1 text-base text-ink-70">
+                <p dir="auto" className="mt-1 text-base text-ink-2">
                   {item.why}
                 </p>
               </li>
@@ -427,8 +429,8 @@ function VerdictScreen({
           <ol className="space-y-3">
             {result.red_flags.map((flag, index) => (
               <li key={index} className="flex gap-3">
-                <span className="pt-0.5 font-bold text-threat">
-                  <bdi>{index + 1}</bdi>
+                <span className="pt-0.5 font-kufi font-bold text-threat">
+                  <bdi>{stepNumeral(index + 1, lang)}</bdi>
                 </span>
                 <span dir="auto">{flag.why}</span>
               </li>
@@ -442,7 +444,7 @@ function VerdictScreen({
           <SectionTitle>{t("verdict.actions")}</SectionTitle>
           <ul className="space-y-3">
             {result.actions.map((action, index) => (
-              <li dir="auto" key={index} className="border-s-2 border-ink-20 ps-4">
+              <li dir="auto" key={index} className="bg-paper-2 px-4 py-3">
                 {action}
               </li>
             ))}
@@ -456,10 +458,10 @@ function VerdictScreen({
           onClick={onShield}
           className="mt-10 block w-full border-2 border-threat px-5 py-4 text-start"
         >
-          <span className="block text-xl font-semibold text-threat">
+          <span className="block font-kufi text-[22px] font-semibold text-threat">
             {t("shield.entry")}
           </span>
-          <span className="mt-1 block text-base text-ink-70">
+          <span className="mt-1 block text-base text-ink-2">
             {t("shield.entry_sub")}
           </span>
         </button>
@@ -467,7 +469,7 @@ function VerdictScreen({
 
       {result.report_recommended && (
         <div className="mt-6">
-          <PrimaryButton threat onClick={onReport}>
+          <PrimaryButton onClick={onReport}>
             {t("report.cta")}
           </PrimaryButton>
         </div>
@@ -477,7 +479,12 @@ function VerdictScreen({
         <QuietButton onClick={onAgain}>{t("verdict.again")}</QuietButton>
       </div>
 
-      <p className="mt-8 text-sm text-ink-55">{t("verdict.powered")}</p>
+      <p className="mt-8 flex items-center gap-3 text-[13px] text-ink-2">
+        <span>{t("verdict.powered")}</span>
+        {result.cached && (
+          <span className="border border-rule px-2 py-0.5">{t("verdict.saved_tag")}</span>
+        )}
+      </p>
     </Page>
   );
 }
@@ -524,20 +531,20 @@ function ReportSheet({
 
   return (
     <Page>
-      <h1 className="mt-6 text-3xl font-bold">{t("report.title")}</h1>
+      <h1 className="mt-6">{t("report.title")}</h1>
       <p className="mt-5 text-lg">{t("report.includes")}</p>
 
-      <label className="mt-7 flex items-center gap-3 text-lg">
+      <label className="mt-7 flex min-h-11 items-center gap-3 bg-paper-2 px-4 py-3 text-base">
         <input
           type="checkbox"
           checked={includeText}
           onChange={(e) => setIncludeText(e.target.checked)}
-          className="size-5 accent-black"
+          className="size-5 accent-ink"
         />
         {t("report.include_text")}
       </label>
 
-      <p className="mt-7 text-base text-ink-70">{t("report.privacy")}</p>
+      <p className="mt-7 text-[13px] text-ink-2">{t("report.privacy")}</p>
 
       {failed && (
         <p role="alert" className="mt-6 border-s-4 border-threat ps-3">
@@ -546,7 +553,7 @@ function ReportSheet({
       )}
 
       <div className="mt-9">
-        <PrimaryButton threat onClick={send} disabled={sending}>
+        <PrimaryButton onClick={send} disabled={sending}>
           {sending ? t("report.sending") : t("report.send")}
         </PrimaryButton>
       </div>
@@ -567,13 +574,13 @@ function ReportDone({
   const { t } = useI18n();
   return (
     <Page>
-      <p className="mt-16 text-2xl leading-snug">{t("report.done")}</p>
+      <p className="fade-in mt-16 font-kufi text-[22px] font-semibold leading-snug">{t("report.done")}</p>
 
       <CaseNumber value={caseNumber} />
 
       <p className="mt-5 text-lg">{t("report.keep")}</p>
       <p className="mt-2 text-lg">{t("report.status")}</p>
-      <p className="mt-8 text-sm text-ink-55">{t("report.pilot")}</p>
+      <p className="mt-8 text-sm text-ink-2">{t("report.pilot")}</p>
 
       <div className="mt-10">
         <QuietButton onClick={onClose}>{t("report.close")}</QuietButton>

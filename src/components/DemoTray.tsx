@@ -25,14 +25,14 @@ export function DemoTray({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold">{t("demo.title")}</h2>
-          <button type="button" onClick={onClose} className="text-ink-70">
+          <h2>{t("demo.title")}</h2>
+          <button type="button" onClick={onClose} className="text-ink-2">
             {t("demo.close")}
           </button>
         </div>
 
         {staged.length === 0 ? (
-          <p className="mt-4 text-base text-ink-70">
+          <p className="mt-4 text-base text-ink-2">
             No staged messages — every case marked <code>demo: true</code> in
             content/eval-cases.json still has placeholder text.
           </p>
@@ -44,14 +44,14 @@ export function DemoTray({
                   type="button"
                   onClick={() => onPick(item.text)}
                   dir="auto"
-                  className="w-full border border-ink-20 p-3 text-start text-base leading-snug"
+                  className="w-full border border-rule p-3 text-start text-base leading-snug"
                 >
-                  <span className="block text-xs uppercase tracking-widest text-ink-55">
+                  <span className="block text-xs uppercase tracking-widest text-ink-2">
                     {item.id}
                     {/* No saved verdict yet means no airplane-mode fallback for
                         this one — worth knowing before a rehearsal. */}
                     {!hasCachedVerdict(item.id) && (
-                      <span className="ms-2 text-ink-55">no saved result</span>
+                      <span className="ms-2 text-ink-2">no saved result</span>
                     )}
                   </span>
                   <span className="mt-1 line-clamp-2 block">{item.text}</span>
@@ -86,7 +86,7 @@ export function DemoTray({
         </button>
 
         {cacheMeta.generated_at && (
-          <p className="mt-4 text-xs text-ink-55">
+          <p className="mt-4 text-xs text-ink-2">
             <bdi>
               {cacheMeta.model} · {cacheMeta.generated_at}
             </bdi>

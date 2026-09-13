@@ -24,10 +24,10 @@ export function BottomNav({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-ink-20 bg-paper"
+      className="fixed inset-x-0 bottom-0 z-30 border-t border-rule bg-paper"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul className="mx-auto flex w-full max-w-[46rem]">
+      <ul className="mx-auto flex w-full max-w-[30rem]">
         {TABS.map(({ route, label }) => {
           const current = active === route;
           return (
@@ -37,7 +37,7 @@ export function BottomNav({
                 onClick={() => navigate(route)}
                 aria-current={current ? "page" : undefined}
                 className={`flex min-h-11 w-full flex-col items-center justify-center gap-1.5 px-1 pb-2.5 pt-2 text-sm ${
-                  current ? "font-semibold text-ink" : "text-ink-55"
+                  current ? "font-semibold text-ink" : "text-ink-2"
                 }`}
               >
                 <span

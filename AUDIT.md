@@ -345,3 +345,100 @@ One more thing worth saying plainly: these fixes are pushed to
 `claude/kind-cray-vyr1v6`. Whether they are **deployed** depends on which branch
 Cloudflare Workers Builds is watching. If it only builds the default branch, the
 live site still has none of them.
+
+---
+
+# Phase 2 results — the facelift
+
+Same routes, same API. The palette, the type, the scale and the layout are the
+deck's; the copy changed only where the deck specifies a layout string
+(`جارٍ الفحص…`, `ماذا أفعل الآن؟`, `مشبوه`).
+
+## Tokens
+
+Six, in `src/styles/theme.css`, and nothing else appears anywhere in the app:
+
+```
+--paper #F4EFE6   --paper-2 #EDE6D8   --rule #D9D2C4
+--ink   #111111   --ink-2   #5C574E   --threat #C40B29
+```
+
+The old opacity ramp (`ink-70/55/20/12`) is gone — 64 usages swept to `ink-2`
+and `rule`. A grep for every six-digit colour in `src/` returns exactly those
+six. No green, no blue, no gradient, no shadow, no rounded corner anywhere
+(`grep rounded` returns nothing), and no emoji in any UI string.
+
+Red now appears in four places only: the danger verdict word and its rule, the
+marks inside a flagged message, the Shield entry, and Shield's top rule and step
+numerals. The report buttons became ink.
+
+## Type
+
+- Headlines, verdicts and case numbers: **Noto Kufi Arabic** 600/700.
+- Body, forms, lists: **IBM Plex Sans Arabic** 400/500/600/700.
+- Both self-hosted and precached. The browser reports exactly two loaded
+  families and **zero external hosts** on every route.
+- Scale: h1 28, h2 22, body 16/1.6, meta 13.
+- Arabic-Indic numerals (٠١ … ٠٦) on section numbers, Shield steps, and the
+  marks inside a flagged message. Case numbers, dates, percentages and the
+  character counter stay Latin.
+
+## Layout
+
+- One column, `max-width: 480px`, paper bleeding to the edges, safe areas kept.
+- **Home** — mark top-right, `درعك الرقمي ضد الاحتيال والابتزاز` under it, then
+  three numbered rows separated by hairlines: كشف، إبلاغ، درع الابتزاز. حماية،
+  توعية and تعافي are absent until Phase 3; there is no "coming soon".
+- **Detect** — textarea on `--paper-2` with a `--rule` border, counter, one
+  full-width ink button. Loading is a thin ink line under the header that fills
+  over 12 s and stops at 92%, with `جارٍ الفحص…` beside it. No spinner.
+- **Verdict** — the word large in Kufi (`احتيال` red under a red rule, `مشبوه`
+  ink on `--paper-2` with a drawn warning mark, `تبدو سليمة` ink with a drawn
+  check), one-sentence summary, the message quoted on `--paper-2` with each
+  flagged span underlined 2px in red over a 12% red wash and numbered, then
+  `لماذا؟` and `ماذا أفعل الآن؟`. Footer: `مدعوم بتقنية Claude`, with the
+  `نتيجة محفوظة` tag beside it when the result came from the saved cache.
+- **Report** — the one field on `--paper-2`, ink submit. Confirmation: the case
+  number large in Kufi with the copy button from Phase 1, then the pilot line.
+- **Shield** — a 2px threat rule across the top, steps as numbered editorial
+  sections with red numerals, everything else ink.
+- Motion: one 150ms opacity fade, and the loading line. Both are disabled under
+  `prefers-reduced-motion`.
+
+## Mobile QA, re-run at 390×844
+
+| Check | Result |
+|---|---|
+| Horizontal overflow, 6 routes | 0 |
+| Console errors / warnings / page errors / failed requests | 0 |
+| External hosts requested | 0 |
+| Fonts loaded | IBM Plex Sans Arabic, Noto Kufi Arabic — both local |
+| Tap targets | every control still answers `elementFromPoint` 21px out in all four directions |
+| `apple-touch-icon` / manifest / `dir=rtl` / `lang=ar` / safe areas | unchanged and correct |
+| Service worker precache | 36 entries, 1364 KiB, still 0 under `/api/` |
+| `npm run verify` | typecheck + 77 tests + honesty + build, all green |
+
+## Screenshots
+
+`docs/screens/phase2/` — 390×844, at 2× :
+
+- `01-home.png`
+- `02-detect-empty.png`
+- `03-detect-result-danger.png`
+- `04-report-form.png`
+- `05-report-confirmation.png`
+- `06-shield.png`
+
+**`03` is the one screenshot that is not the live engine.** The deployed Worker
+has no key (A15) and there is no key here, so that screen was photographed
+against a stand-in response shaped exactly like the engine's output, to review
+the design. Every other screenshot is the real app doing the real thing —
+`05` is a real report, a real row in D1 and a real case number, deleted after.
+
+## One thing found while shooting
+
+The quoted-message renderer walks the text with a single cursor and assumed the
+flags arrive in document order. `worker/engine/postvalidate.ts:165` does sort
+them, so the deployed path was never wrong — but a verdict that reached the
+screen any other way would have duplicated half the message on the one screen
+the whole demo is built around. It now sorts defensively before rendering.

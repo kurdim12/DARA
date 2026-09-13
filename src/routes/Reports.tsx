@@ -57,13 +57,13 @@ export function Reports({ navigate }: { navigate: (route: Route) => void }) {
           <LangToggle />
         </header>
 
-        <h1 className="mt-6 text-3xl font-bold">{t("reports.title")}</h1>
-        <p className="mt-2 text-base text-ink-70">{t("reports.subtitle")}</p>
+        <h1 className="mt-6">{t("reports.title")}</h1>
+        <p className="mt-2 text-[13px] text-ink-2">{t("reports.subtitle")}</p>
 
         {rows.length === 0 ? (
           <section className="mt-12">
-            <p className="text-xl leading-snug">{t("reports.empty_title")}</p>
-            <p className="mt-3 text-base text-ink-70">{t("reports.empty_sub")}</p>
+            <p className="text-lg leading-snug">{t("reports.empty_title")}</p>
+            <p className="mt-3 text-[13px] text-ink-2">{t("reports.empty_sub")}</p>
             <div className="mt-8">
               <PrimaryButton onClick={() => navigate("detect")}>
                 {t("reports.empty_cta")}
@@ -72,27 +72,27 @@ export function Reports({ navigate }: { navigate: (route: Route) => void }) {
           </section>
         ) : (
           <>
-            <ul className="mt-8 divide-y divide-ink-12 border-y border-ink-12">
+            <ul className="mt-8 border-t border-rule">
               {rows.map((row) => (
-                <li key={row.case_number} className="py-4">
-                  <p className="text-xl font-bold tracking-tight">
+                <li key={row.case_number} className="border-b border-rule py-4">
+                  <p className="font-kufi text-[22px] font-bold tracking-tight">
                     <bdi>{row.case_number}</bdi>
                   </p>
                   {row.failed ? (
-                    <p className="mt-1 text-base text-ink-70">{t("reports.error")}</p>
+                    <p className="mt-1 text-base text-ink-2">{t("reports.error")}</p>
                   ) : row.live ? (
-                    <p className="mt-1 text-base text-ink-70">
+                    <p className="mt-1 text-base text-ink-2">
                       {statusLabel(row.live, t)}
                     </p>
                   ) : (
-                    <p className="mt-1 text-base text-ink-55">
+                    <p className="mt-1 text-base text-ink-2">
                       {checking ? t("reports.checking") : ""}
                     </p>
                   )}
                 </li>
               ))}
             </ul>
-            <p className="mt-6 text-sm text-ink-55">{t("reports.privacy")}</p>
+            <p className="mt-6 text-[13px] text-ink-2">{t("reports.privacy")}</p>
           </>
         )}
       </Page>
