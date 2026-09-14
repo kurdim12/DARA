@@ -49,6 +49,17 @@ jobs:
           curl -sS --max-time 20 -o /tmp/community.txt -w "http=%{http_code}\n" "$TARGET/api/reports/community" || echo "(unreachable)"
           cat /tmp/community.txt; echo
 
+          # Self-hosted since the facelift. A 404 here would not break the
+          # page — it would quietly swap both typefaces for the system font,
+          # which is the kind of thing you notice on stage and not before.
+          echo "=== fonts, served from /public/fonts ==="
+          for f in manrope-latin-800-normal ibm-plex-sans-arabic-arabic-500-normal; do
+            code=$(curl -sS --max-time 20 -o /dev/null -w "%{http_code}" "$TARGET/fonts/$f.woff2" || echo "---")
+            type=$(curl -sSI --max-time 20 "$TARGET/fonts/$f.woff2" | grep -i '^content-type:' | tr -d '\r' || true)
+            echo "$f.woff2 http=$code $type"
+          done
+          echo
+
           # The rebuild opens in English and LTR; every earlier build shipped
           # <html lang="ar" dir="rtl">.
           echo "=== root <html> tag ==="
