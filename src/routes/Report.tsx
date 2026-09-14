@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { Check, UserRound } from "lucide-react";
+import {
+  Banknote,
+  Briefcase,
+  Check,
+  Fish,
+  Lock,
+  Monitor,
+  MoreHorizontal,
+  User,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   RELEVANT_AUTHORITIES,
   THREAT_TYPES,
@@ -15,8 +25,8 @@ import {
   Header,
   Page,
   PrimaryButton,
+  FieldLabel,
   SectionHeading,
-  SectionLabel,
 } from "../components/Shell";
 import { sendReport } from "../lib/api";
 import { isTestMode, rememberCase } from "../lib/storage";
@@ -31,6 +41,15 @@ const MIN_DESCRIPTION = 20;
  * counts by. This is the reporter's own words mapped onto it as closely as it
  * goes; where it does not go, "other" is honest.
  */
+const THREAT_ICON: Record<ThreatType, LucideIcon> = {
+  phishing: Fish,
+  financial_scam: Banknote,
+  fake_job: Briefcase,
+  cyber_extortion: Lock,
+  account_takeover: Monitor,
+  other: MoreHorizontal,
+};
+
 const CATEGORY_FOR: Record<ThreatType, Category> = {
   phishing: "phishing_link",
   financial_scam: "other",
@@ -88,9 +107,9 @@ export function Report({
       <>
         <Page>
           <Header title={t("report.title")} />
-          <div className="fade-in mt-8 flex flex-col items-center text-center">
+          <div className="fade-in mt-7 flex flex-col items-center text-center">
             <span className="flex size-14 items-center justify-center rounded-full bg-primary-soft text-primary">
-              <Check size={28} aria-hidden="true" />
+              <Check size={28} strokeWidth={1.75} aria-hidden="true" />
             </span>
             <h2 className="mt-4 text-[22px] font-semibold">{t("report.received")}</h2>
           </div>
@@ -115,13 +134,13 @@ export function Report({
       <Page>
         <Header title={t("report.title")} />
 
-        <Card className="mt-4 flex items-center gap-3 p-4">
+        <Card className="mt-3 flex items-center gap-3 px-4 py-3.5">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-            <UserRound size={20} aria-hidden="true" />
+            <User size={20} strokeWidth={1.75} aria-hidden="true" />
           </span>
           <span className="flex-1">
-            <span className="block font-semibold">{t("report.anon_title")}</span>
-            <span className="block text-[13px] text-text-2">{t("report.anon_sub")}</span>
+            <span className="block text-[16px] font-semibold">{t("report.anon_title")}</span>
+            <span className="block text-[14px] text-text-2">{t("report.anon_sub")}</span>
           </span>
           <button
             type="button"
@@ -129,46 +148,48 @@ export function Report({
             aria-checked={anonymous}
             aria-label={t("report.anon_title")}
             onClick={() => setAnonymous((prev) => !prev)}
-            className={`relative h-7 w-12 shrink-0 rounded-full transition-colors ${
+            className={`relative h-[26px] w-11 shrink-0 rounded-full transition-colors ${
               anonymous ? "bg-primary" : "bg-line"
             }`}
           >
             <span
-              className={`absolute top-1 size-5 rounded-full bg-white transition-all ${
-                anonymous ? "start-6" : "start-1"
+              className={`absolute top-[3px] size-5 rounded-full bg-white transition-all ${
+                anonymous ? "start-[21px]" : "start-[3px]"
               }`}
             />
           </button>
         </Card>
 
-        <div className="mt-6">
-          <SectionLabel>{t("report.type_label")}</SectionLabel>
+        <div className="mt-7">
+          <FieldLabel>{t("report.type_label")}</FieldLabel>
         </div>
-        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
+        <div className="no-scrollbar -mx-4 mt-2.5 flex gap-2 overflow-x-auto px-4">
           {THREAT_TYPES.map((option) => {
             const selected = option === threatType;
+            const Icon = THREAT_ICON[option];
             return (
               <button
                 key={option}
                 type="button"
                 onClick={() => setThreatType(option)}
                 aria-pressed={selected}
-                className={`min-h-11 shrink-0 rounded-full border px-4 text-[14px] font-medium ${
+                className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[15px] font-medium ${
                   selected
                     ? "border-primary bg-primary text-white"
                     : "border-line bg-card text-text-2"
                 }`}
               >
+                <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
                 {t(`threat.${option}` as TextKey)}
               </button>
             );
           })}
         </div>
 
-        <div className="mt-6">
-          <SectionLabel>{t("report.authority_label")}</SectionLabel>
+        <div className="mt-7">
+          <FieldLabel>{t("report.authority_label")}</FieldLabel>
         </div>
-        <Card className="mt-3 divide-y divide-line">
+        <Card className="mt-2.5 divide-y divide-line">
           {RELEVANT_AUTHORITIES.map((option) => {
             const selected = option === authority;
             return (
@@ -178,15 +199,15 @@ export function Report({
                 role="radio"
                 aria-checked={selected}
                 onClick={() => setAuthority(option)}
-                className="flex min-h-12 w-full items-center gap-3 p-4 text-start"
+                className="flex h-[52px] w-full items-center gap-3 px-4 text-start"
               >
                 <span
                   aria-hidden="true"
-                  className={`flex size-5 shrink-0 items-center justify-center rounded-full border-2 ${
+                  className={`flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 ${
                     selected ? "border-primary" : "border-line"
                   }`}
                 >
-                  {selected && <span className="size-2.5 rounded-full bg-primary" />}
+                  {selected && <span className="size-[11px] rounded-full bg-primary" />}
                 </span>
                 <span className="text-[15px]">{t(`authority.${option}` as TextKey)}</span>
               </button>
@@ -194,33 +215,33 @@ export function Report({
           })}
         </Card>
 
-        <div className="mt-6">
-          <SectionLabel>{t("report.what_label")}</SectionLabel>
+        <div className="mt-7">
+          <FieldLabel>{t("report.what_label")}</FieldLabel>
         </div>
-        <Card className="mt-3 p-4">
+        <Card className="mt-2.5 px-4 py-3.5">
           <textarea
             dir={description.length > 0 ? "auto" : undefined}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t("report.what_ph")}
-            rows={5}
+            rows={4}
             maxLength={2000}
-            className="w-full resize-none bg-transparent text-[16px] leading-relaxed outline-none placeholder:text-text-2"
+            className="min-h-[120px] w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-text-2"
           />
         </Card>
 
         {!anonymous && (
           <div className="fade-in">
-            <div className="mt-6">
-              <SectionLabel>{t("report.contact_label")}</SectionLabel>
+            <div className="mt-7">
+              <FieldLabel>{t("report.contact_label")}</FieldLabel>
             </div>
-            <Card className="mt-3 p-4">
+            <Card className="mt-2.5 px-4 py-3.5">
               <input
                 type="text"
                 value={contact}
                 onChange={(e) => setContact(e.target.value)}
                 placeholder={t("report.contact_ph")}
-                className="w-full bg-transparent text-[16px] outline-none placeholder:text-text-2"
+                className="h-9 w-full bg-transparent text-[15px] outline-none placeholder:text-text-2"
               />
             </Card>
           </div>
@@ -232,7 +253,7 @@ export function Report({
           </p>
         )}
 
-        <div className="mt-6">
+        <div className="mt-7">
           <PrimaryButton
             arrow={false}
             disabled={sending || description.trim().length < MIN_DESCRIPTION}
@@ -242,7 +263,7 @@ export function Report({
           </PrimaryButton>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-7">
           <SectionHeading>{t("report.community")}</SectionHeading>
         </div>
         <CommunityFeed />
@@ -281,20 +302,20 @@ function CommunityFeed() {
   if (rows.length === 0) return null;
 
   return (
-    <div className="mt-3 space-y-3">
+    <Card className="mt-2.5 divide-y divide-line">
       {rows.map((row) => (
-        <Card key={row.case_number} className="p-4">
+        <div key={row.case_number} className="px-4 py-3.5">
           <div className="flex items-center gap-2">
-            <span className="rounded-full bg-primary-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-primary">
+            <span className="flex h-[22px] items-center rounded-full bg-primary-soft px-2 text-[11px] font-bold uppercase tracking-[0.04em] text-primary">
               {t(`threat.${row.threat_type}` as TextKey)}
             </span>
-            <span className="text-[12px] text-text-2">{t("report.anonymous_tag")}</span>
+            <span className="text-[13px] text-text-2">{t("report.anonymous_tag")}</span>
           </div>
-          <p dir="auto" className="mt-2 line-clamp-2 text-[14px] leading-snug text-text-2">
+          <p dir="auto" className="mt-1.5 line-clamp-2 text-[14px] leading-snug text-text-2">
             {row.description}
           </p>
-        </Card>
+        </div>
       ))}
-    </div>
+    </Card>
   );
 }

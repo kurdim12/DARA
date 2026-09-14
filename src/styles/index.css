@@ -64,9 +64,16 @@
     margin: 0;
     color: var(--text);
     font-family: var(--font-sans);
-    font-size: 16px;
-    line-height: 1.55;
+    /* A phone reads denser than a laptop. 15/1.5 is the reference app's body. */
+    font-size: 15px;
+    line-height: 1.5;
     -webkit-text-size-adjust: 100%;
+  }
+
+  @media (min-width: 481px) {
+    body {
+      font-size: 16px;
+    }
   }
 
   button {

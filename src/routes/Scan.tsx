@@ -131,7 +131,7 @@ export function Scan({
           </div>
         )}
 
-        <div className="no-scrollbar -mx-4 mt-4 flex gap-2 overflow-x-auto px-4">
+        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
           {ANALYSIS_TYPES.map((option) => {
             const { label, Icon } = TYPES[option];
             const selected = option === type;
@@ -141,20 +141,20 @@ export function Scan({
                 type="button"
                 onClick={() => setType(option)}
                 aria-pressed={selected}
-                className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full border px-4 text-[14px] font-medium ${
+                className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[15px] font-medium ${
                   selected
                     ? "border-primary bg-primary text-white"
                     : "border-line bg-card text-text-2"
                 }`}
               >
-                <Icon size={16} aria-hidden="true" />
+                <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
                 {t(label)}
               </button>
             );
           })}
         </div>
 
-        <Card className="mt-4 p-4">
+        <Card className="mt-2.5 px-4 py-3.5">
           <textarea
             dir={text.length > 0 ? "auto" : undefined}
             value={text}
@@ -162,8 +162,8 @@ export function Scan({
             maxLength={MAX_INPUT_CHARS}
             onChange={(e) => setText(e.target.value)}
             placeholder={t(TYPES[type].placeholder)}
-            rows={6}
-            className="w-full resize-none bg-transparent text-[16px] leading-relaxed outline-none placeholder:text-text-2"
+            rows={4}
+            className="min-h-[140px] w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-text-2"
           />
           <div className="mt-2 flex items-center justify-between border-t border-line pt-3">
             <button
@@ -171,7 +171,7 @@ export function Scan({
               onClick={paste}
               className="flex min-h-9 items-center gap-2 rounded-full border border-line px-3 text-[13px] font-medium text-text-2"
             >
-              <ClipboardPaste size={16} aria-hidden="true" />
+              <ClipboardPaste size={16} strokeWidth={1.75} aria-hidden="true" />
               {t("scan.paste")}
             </button>
             <span className="text-[13px] text-text-2">
@@ -198,14 +198,14 @@ export function Scan({
           </PrimaryButton>
         </div>
 
-        <Card className="mt-8 p-4">
+        <Card className="mt-7 px-4 py-3.5">
           <SectionLabel>{t("scan.what")}</SectionLabel>
           <ul className="mt-3 space-y-3">
             {WHAT.map((key, index) => {
               const Icon = WHAT_ICONS[index];
               return (
                 <li key={key} className="flex items-center gap-3 text-[14px]">
-                  <Icon size={20} className="shrink-0 text-primary" aria-hidden="true" />
+                  <Icon size={20} strokeWidth={1.75} className="shrink-0 text-primary" aria-hidden="true" />
                   {t(key)}
                 </li>
               );
@@ -238,8 +238,8 @@ function Result({
       <Page>
         <Header title={t("scan.title")} />
 
-        <Card className={`fade-in mt-4 border-s-[3px] p-5 ${tone.border} ${tone.soft}`}>
-          <p className={`text-[28px] font-bold leading-tight ${tone.text}`}>
+        <Card className={`fade-in mt-3 border-s-[3px] px-4 py-4 ${tone.border} ${tone.soft}`}>
+          <p className={`text-[26px] font-bold leading-tight ${tone.text}`}>
             {t(LEVEL_LABEL[level])}
           </p>
           <p dir="auto" className="mt-2 leading-snug">
@@ -247,7 +247,7 @@ function Result({
           </p>
         </Card>
 
-        <Card className="mt-4 p-4">
+        <Card className="mt-2.5 px-4 py-3.5">
           <SectionLabel>{t("result.input")}</SectionLabel>
           <div className="mt-3">
             <HighlightedMessage text={input} flags={result.red_flags} />
@@ -273,7 +273,7 @@ function Result({
         </Card>
 
         {result.actions.length > 0 && (
-          <Card className="mt-4 p-4">
+          <Card className="mt-2.5 px-4 py-3.5">
             <SectionLabel>{t("result.what_now")}</SectionLabel>
             <ul className="mt-3 space-y-3">
               {result.actions.map((action, index) => (
@@ -285,7 +285,7 @@ function Result({
           </Card>
         )}
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-5 space-y-2.5">
           <PrimaryButton onClick={() => navigate("report")}>
             {t("result.report_cta")}
           </PrimaryButton>

@@ -77,9 +77,9 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
     <>
       <Page>
         <Header title={t("tool.learn")} />
-        <p className="mt-1 text-text-2">{t("tool.learn_sub")}</p>
+        <p className="mt-0.5 text-[14px] text-text-2">{t("tool.learn_sub")}</p>
 
-        <div className="mt-6 flex items-center gap-3">
+        <div className="mt-5 flex items-center gap-3">
           <SectionLabel>
             {t("learn.question")} <bdi>{index + 1}</bdi> / <bdi>{set.length}</bdi>
           </SectionLabel>
@@ -93,18 +93,18 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
 
         {/* A quiz message is quoted text, never a link — the same rule the
             verdict screen follows for the message being analysed. */}
-        <Card className="mt-3 p-4">
+        <Card className="mt-2.5 px-4 py-3.5">
           <p dir="auto" className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">
             {question.message}
           </p>
         </Card>
 
-        <div className="mt-4 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-2 gap-2.5">
           <button
             type="button"
             disabled={Boolean(given)}
             onClick={() => answer("scam")}
-            className={`min-h-12 rounded-full border text-[15px] font-semibold ${
+            className={`h-[50px] rounded-full border text-[15px] font-semibold ${
               given === "scam"
                 ? "border-primary bg-primary text-white"
                 : "border-line bg-card text-text"
@@ -133,10 +133,10 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
                 right ? "text-success" : "text-danger"
               }`}
             >
-              {right ? <Check size={18} aria-hidden="true" /> : <X size={18} aria-hidden="true" />}
+              {right ? <Check size={18} strokeWidth={1.75} aria-hidden="true" /> : <X size={18} strokeWidth={1.75} aria-hidden="true" />}
               {t(right ? "learn.correct" : "learn.incorrect")}
             </p>
-            <Card className="mt-3 p-4">
+            <Card className="mt-2.5 px-4 py-3.5">
               <SectionLabel>{t("learn.tell")}</SectionLabel>
               <p dir="auto" className="mt-2 text-[15px] leading-snug">
                 {question.tell}

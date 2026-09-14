@@ -26,9 +26,9 @@ export function Protect({
     <>
       <Page>
         <Header title={t("tool.protect")} />
-        <p className="mt-1 text-text-2">{t("tool.protect_sub")}</p>
+        <p className="mt-0.5 text-[14px] text-text-2">{t("tool.protect_sub")}</p>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-4 space-y-2.5">
           <CheckField
             icon={<Phone size={20} aria-hidden="true" />}
             label={t("protect.check_sender")}
@@ -45,7 +45,7 @@ export function Protect({
           />
         </div>
 
-        <div className="mt-9 flex items-baseline justify-between gap-3">
+        <div className="mt-7 flex items-baseline justify-between gap-3">
           <SectionLabel>{t("protect.checklist")}</SectionLabel>
           <span className="shrink-0 text-[13px] text-text-2">
             <bdi>
@@ -55,7 +55,7 @@ export function Protect({
           </span>
         </div>
 
-        <Card className="mt-3 divide-y divide-line">
+        <Card className="mt-2.5 divide-y divide-line">
           {items.map((item) => {
             const on = Boolean(ticked[item.id]);
             return (
@@ -65,7 +65,7 @@ export function Protect({
                 role="checkbox"
                 aria-checked={on}
                 onClick={() => setTicked((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}
-                className="flex w-full gap-3 p-4 text-start"
+                className="flex w-full gap-3 px-4 py-3.5 text-start"
               >
                 <span
                   aria-hidden="true"
@@ -113,7 +113,7 @@ function CheckField({
   const [value, setValue] = useState("");
 
   return (
-    <Card className="p-4">
+    <Card className="px-4 py-3.5">
       <p className="flex items-center gap-2 font-semibold">
         <span className="text-primary">{icon}</span>
         {label}

@@ -1,14 +1,14 @@
-import { Flag, Home, LifeBuoy, ScanLine, Shield } from "lucide-react";
+import { House, Megaphone, ScanLine, User, Wrench } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
 const TABS: { route: Route; label: TextKey; Icon: LucideIcon }[] = [
-  { route: "home", label: "nav.home", Icon: Home },
+  { route: "home", label: "nav.home", Icon: House },
   { route: "scan", label: "nav.scan", Icon: ScanLine },
-  { route: "report", label: "nav.report", Icon: Flag },
-  { route: "recover", label: "nav.recover", Icon: LifeBuoy },
-  { route: "shield", label: "nav.shield", Icon: Shield },
+  { route: "report", label: "nav.report", Icon: Megaphone },
+  { route: "recover", label: "nav.recover", Icon: Wrench },
+  { route: "shield", label: "nav.shield", Icon: User },
 ];
 
 /** Five destinations, fixed, safe-area padded. Order mirrors with `dir`. */
@@ -35,12 +35,12 @@ export function BottomNav({
                 type="button"
                 onClick={() => navigate(route)}
                 aria-current={current ? "page" : undefined}
-                className={`flex min-h-14 w-full flex-col items-center justify-center gap-1 px-1 py-2 ${
+                className={`flex h-14 w-full flex-col items-center justify-center gap-1 px-1 ${
                   current ? "text-primary" : "text-text-2"
                 }`}
               >
-                <Icon size={20} aria-hidden="true" />
-                <span className="text-[12px] leading-none">{t(label)}</span>
+                <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
+                <span className="text-[11px] leading-none">{t(label)}</span>
               </button>
             </li>
           );
@@ -51,4 +51,5 @@ export function BottomNav({
 }
 
 /** Height the nav occupies, so a page can keep its last line clear of it. */
-export const NAV_CLEARANCE = "calc(5rem + env(safe-area-inset-bottom))";
+/** Nav height, the safe area under it, and 16px of air above it. */
+export const NAV_CLEARANCE = "calc(56px + env(safe-area-inset-bottom) + 16px)";

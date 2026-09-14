@@ -49,9 +49,11 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       // Private mode: the toggle still works for this page.
     }
     // The status bar and the address bar follow the page, not the system.
+    // index.html ships two media-scoped tags so the very first paint is right
+    // before this runs; once someone picks a theme, their choice wins on both.
     document
-      .querySelector('meta[name="theme-color"]')
-      ?.setAttribute("content", CHROME[theme]);
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((tag) => tag.setAttribute("content", CHROME[theme]));
   }, [theme]);
 
   const toggle = useCallback(

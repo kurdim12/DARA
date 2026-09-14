@@ -11,12 +11,12 @@ export function ThreatRow({ threat, count }: { threat: Threat; count: number }) 
   const { t, lang } = useI18n();
 
   return (
-    <article className="rounded-card border border-line border-s-[3px] border-s-danger bg-card p-4">
+    <article className="border-s-[3px] border-s-danger px-4 py-3.5">
       <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-full bg-danger-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-danger">
+        <span className="flex h-[22px] items-center rounded-full bg-danger-soft px-2 text-[11px] font-bold uppercase tracking-[0.04em] text-danger">
           {t(`tag.${threat.channel}` as "tag.sms")}
         </span>
-        <span className="text-[12px] text-text-2">
+        <span className="text-[13px] text-text-2">
           {count > 0 ? (
             <>
               <bdi>{count}</bdi>{" "}
@@ -28,8 +28,8 @@ export function ThreatRow({ threat, count }: { threat: Threat; count: number }) 
         </span>
       </div>
 
-      <h3 className="mt-2 font-semibold leading-snug">{pick(threat.title, lang)}</h3>
-      <p className="mt-1 text-[14px] leading-snug text-text-2">
+      <h3 className="mt-1.5 text-[16px] font-semibold leading-snug">{pick(threat.title, lang)}</h3>
+      <p className="mt-0.5 line-clamp-2 text-[14px] leading-snug text-text-2">
         {pick(threat.description, lang)}
       </p>
     </article>

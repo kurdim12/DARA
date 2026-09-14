@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import { useI18n } from "../i18n";
 
 /**
  * The submitted app's mark: a blue rounded square with a white D, the word
@@ -8,29 +7,28 @@ import { useI18n } from "../i18n";
  * This is not the brush-stroke درع in public/brand — that file is untouched.
  */
 export function Logo({ onLongPress }: { onLongPress?: () => void }) {
-  const { lang } = useI18n();
   const press = useLongPress(onLongPress);
 
   return (
-    <div className="flex items-center gap-2.5" {...press}>
+    <div className="flex h-9 items-center gap-2" {...press}>
       <span
         aria-hidden="true"
-        className="flex size-9 items-center justify-center rounded-[10px] bg-primary"
+        className="flex size-7 items-center justify-center rounded-lg bg-primary"
       >
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
           <path
             d="M12 2.5 4.5 5.5v6.2c0 4.6 3.1 8.4 7.5 9.8 4.4-1.4 7.5-5.2 7.5-9.8V5.5L12 2.5z"
             stroke="white"
-            strokeWidth="1.6"
+            strokeWidth="1.75"
             strokeLinejoin="round"
           />
           <text
             x="12"
-            y="15.4"
+            y="15.6"
             textAnchor="middle"
             fill="white"
             fontSize="9"
-            fontWeight="700"
+            fontWeight="800"
             fontFamily="Inter, system-ui, sans-serif"
           >
             D
@@ -38,12 +36,11 @@ export function Logo({ onLongPress }: { onLongPress?: () => void }) {
         </svg>
       </span>
       <span className="relative leading-none" dir="ltr">
-        <span className="text-[22px] font-bold tracking-tight">DARA&rsquo;</span>
+        <span className="text-[20px] font-extrabold tracking-tight">DARA&rsquo;</span>
         <span
           lang="ar"
           dir="rtl"
-          className="absolute -bottom-2.5 text-[12px] font-semibold text-primary"
-          style={{ insetInlineEnd: lang === "ar" ? undefined : 0, right: 0 }}
+          className="absolute -bottom-2 right-0 text-[11px] font-semibold leading-none text-primary"
         >
           درع
         </span>

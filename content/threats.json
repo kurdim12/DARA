@@ -21,7 +21,7 @@
     {
       "id": "fake_customs_parcel",
       "category": "parcel_customs",
-      "channel": "sms",
+      "channel": "whatsapp",
       "title": {
         "en": "Fake Jordan Customs Parcel Scam",
         "ar": "احتيال الطرد الجمركي"
@@ -34,7 +34,7 @@
     {
       "id": "fake_bank_suspension",
       "category": "impersonation_bank",
-      "channel": "whatsapp",
+      "channel": "call",
       "title": {
         "en": "Fake Arab Bank Account Suspension",
         "ar": "رسالة تنتحل صفة البنك العربي"
