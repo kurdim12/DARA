@@ -1,3 +1,4 @@
+import { Tag } from "./Shell";
 import { useI18n } from "../i18n";
 import { pick, type Threat } from "../lib/threats";
 
@@ -7,19 +8,33 @@ import { pick, type Threat } from "../lib/threats";
  * reported one yet, the words "Known pattern" — never a number without a row
  * behind it.
  */
-export function ThreatRow({ threat, count }: { threat: Threat; count: number }) {
+export function ThreatRow({
+  threat,
+  count,
+  level = 3,
+}: {
+  threat: Threat;
+  count: number;
+  /** 3 under Home's section heading, 2 on the full-list screen. */
+  level?: 2 | 3;
+}) {
   const { t, lang } = useI18n();
+  const Title = level === 2 ? "h2" : "h3";
 
   return (
-    <article className="border-s-[3px] border-s-danger px-4 py-3.5">
+    <article className="relative px-4 py-3.5 ps-5">
+      {/* The leading bar is inset rather than full-bleed, so a list of these
+          reads as rows of one card and not as three separate cards. */}
+      <span
+        aria-hidden="true"
+        className="absolute inset-y-3.5 start-0 w-[3px] rounded-e-full bg-red"
+      />
       <div className="flex flex-wrap items-center gap-2">
-        <span className="flex h-[22px] items-center rounded-full bg-danger-soft px-2 text-[11px] font-bold uppercase tracking-[0.04em] text-danger">
-          {t(`tag.${threat.channel}` as "tag.sms")}
-        </span>
-        <span className="text-[13px] text-text-2">
+        <Tag tone="danger">{t(`tag.${threat.channel}` as "tag.sms")}</Tag>
+        <span className="t-meta text-slate">
           {count > 0 ? (
             <>
-              <bdi>{count}</bdi>{" "}
+              <bdi className="tnum">{count}</bdi>{" "}
               {t(count === 1 ? "threats.report_suffix" : "threats.reports_suffix")}
             </>
           ) : (
@@ -28,10 +43,8 @@ export function ThreatRow({ threat, count }: { threat: Threat; count: number }) 
         </span>
       </div>
 
-      <h3 className="mt-1.5 text-[16px] font-semibold leading-snug">{pick(threat.title, lang)}</h3>
-      <p className="mt-0.5 line-clamp-2 text-[14px] leading-snug text-text-2">
-        {pick(threat.description, lang)}
-      </p>
+      <Title className="t-row mt-2">{pick(threat.title, lang)}</Title>
+      <p className="t-sub mt-1 line-clamp-2">{pick(threat.description, lang)}</p>
     </article>
   );
 }

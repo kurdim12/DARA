@@ -17,8 +17,11 @@ interface ThemeState {
 
 const Ctx = createContext<ThemeState | null>(null);
 
-/** Matches the tokens in src/styles/theme.css, for the browser chrome. */
-const CHROME: Record<Theme, string> = { light: "#F7F8FA", dark: "#0F1115" };
+/**
+ * The browser chrome. Navy in light because Home's hero runs under the status
+ * bar; the dark page ground in dark. Both match src/styles/tokens.css.
+ */
+const CHROME: Record<Theme, string> = { light: "#0B2A6F", dark: "#0E1220" };
 
 const KEY = "dara.theme";
 

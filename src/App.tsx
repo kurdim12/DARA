@@ -1,10 +1,10 @@
 import { useCallback, useState } from "react";
-import type { AnalysisType } from "../shared/types";
+import type { AnalysisType, AnalyzeImage, Category } from "../shared/types";
 import { LangProvider } from "./i18n";
 import { ThemeProvider } from "./lib/theme";
 import { useRouter } from "./lib/router";
 import { Home } from "./routes/Home";
-import { Scan } from "./routes/Scan";
+import { Scan, type Seed } from "./routes/Scan";
 import { Threats } from "./routes/Threats";
 import { Report } from "./routes/Report";
 import { Protect } from "./routes/Protect";
@@ -25,29 +25,42 @@ export default function App() {
 
 function Screens() {
   const { route, navigate, quickExit } = useRouter();
-  /** Text handed to Scan, the chip to land on, and whether to run it at once. */
-  const [seed, setSeed] = useState<{
-    text: string;
-    run: boolean;
-    type?: AnalysisType;
-  } | null>(null);
+  /** Text or a screenshot handed to Scan, the chip to land on, and whether to run it. */
+  const [seed, setSeed] = useState<Seed | null>(null);
   const clearSeed = useCallback(() => setSeed(null), []);
+  /** What a verdict knew about the threat, so Report opens with it filled in. */
+  const [prefill, setPrefill] = useState<{ category: Category; messageText: string } | null>(null);
 
   const handOff = useCallback(
-    (text: string, run: boolean, type?: AnalysisType) => {
-      setSeed({ text, run, type });
+    (text: string, run: boolean, type?: AnalysisType, image?: AnalyzeImage | null) => {
+      setSeed({ text, run, type, image });
       navigate("scan");
+    },
+    [navigate],
+  );
+
+  const openReport = useCallback(
+    (next: { category: Category; messageText: string }) => {
+      setPrefill(next);
+      navigate("report");
     },
     [navigate],
   );
 
   switch (route) {
     case "scan":
-      return <Scan navigate={navigate} seed={seed} onSeedUsed={clearSeed} />;
+      return (
+        <Scan
+          navigate={navigate}
+          seed={seed}
+          onSeedUsed={clearSeed}
+          onReport={openReport}
+        />
+      );
     case "threats":
       return <Threats navigate={navigate} />;
     case "report":
-      return <Report navigate={navigate} />;
+      return <Report navigate={navigate} prefill={prefill} />;
     case "protect":
       return (
         <Protect
@@ -70,7 +83,7 @@ function Screens() {
         <Home
           navigate={navigate}
           onStaged={(text) => handOff(text, false)}
-          onSubmit={(text) => handOff(text, true)}
+          onSubmit={(text, type, image) => handOff(text, true, type, image)}
         />
       );
   }

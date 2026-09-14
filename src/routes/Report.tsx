@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   Banknote,
   Briefcase,
-  Check,
+  CheckCircle2,
   Fish,
   Lock,
   Monitor,
@@ -22,11 +22,17 @@ import { BottomNav } from "../components/BottomNav";
 import { CaseNumber } from "../components/CaseNumber";
 import {
   Card,
+  Chip,
+  ChipRow,
+  FieldLabel,
   Header,
+  IconRow,
+  ListCard,
   Page,
   PrimaryButton,
-  FieldLabel,
   SectionHeading,
+  Tag,
+  Toggle,
 } from "../components/Shell";
 import { sendReport } from "../lib/api";
 import { isTestMode, rememberCase } from "../lib/storage";
@@ -59,6 +65,23 @@ const CATEGORY_FOR: Record<ThreatType, Category> = {
   other: "other",
 };
 
+/** The same mapping read backwards, so a verdict can choose the chip for you. */
+const TYPE_FOR_CATEGORY: Partial<Record<Category, ThreatType>> = {
+  impersonation_government: "phishing",
+  impersonation_bank: "phishing",
+  impersonation_telecom: "phishing",
+  phishing_link: "phishing",
+  otp_theft: "account_takeover",
+  fake_prize: "financial_scam",
+  fake_job: "fake_job",
+  fake_shop: "financial_scam",
+  investment: "financial_scam",
+  parcel_customs: "financial_scam",
+  traffic_fine: "financial_scam",
+  police_threat: "cyber_extortion",
+  extortion: "cyber_extortion",
+};
+
 export function Report({
   navigate,
   prefill,
@@ -69,7 +92,10 @@ export function Report({
 }) {
   const { t } = useI18n();
   const [anonymous, setAnonymous] = useState(true);
-  const [threatType, setThreatType] = useState<ThreatType>(prefill?.threatType ?? "phishing");
+  const [threatType, setThreatType] = useState<ThreatType>(
+    prefill?.threatType ??
+      (prefill?.category ? (TYPE_FOR_CATEGORY[prefill.category] ?? "other") : "phishing"),
+  );
   const [authority, setAuthority] = useState<RelevantAuthority>("cybercrime_unit");
   const [description, setDescription] = useState("");
   const [contact, setContact] = useState("");
@@ -107,18 +133,21 @@ export function Report({
       <>
         <Page>
           <Header title={t("report.title")} />
-          <div className="fade-in mt-7 flex flex-col items-center text-center">
-            <span className="flex size-14 items-center justify-center rounded-full bg-primary-soft text-primary">
-              <Check size={28} strokeWidth={1.75} aria-hidden="true" />
+          <div className="reveal mt-6 flex flex-col items-center text-center">
+            <span
+              aria-hidden="true"
+              className="flex size-16 items-center justify-center rounded-full bg-sky text-green"
+            >
+              <CheckCircle2 size={32} strokeWidth={2} />
             </span>
-            <h2 className="mt-4 text-[22px] font-semibold">{t("report.received")}</h2>
+            <h2 className="t-title mt-4">{t("report.received")}</h2>
           </div>
 
           <CaseNumber value={caseNumber} />
 
-          <p className="mt-5 text-[14px] leading-relaxed text-text-2">{t("report.pilot_note")}</p>
+          <p className="t-sub mt-6 leading-relaxed">{t("report.pilot_note")}</p>
 
-          <div className="mt-7">
+          <div className="mt-6">
             <PrimaryButton arrow={false} onClick={() => navigate("home")}>
               {t("report.back_home")}
             </PrimaryButton>
@@ -134,129 +163,108 @@ export function Report({
       <Page>
         <Header title={t("report.title")} />
 
-        <Card className="mt-3 flex items-center gap-3 px-4 py-3.5">
-          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
-            <User size={20} strokeWidth={1.75} aria-hidden="true" />
-          </span>
-          <span className="flex-1">
-            <span className="block text-[16px] font-semibold">{t("report.anon_title")}</span>
-            <span className="block text-[14px] text-text-2">{t("report.anon_sub")}</span>
-          </span>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={anonymous}
-            aria-label={t("report.anon_title")}
-            onClick={() => setAnonymous((prev) => !prev)}
-            className={`relative h-[26px] w-11 shrink-0 rounded-full transition-colors ${
-              anonymous ? "bg-primary" : "bg-line"
-            }`}
-          >
-            <span
-              className={`absolute top-[3px] size-5 rounded-full bg-white transition-all ${
-                anonymous ? "start-[21px]" : "start-[3px]"
-              }`}
-            />
-          </button>
-        </Card>
-
-        <div className="mt-7">
-          <FieldLabel>{t("report.type_label")}</FieldLabel>
-        </div>
-        <div className="no-scrollbar -mx-4 mt-2.5 flex gap-2 overflow-x-auto px-4">
-          {THREAT_TYPES.map((option) => {
-            const selected = option === threatType;
-            const Icon = THREAT_ICON[option];
-            return (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setThreatType(option)}
-                aria-pressed={selected}
-                className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[15px] font-medium ${
-                  selected
-                    ? "border-primary bg-primary text-white"
-                    : "border-line bg-card text-text-2"
-                }`}
-              >
-                <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-                {t(`threat.${option}` as TextKey)}
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="mt-7">
-          <FieldLabel>{t("report.authority_label")}</FieldLabel>
-        </div>
-        <Card className="mt-2.5 divide-y divide-line">
-          {RELEVANT_AUTHORITIES.map((option) => {
-            const selected = option === authority;
-            return (
-              <button
-                key={option}
-                type="button"
-                role="radio"
-                aria-checked={selected}
-                onClick={() => setAuthority(option)}
-                className="flex h-[52px] w-full items-center gap-3 px-4 text-start"
-              >
-                <span
-                  aria-hidden="true"
-                  className={`flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 ${
-                    selected ? "border-primary" : "border-line"
-                  }`}
-                >
-                  {selected && <span className="size-[11px] rounded-full bg-primary" />}
-                </span>
-                <span className="text-[15px]">{t(`authority.${option}` as TextKey)}</span>
-              </button>
-            );
-          })}
-        </Card>
-
-        <div className="mt-7">
-          <FieldLabel>{t("report.what_label")}</FieldLabel>
-        </div>
-        <Card className="mt-2.5 px-4 py-3.5">
-          <textarea
-            dir={description.length > 0 ? "auto" : undefined}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder={t("report.what_ph")}
-            rows={4}
-            maxLength={2000}
-            className="min-h-[120px] w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-text-2"
+        <Card padded={false}>
+          <IconRow
+            Icon={User}
+            title={t("report.anon_title")}
+            sub={t("report.anon_sub")}
+            trailing={
+              <Toggle
+                on={anonymous}
+                onChange={() => setAnonymous((prev) => !prev)}
+                label={t("report.anon_title")}
+              />
+            }
           />
         </Card>
 
+        <div className="mt-6">
+          <FieldLabel>{t("report.type_label")}</FieldLabel>
+        </div>
+        <div className="mt-2.5">
+          <ChipRow>
+            {THREAT_TYPES.map((option) => (
+              <Chip
+                key={option}
+                Icon={THREAT_ICON[option]}
+                label={t(`threat.${option}` as TextKey)}
+                selected={option === threatType}
+                onClick={() => setThreatType(option)}
+              />
+            ))}
+          </ChipRow>
+        </div>
+
+        <div className="mt-6">
+          <FieldLabel>{t("report.authority_label")}</FieldLabel>
+        </div>
+        <ListCard className="mt-2.5">
+          {RELEVANT_AUTHORITIES.map((option) => {
+            const selected = option === authority;
+            return (
+              <IconRow
+                key={option}
+                role="radio"
+                selected={selected}
+                onClick={() => setAuthority(option)}
+                title={t(`authority.${option}` as TextKey)}
+                lead={
+                  <span
+                    aria-hidden="true"
+                    className={`flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 ${
+                      selected ? "border-blue" : "border-line"
+                    }`}
+                  >
+                    {selected && <span className="size-[11px] rounded-full bg-blue" />}
+                  </span>
+                }
+              />
+            );
+          })}
+        </ListCard>
+
+        <div className="mt-6">
+          <FieldLabel>{t("report.what_label")}</FieldLabel>
+        </div>
+        <textarea
+          dir={description.length > 0 ? "auto" : undefined}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("report.what_ph")}
+          rows={4}
+          maxLength={2000}
+          className="mt-2.5 min-h-[120px] w-full resize-none rounded-btn border border-line bg-mist p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-slate"
+        />
+
         {!anonymous && (
-          <div className="fade-in">
-            <div className="mt-7">
+          <div className="reveal">
+            <div className="mt-6">
               <FieldLabel>{t("report.contact_label")}</FieldLabel>
             </div>
-            <Card className="mt-2.5 px-4 py-3.5">
-              <input
-                type="text"
-                value={contact}
-                onChange={(e) => setContact(e.target.value)}
-                placeholder={t("report.contact_ph")}
-                className="h-9 w-full bg-transparent text-[15px] outline-none placeholder:text-text-2"
-              />
-            </Card>
+            <input
+              type="text"
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              placeholder={t("report.contact_ph")}
+              className="mt-2.5 h-12 w-full rounded-btn border border-line bg-mist px-3.5 text-[15px] font-medium text-ink outline-none placeholder:text-slate"
+            />
           </div>
         )}
 
         {failed && (
-          <p role="alert" className="mt-5 rounded-card bg-danger-soft p-3 text-[14px] text-danger">
+          <p
+            role="alert"
+            className="mt-5 rounded-btn bg-red-soft p-3 text-[14px] font-medium text-red-ink"
+          >
             {t("error.generic")}
           </p>
         )}
 
-        <div className="mt-7">
+        <div className="mt-6">
           <PrimaryButton
             arrow={false}
-            disabled={sending || description.trim().length < MIN_DESCRIPTION}
+            loading={sending}
+            disabled={description.trim().length < MIN_DESCRIPTION}
             onClick={() => void submit()}
           >
             {sending ? t("report.sending") : t("report.submit")}
@@ -302,20 +310,18 @@ function CommunityFeed() {
   if (rows.length === 0) return null;
 
   return (
-    <Card className="mt-2.5 divide-y divide-line">
+    <ListCard className="mt-3">
       {rows.map((row) => (
         <div key={row.case_number} className="px-4 py-3.5">
           <div className="flex items-center gap-2">
-            <span className="flex h-[22px] items-center rounded-full bg-primary-soft px-2 text-[11px] font-bold uppercase tracking-[0.04em] text-primary">
-              {t(`threat.${row.threat_type}` as TextKey)}
-            </span>
-            <span className="text-[13px] text-text-2">{t("report.anonymous_tag")}</span>
+            <Tag>{t(`threat.${row.threat_type}` as TextKey)}</Tag>
+            <span className="t-meta text-slate">{t("report.anonymous_tag")}</span>
           </div>
-          <p dir="auto" className="mt-1.5 line-clamp-2 text-[14px] leading-snug text-text-2">
+          <p dir="auto" className="mt-2 line-clamp-2 text-[14px] font-medium leading-snug text-slate">
             {row.description}
           </p>
         </div>
       ))}
-    </Card>
+    </ListCard>
   );
 }

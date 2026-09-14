@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BottomNav } from "../components/BottomNav";
-import { Card, Header, Page } from "../components/Shell";
+import { Header, ListCard, Page } from "../components/Shell";
 import { ThreatRow } from "../components/ThreatRow";
 import { useI18n } from "../i18n";
 import { allThreats, reportCounts } from "../lib/threats";
@@ -22,12 +22,12 @@ export function Threats({ navigate }: { navigate: (route: Route) => void }) {
   return (
     <>
       <Page>
-        <Header title={t("threats.title")} />
-        <Card className="mt-3 divide-y divide-line overflow-hidden">
+        <Header title={t("threats.title")} onBack={() => navigate("home")} />
+        <ListCard>
           {allThreats().map((threat) => (
-            <ThreatRow key={threat.id} threat={threat} count={counts[threat.category] ?? 0} />
+            <ThreatRow key={threat.id} threat={threat} count={counts[threat.category] ?? 0} level={2} />
           ))}
-        </Card>
+        </ListCard>
       </Page>
       <BottomNav active="home" navigate={navigate} />
     </>

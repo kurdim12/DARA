@@ -1,48 +1,54 @@
 import { useEffect, useRef } from "react";
+import { useI18n } from "../i18n";
 
 /**
- * The submitted app's mark: a blue rounded square with a white D, the word
- * DARA' beside it, and درع in primary tucked under the apostrophe.
+ * The hero's identity block: a white badge carrying the navy shield-D, the
+ * wordmark, and one line saying what DARA' is.
  *
  * This is not the brush-stroke درع in public/brand — that file is untouched.
  */
 export function Logo({ onLongPress }: { onLongPress?: () => void }) {
+  const { t, lang } = useI18n();
   const press = useLongPress(onLongPress);
 
   return (
-    <div className="flex h-9 items-center gap-2" {...press}>
+    <div className="flex min-w-0 items-center gap-2.5" {...press}>
       <span
         aria-hidden="true"
-        className="flex size-7 items-center justify-center rounded-lg bg-primary"
+        className="flex size-[34px] shrink-0 items-center justify-center rounded-[11px] bg-white"
       >
-        <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+        <svg viewBox="0 0 24 24" width="21" height="21" fill="none">
           <path
             d="M12 2.5 4.5 5.5v6.2c0 4.6 3.1 8.4 7.5 9.8 4.4-1.4 7.5-5.2 7.5-9.8V5.5L12 2.5z"
-            stroke="white"
-            strokeWidth="1.75"
+            stroke="var(--navy)"
+            strokeWidth="1.9"
             strokeLinejoin="round"
           />
           <text
             x="12"
-            y="15.6"
+            y="15.8"
             textAnchor="middle"
-            fill="white"
-            fontSize="9"
+            fill="var(--navy)"
+            fontSize="9.5"
             fontWeight="800"
-            fontFamily="Inter, system-ui, sans-serif"
+            fontFamily="Manrope, system-ui, sans-serif"
           >
             D
           </text>
         </svg>
       </span>
-      <span className="relative leading-none" dir="ltr">
-        <span className="text-[20px] font-extrabold tracking-tight">DARA&rsquo;</span>
-        <span
-          lang="ar"
-          dir="rtl"
-          className="absolute -bottom-2 right-0 text-[11px] font-semibold leading-none text-primary"
-        >
-          درع
+      <span className="min-w-0">
+        <span dir="ltr" className="block text-[20px] font-extrabold leading-none tracking-tight">
+          DARA&rsquo;
+        </span>
+        <span className="mt-1 block text-[11px] font-medium leading-tight text-white/80">
+          {lang === "en" ? (
+            <>
+              <bdi lang="ar">درع</bdi> · {t("home.eyebrow")}
+            </>
+          ) : (
+            t("home.eyebrow")
+          )}
         </span>
       </span>
     </div>

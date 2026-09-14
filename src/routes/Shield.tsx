@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   AlertCircle,
   Banknote,
-  ChevronRight,
   EyeOff,
   FileText,
   House,
@@ -14,12 +13,25 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
-import { Card, Header, Page, PrimaryButton, SectionLabel } from "../components/Shell";
+import {
+  Card,
+  FieldLabel,
+  Header,
+  IconRow,
+  ListCard,
+  Page,
+  PrimaryButton,
+  RowChevron,
+  SectionLabel,
+  Stepper,
+} from "../components/Shell";
 import { useI18n } from "../i18n";
-import { contact, contacts, legalLine } from "../lib/verified";
+import { contact, contacts, legalLine, type Contact } from "../lib/verified";
 import { situations, type Situation } from "../lib/shield";
+import type { IconTone } from "../components/Shell";
 import type { Route } from "../lib/router";
 
+/** Family Protection first, the police last: the order the screen was designed in. */
 const HELP_LINE_IDS = ["family_protection", "cybercrime_unit", "emergency"];
 
 const HELP_LINE_ICON: Record<string, LucideIcon> = {
@@ -36,17 +48,11 @@ const SITUATION_ICON: Record<string, LucideIcon> = {
   data_stolen: FileText,
 };
 
-const TONE: Record<"primary" | "warn" | "danger", string> = {
-  primary: "bg-primary",
-  warn: "bg-warn",
-  danger: "bg-danger",
-};
-
-/** The Call pill's text takes the card's own colour, as the reference does. */
-const TONE_TEXT: Record<"primary" | "warn" | "danger", string> = {
-  primary: "text-primary",
-  warn: "text-warn",
-  danger: "text-danger",
+/** The file's own tone names, in the palette's. */
+const TONE: Record<Contact["tone"], IconTone> = {
+  primary: "blue",
+  warn: "amber",
+  danger: "red",
 };
 
 export function Shield({
@@ -60,12 +66,19 @@ export function Shield({
   const [chosen, setChosen] = useState<Situation | null>(null);
   const [open, setOpen] = useState<Situation | null>(null);
 
-  if (open) return <Steps situation={open} onBack={() => setOpen(null)} onExit={quickExit} navigate={navigate} />;
+  if (open) {
+    return (
+      <Steps
+        situation={open}
+        onBack={() => setOpen(null)}
+        onExit={quickExit}
+        navigate={navigate}
+      />
+    );
+  }
 
   const emergency = contact("emergency", lang);
   const law = legalLine("cybercrime_law", lang);
-  // Ordered by this list, not by the file: Family Protection first, the
-  // police last, which is the order the screen was designed in.
   const byId = new Map(contacts(lang).map((entry) => [entry.id, entry]));
   const lines = HELP_LINE_IDS.map((id) => byId.get(id)).filter((entry) => entry !== undefined);
 
@@ -74,109 +87,84 @@ export function Shield({
       <Page>
         <Header title={t("shield.title")} />
 
-        <div className="mt-3 rounded-card border border-danger/20 bg-danger-soft px-4 py-3.5">
-          <p className="flex items-center gap-2 text-[13px] font-bold uppercase tracking-[0.04em] text-danger">
-            <span aria-hidden="true" className="size-2 rounded-full bg-danger" />
+        <div className="lift-red rounded-scanner bg-red-fill px-4 py-4 text-white">
+          <SectionLabel className="flex items-center gap-2 text-white">
+            <span aria-hidden="true" className="pulse-dot size-2 rounded-full bg-white" />
             {t("shield.danger_title")}
-          </p>
-          <p className="mt-2 text-[15px] leading-snug">{t("shield.danger_line")}</p>
+          </SectionLabel>
+          <p className="mt-2 text-[15px] font-medium leading-snug">{t("shield.danger_line")}</p>
           <div className="mt-3.5">
             {emergency?.number ? (
               <a
                 href={`tel:${emergency.number.replace(/\s/g, "")}`}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-danger px-5 text-[16px] font-semibold text-white"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-btn bg-white px-5 text-[16px] font-extrabold text-red-fill"
               >
-                <Phone size={18} strokeWidth={1.75} aria-hidden="true" />
+                <Phone size={18} strokeWidth={2.25} aria-hidden="true" />
                 {t("shield.call_now")}
               </a>
             ) : (
               // No number has been checked against an official source, so there
               // is nothing to dial. The card still says what it is for.
-              <p className="flex h-12 w-full items-center justify-center rounded-full border border-warn px-5 text-[14px] font-semibold text-warn">
+              <p className="flex min-h-12 w-full items-center justify-center rounded-btn bg-white px-5 py-2 text-center text-[15px] font-extrabold text-amber-on-white">
                 {t("shield.pending_emergency")}
               </p>
             )}
           </div>
         </div>
 
-        <div className="mt-7">
-          <SectionLabel>{t("shield.helplines")}</SectionLabel>
+        <div className="mt-6">
+          <FieldLabel>{t("shield.helplines")}</FieldLabel>
         </div>
-        <div className="mt-2.5 space-y-2.5">
-          {lines.map((line) => {
-            const Icon = HELP_LINE_ICON[line.id] ?? ShieldIcon;
-            return (
-              <div
-                key={line.id}
-                className={`flex min-h-[72px] items-center gap-3 rounded-card px-4 py-3.5 text-white ${TONE[line.tone]}`}
-              >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-white/20">
-                  <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-[17px] font-bold leading-snug">{line.label}</span>
-                  <span className="mt-0.5 block text-[14px] text-white/85">
-                    {line.number ? <bdi>{line.number}</bdi> : t("shield.pending_number")}
-                  </span>
-                </span>
-                {line.number && (
+        <ListCard className="mt-2.5">
+          {lines.map((line) => (
+            <IconRow
+              key={line.id}
+              Icon={HELP_LINE_ICON[line.id] ?? ShieldIcon}
+              tone={TONE[line.tone]}
+              title={line.label}
+              sub={line.number ? <bdi className="tnum">{line.number}</bdi> : t("shield.pending_number")}
+              trailing={
+                line.number ? (
                   <a
                     href={`tel:${line.number.replace(/\s/g, "")}`}
-                    className={`flex h-[34px] shrink-0 items-center gap-1.5 rounded-full bg-white px-3.5 text-[14px] font-semibold ${TONE_TEXT[line.tone]}`}
+                    className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-full bg-navy px-3.5 text-[13px] font-bold text-white"
                   >
-                    <Phone size={15} strokeWidth={1.75} aria-hidden="true" />
+                    <Phone size={15} strokeWidth={2.25} aria-hidden="true" />
                     {t("shield.call")}
                   </a>
-                )}
-              </div>
-            );
-          })}
+                ) : (
+                  <span className="flex h-[26px] shrink-0 items-center rounded-full border border-amber-ink px-2.5 text-[12px] font-bold text-amber-ink">
+                    {t("shield.verify_tag")}
+                  </span>
+                )
+              }
+            />
+          ))}
+        </ListCard>
+
+        <div className="mt-6 flex items-center gap-3">
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+          <span className="t-sub">{t("shield.or_guidance")}</span>
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
         </div>
 
-        <div className="mt-7 flex items-center gap-3">
-          <span aria-hidden="true" className="h-px flex-1 bg-line" />
-          <span className="text-[13px] text-text-2">{t("shield.or_guidance")}</span>
-          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+        <div className="mt-6">
+          <FieldLabel>{t("shield.what_happened")}</FieldLabel>
+          <p className="t-sub mt-1">{t("shield.what_sub")}</p>
         </div>
-
-        <div className="mt-7">
-          <SectionLabel>{t("shield.what_happened")}</SectionLabel>
-          <p className="mt-1 text-[13px] text-text-2">{t("shield.what_sub")}</p>
-        </div>
-        <div className="mt-2.5 space-y-2.5">
-          {situations(lang).map((situation) => {
-            const selected = chosen?.id === situation.id;
-            const Icon = SITUATION_ICON[situation.id] ?? AlertCircle;
-            return (
-              <button
-                key={situation.id}
-                type="button"
-                aria-pressed={selected}
-                onClick={() => setChosen(situation)}
-                className={`flex min-h-16 w-full items-center gap-3 rounded-card px-4 py-3 text-start ${
-                  selected ? "border-2 border-primary bg-primary-soft" : "border border-line bg-card"
-                }`}
-              >
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-[10px] bg-primary-soft text-primary">
-                  <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
-                </span>
-                <span className="flex-1">
-                  <span className="block text-[16px] font-semibold leading-snug">
-                    {situation.title}
-                  </span>
-                  <span className="mt-0.5 block text-[14px] leading-snug text-text-2">
-                    {situation.summary}
-                  </span>
-                </span>
-                <ChevronRight
-                  size={18}
-                  strokeWidth={1.75}
-                  aria-hidden="true"
-                  className="shrink-0 text-text-2 rtl:rotate-180"
-                />
-              </button>
-            );
-          })}
+        <div className="mt-2.5 space-y-2">
+          {situations(lang).map((situation) => (
+            <IconRow
+              key={situation.id}
+              as="card"
+              Icon={SITUATION_ICON[situation.id] ?? AlertCircle}
+              title={situation.title}
+              sub={situation.summary}
+              selected={chosen?.id === situation.id}
+              onClick={() => setChosen(situation)}
+              trailing={<RowChevron />}
+            />
+          ))}
         </div>
 
         <div className="mt-5">
@@ -185,20 +173,17 @@ export function Shield({
           </PrimaryButton>
         </div>
 
-        <p className="mt-3 text-center text-[13px] leading-snug text-success">
-          <EyeOff
-            size={14}
-            strokeWidth={1.75}
-            aria-hidden="true"
-            className="me-1.5 inline align-[-2px]"
-          />
-          {t("shield.anon_note")}
-        </p>
+        <AnonNote />
 
         {law && (
-          <Card className="mt-7 flex items-start gap-3 px-4 py-3.5">
-            <FileText size={20} strokeWidth={1.75} className="mt-0.5 shrink-0 text-primary" aria-hidden="true" />
-            <p className="text-[14px] leading-snug text-text-2">{law}</p>
+          <Card className="mt-6 flex items-start gap-3">
+            <FileText
+              size={20}
+              strokeWidth={1.9}
+              className="mt-0.5 shrink-0 text-blue"
+              aria-hidden="true"
+            />
+            <p className="t-sub flex-1">{law}</p>
           </Card>
         )}
       </Page>
@@ -207,12 +192,23 @@ export function Shield({
   );
 }
 
+/** Anonymous by default. The one green line in the app that is not a verdict. */
+function AnonNote() {
+  const { t } = useI18n();
+  return (
+    <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[12.5px] font-semibold leading-snug text-green">
+      <EyeOff size={14} strokeWidth={2} aria-hidden="true" className="shrink-0" />
+      {t("shield.anon_note")}
+    </p>
+  );
+}
+
 /**
  * The guided steps for one situation. Reviewed, fixed text — deliberately not
  * AI, because the person reading it is in no position to judge generated text.
  *
- * Quick exit is kept from the previous build: it replaces the page rather than
- * pushing, so Back cannot return here.
+ * Quick exit stays where it has always been, top right: it replaces the page
+ * rather than pushing, so Back cannot return here.
  */
 function Steps({
   situation,
@@ -230,45 +226,27 @@ function Steps({
   return (
     <>
       <Page>
-        <div className="flex items-center justify-between py-3">
-          <button type="button" onClick={onBack} className="tap text-[15px] text-text-2">
-            {t("shield.back")}
-          </button>
-          <button
-            type="button"
-            onClick={onExit}
-            className="min-h-9 rounded-full border border-line px-3 text-[14px] font-semibold"
-          >
-            {t("shield.exit")}
-          </button>
-        </div>
+        <Header
+          title={situation.title}
+          onBack={onBack}
+          trailing={
+            <button
+              type="button"
+              onClick={onExit}
+              className="flex h-[34px] shrink-0 items-center rounded-full bg-navy px-3.5 text-[13px] font-bold text-white"
+            >
+              {t("shield.exit")}
+            </button>
+          }
+        />
 
-        <h1 className="mt-1 text-[20px] font-semibold">{situation.title}</h1>
-        <p className="mt-2 leading-snug text-text-2">{situation.intro}</p>
+        <p className="t-body text-slate">{situation.intro}</p>
 
         <div className="mt-6">
-          <SectionLabel>{t("shield.steps_label")}</SectionLabel>
+          <Stepper steps={situation.steps.map((step) => ({ body: step }))} />
         </div>
-        <Card className="mt-2.5 divide-y divide-line">
-          {situation.steps.map((step, index) => (
-            <div key={index} className="flex gap-3 px-4 py-3.5">
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary-soft text-[13px] font-semibold text-primary">
-                <bdi>{index + 1}</bdi>
-              </span>
-              <p className="text-[15px] leading-snug">{step}</p>
-            </div>
-          ))}
-        </Card>
 
-        <p className="mt-6 text-center text-[13px] leading-snug text-success">
-          <EyeOff
-            size={14}
-            strokeWidth={1.75}
-            aria-hidden="true"
-            className="me-1.5 inline align-[-2px]"
-          />
-          {t("shield.anon_note")}
-        </p>
+        <AnonNote />
 
         <div className="mt-5">
           <PrimaryButton onClick={() => navigate("report")}>{t("report.title")}</PrimaryButton>

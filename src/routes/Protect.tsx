@@ -1,8 +1,16 @@
-import { useState } from "react";
-import { Check, Globe, Phone } from "lucide-react";
+import { useState, type ReactNode } from "react";
+import { Globe, Phone } from "lucide-react";
 import type { AnalysisType } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
-import { Card, Header, Page, SectionLabel } from "../components/Shell";
+import {
+  Card,
+  FieldLabel,
+  Header,
+  IconRow,
+  ListCard,
+  Page,
+  Toggle,
+} from "../components/Shell";
 import { useI18n } from "../i18n";
 import { checklist } from "../lib/plans";
 import type { Route } from "../lib/router";
@@ -26,18 +34,18 @@ export function Protect({
     <>
       <Page>
         <Header title={t("tool.protect")} />
-        <p className="mt-0.5 text-[14px] text-text-2">{t("tool.protect_sub")}</p>
+        <p className="t-sub -mt-1">{t("tool.protect_sub")}</p>
 
         <div className="mt-4 space-y-2.5">
           <CheckField
-            icon={<Phone size={20} aria-hidden="true" />}
+            icon={<Phone size={20} strokeWidth={1.9} aria-hidden="true" />}
             label={t("protect.check_sender")}
             placeholder={t("protect.check_sender_ph")}
             cta={t("protect.check_cta")}
             onSubmit={(value) => onCheck(value, "call")}
           />
           <CheckField
-            icon={<Globe size={20} aria-hidden="true" />}
+            icon={<Globe size={20} strokeWidth={1.9} aria-hidden="true" />}
             label={t("protect.check_website")}
             placeholder={t("protect.check_website_ph")}
             cta={t("protect.check_cta")}
@@ -46,51 +54,33 @@ export function Protect({
         </div>
 
         <div className="mt-7 flex items-baseline justify-between gap-3">
-          <SectionLabel>{t("protect.checklist")}</SectionLabel>
-          <span className="shrink-0 text-[13px] text-text-2">
-            <bdi>
+          <FieldLabel>{t("protect.checklist")}</FieldLabel>
+          <span className="t-meta shrink-0 text-slate">
+            <bdi className="tnum">
               {done} / {items.length}
             </bdi>{" "}
             {t("protect.completed")}
           </span>
         </div>
 
-        <Card className="mt-2.5 divide-y divide-line">
+        <ListCard className="mt-2.5">
           {items.map((item) => {
             const on = Boolean(ticked[item.id]);
+            const flip = () => setTicked((prev) => ({ ...prev, [item.id]: !prev[item.id] }));
             return (
-              <button
+              <IconRow
                 key={item.id}
-                type="button"
-                role="checkbox"
-                aria-checked={on}
-                onClick={() => setTicked((prev) => ({ ...prev, [item.id]: !prev[item.id] }))}
-                className="flex w-full gap-3 px-4 py-3.5 text-start"
-              >
-                <span
-                  aria-hidden="true"
-                  className={`mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border-2 ${
-                    on ? "border-primary bg-primary text-white" : "border-line"
-                  }`}
-                >
-                  {on && <Check size={14} strokeWidth={3} />}
-                </span>
-                <span className="flex-1">
-                  <span
-                    className={`block font-medium leading-snug ${on ? "text-text-2 line-through" : ""}`}
-                  >
-                    {item.title}
-                  </span>
-                  <span className="mt-1 block text-[13px] leading-snug text-text-2">
-                    {item.body}
-                  </span>
-                </span>
-              </button>
+                title={
+                  <span className={on ? "text-slate line-through" : undefined}>{item.title}</span>
+                }
+                sub={item.body}
+                trailing={<Toggle small on={on} onChange={flip} label={item.title} />}
+              />
             );
           })}
-        </Card>
+        </ListCard>
 
-        <p className="mt-3 text-[13px] text-text-2">{t("protect.session_note")}</p>
+        <p className="t-sub mt-3">{t("protect.session_note")}</p>
       </Page>
       <BottomNav active="home" navigate={navigate} />
     </>
@@ -104,18 +94,19 @@ function CheckField({
   cta,
   onSubmit,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   placeholder: string;
   cta: string;
   onSubmit: (value: string) => void;
 }) {
   const [value, setValue] = useState("");
+  const empty = value.trim().length === 0;
 
   return (
-    <Card className="px-4 py-3.5">
-      <p className="flex items-center gap-2 font-semibold">
-        <span className="text-primary">{icon}</span>
+    <Card>
+      <p className="t-row flex items-center gap-2">
+        <span className="text-blue">{icon}</span>
         {label}
       </p>
       <div className="mt-3 flex items-center gap-2">
@@ -124,14 +115,14 @@ function CheckField({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
-          className="min-h-11 flex-1 rounded-full border border-line bg-bg px-4 text-[15px] outline-none placeholder:text-text-2"
+          className="h-11 min-w-0 flex-1 rounded-btn border border-line bg-mist px-3.5 text-[15px] font-medium text-ink outline-none placeholder:text-slate"
         />
         <button
           type="button"
-          disabled={value.trim().length === 0}
+          disabled={empty}
           onClick={() => onSubmit(value.trim())}
-          className={`min-h-11 shrink-0 rounded-full px-4 text-[15px] font-semibold text-white ${
-            value.trim().length === 0 ? "bg-primary-soft" : "bg-primary"
+          className={`h-9 shrink-0 rounded-full px-4 text-[14px] font-bold ${
+            empty ? "bg-sky-2 text-disabled-ink" : "bg-blue-fill text-white"
           }`}
         >
           {cta}

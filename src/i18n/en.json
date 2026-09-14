@@ -297,5 +297,8 @@
   "learn.finish": "See your score",
   "learn.your_score": "Your score",
   "learn.try_scanner": "Try the scanner",
-  "learn.restart": "Start again"
+  "learn.restart": "Start again",
+  "home.paste_clipboard": "Paste from clipboard",
+  "scan.screenshot": "Scan a screenshot",
+  "shield.verify_tag": "Verify"
 }

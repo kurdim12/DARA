@@ -1,13 +1,17 @@
 import type { ReactNode } from "react";
-import { Moon, Sun } from "lucide-react";
+import { ArrowRight, ChevronRight, Moon, Sun } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { useI18n } from "../i18n";
 import { useTheme } from "../lib/theme";
-import { Logo } from "./Logo";
-import { NAV_CLEARANCE } from "./BottomNav";
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * The kit. Every screen is assembled from these; no screen styles its own
+ * version of one. If something here is wrong it is wrong in one place.
+ * ──────────────────────────────────────────────────────────────────────────── */
 
 /**
- * Every screen sits in this. One column, safe areas respected, the bottom nav
- * cleared when there is one.
+ * One column, 16px gutters, and enough room at the bottom that the raised Scan
+ * button can never sit on top of a page's last control.
  */
 export function Page({
   children,
@@ -17,87 +21,150 @@ export function Page({
   withNav?: boolean;
 }) {
   return (
-    <div
-      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-bg"
-      // index.html asks for viewport-fit=cover, so the layout runs under the
-      // status bar and the notch. Nothing may sit there.
+    <main
+      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-mist"
       style={{
-        paddingTop: "max(0.25rem, env(safe-area-inset-top))",
-        paddingBottom: withNav ? NAV_CLEARANCE : "max(1.5rem, env(safe-area-inset-bottom))",
         paddingInlineStart: "max(16px, env(safe-area-inset-left))",
         paddingInlineEnd: "max(16px, env(safe-area-inset-right))",
+        paddingBottom: withNav
+          ? "calc(var(--nav-total) + var(--scan-lift) + 24px)"
+          : "max(24px, env(safe-area-inset-bottom))",
       }}
+    >
+      {children}
+    </main>
+  );
+}
+
+/**
+ * A page that paints to the edges — Home, whose hero is full-bleed navy. The
+ * gutters move inside it, onto whatever needs them.
+ */
+export function BleedPage({ children }: { children: ReactNode }) {
+  return (
+    <main
+      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-mist"
+      style={{ paddingBottom: "calc(var(--nav-total) + var(--scan-lift) + 24px)" }}
+    >
+      {children}
+    </main>
+  );
+}
+
+/** The 16px gutter, for a block inside a BleedPage. */
+export function Gutter({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={`px-4 ${className}`}>{children}</div>;
+}
+
+/**
+ * Title on the leading side, the two round pills on the trailing one. The 54px
+ * above it is the status bar's room: on a phone in standalone the notch sits
+ * there, and nothing of ours may.
+ */
+export function Header({
+  title,
+  onBack,
+  trailing,
+}: {
+  title: string;
+  onBack?: () => void;
+  /** Replaces the language/theme pills — Shield's guided steps put quick exit here. */
+  trailing?: ReactNode;
+}) {
+  const { t } = useI18n();
+
+  return (
+    <header
+      className="flex items-center gap-2 pb-3"
+      style={{ paddingTop: "max(54px, env(safe-area-inset-top))" }}
+    >
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label={t("shield.back")}
+          className="tap -ms-1 flex size-8 shrink-0 items-center justify-center text-ink"
+        >
+          <ChevronRight
+            size={22}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="rotate-180 rtl:rotate-0"
+          />
+        </button>
+      )}
+      <h1 className="t-title min-w-0 flex-1 truncate">{title}</h1>
+      {trailing ?? <Pills />}
+    </header>
+  );
+}
+
+/** Language, then theme. 32px each, hairline border. */
+export function Pills({ onNavy = false }: { onNavy?: boolean }) {
+  const { t, lang, toggle } = useI18n();
+  const { theme, toggle: toggleTheme } = useTheme();
+
+  const skin = onNavy
+    ? "border-white/35 text-white"
+    : "border-line bg-card text-ink";
+
+  return (
+    <div className="flex shrink-0 items-center gap-2">
+      <button
+        type="button"
+        onClick={toggle}
+        className={`tap flex size-8 items-center justify-center rounded-full border ${skin}`}
+      >
+        {/* The name is built from both, so what a reader hears contains what a
+            sighted user sees — an aria-label alone contradicts the glyph. */}
+        <span className="sr-only">{t("a11y.language")}</span>
+        <span className="text-[12px] font-bold leading-none">
+          {lang === "en" ? "عر" : "EN"}
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={toggleTheme}
+        aria-label={t("a11y.theme")}
+        className={`tap flex size-8 items-center justify-center rounded-full border ${skin}`}
+      >
+        {theme === "light" ? (
+          <Moon size={15} strokeWidth={2} aria-hidden="true" />
+        ) : (
+          <Sun size={15} strokeWidth={2} aria-hidden="true" />
+        )}
+      </button>
+    </div>
+  );
+}
+
+/** Card, radius 18, one hairline, no shadow. The default container. */
+export function Card({
+  children,
+  className = "",
+  padded = true,
+}: {
+  children: ReactNode;
+  className?: string;
+  padded?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-card border border-line bg-card ${padded ? "px-4 py-3.5" : ""} ${className}`}
     >
       {children}
     </div>
   );
 }
 
-/**
- * Title on the leading side, or the logo on Home. Two round buttons on the
- * trailing side: language, then theme. Both sides swap with `dir`, which the
- * browser does on its own because the header is a flex row.
- */
-export function Header({
-  title,
-  onLogoLongPress,
-}: {
-  /** Omit on Home, where the logo takes this place. */
-  title?: string;
-  onLogoLongPress?: () => void;
-}) {
-  const { t, lang, toggle } = useI18n();
-  const { theme, toggle: toggleTheme } = useTheme();
-
-  return (
-    <header className="flex h-14 items-center justify-between gap-3">
-      {title ? (
-        <h1 className="text-[20px] font-semibold">{title}</h1>
-      ) : (
-        <Logo onLongPress={onLogoLongPress} />
-      )}
-
-      <div className="flex items-center gap-2">
-        <RoundButton onClick={toggle} label={t("a11y.language")}>
-          <span className="text-[12px] font-semibold leading-none">
-            {lang === "en" ? "عر" : "EN"}
-          </span>
-        </RoundButton>
-        <RoundButton onClick={toggleTheme} label={t("a11y.theme")}>
-          {theme === "light" ? (
-            <Moon size={16} strokeWidth={1.75} />
-          ) : (
-            <Sun size={16} strokeWidth={1.75} />
-          )}
-        </RoundButton>
-      </div>
-    </header>
-  );
-}
-
-function RoundButton({
-  children,
-  onClick,
-  label,
-}: {
-  children: ReactNode;
-  onClick: () => void;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      className="tap flex size-[34px] items-center justify-center rounded-full border border-line bg-card text-text"
-    >
-      {children}
-    </button>
-  );
-}
-
-/** The 14px card every block on every screen sits in. */
-export function Card({
+/** A Card of rows separated by hairlines. Rows are IconRows. */
+export function ListCard({
   children,
   className = "",
 }: {
@@ -105,67 +172,237 @@ export function Card({
   className?: string;
 }) {
   return (
-    <div className={`rounded-card border border-line bg-card ${className}`}>{children}</div>
+    <div
+      className={`overflow-hidden rounded-card border border-line bg-card ${className}`}
+    >
+      <div className="divide-y divide-line">{children}</div>
+    </div>
   );
 }
 
-/**
- * 13/500 uppercase and tracked. The reference uses this shape in exactly four
- * places — "WHAT CAN YOU ANALYZE?", "WHAT HAPPENED?", "HELP LINES" and
- * "WHAT HAPPENED TO YOU?" — and title case everywhere else, which is what
- * FieldLabel is for.
- */
-export function SectionLabel({ children }: { children: ReactNode }) {
+export type IconTone = "blue" | "amber" | "red";
+
+const ICON_BOX: Record<IconTone, string> = {
+  blue: "bg-sky text-blue",
+  amber: "bg-amber-soft text-amber",
+  red: "bg-red-soft text-red",
+};
+
+/** The 40px rounded square an IconRow leads with. */
+export function IconBox({
+  Icon,
+  tone = "blue",
+  size = 40,
+}: {
+  Icon: LucideIcon;
+  tone?: IconTone;
+  size?: number;
+}) {
   return (
-    <p className="text-[13px] font-medium uppercase tracking-wider text-text-2">{children}</p>
+    <span
+      aria-hidden="true"
+      className={`flex shrink-0 items-center justify-center rounded-box ${ICON_BOX[tone]}`}
+      style={{ width: size, height: size }}
+    >
+      <Icon size={Math.round(size / 2)} strokeWidth={1.9} />
+    </span>
   );
 }
 
-/** The label above a form field: title case, ink, same weight as a heading. */
-export function FieldLabel({ children }: { children: ReactNode }) {
-  return <p className="text-[15px] font-semibold text-text">{children}</p>;
+/**
+ * The row this app is mostly made of: icon box, title, sub, and whatever the
+ * screen needs on the trailing edge — a chevron, a Call pill, a toggle, a
+ * radio. 64px minimum, because a thumb is not a mouse.
+ */
+export function IconRow({
+  Icon,
+  tone = "blue",
+  title,
+  sub,
+  lead,
+  trailing,
+  onClick,
+  selected = false,
+  as = "row",
+  role,
+  subDir,
+}: {
+  Icon?: LucideIcon;
+  tone?: IconTone;
+  title: ReactNode;
+  sub?: ReactNode;
+  /** Replaces the icon box — a step number, a red bar, a radio. */
+  lead?: ReactNode;
+  trailing?: ReactNode;
+  onClick?: () => void;
+  selected?: boolean;
+  /** "row" sits inside a ListCard; "card" carries its own border and radius. */
+  as?: "row" | "card";
+  role?: "radio" | "checkbox";
+  /** Set to "auto" when the sub-line is text somebody else wrote. */
+  subDir?: "auto";
+}) {
+  const inner = (
+    <>
+      {lead ?? (Icon && <IconBox Icon={Icon} tone={tone} />)}
+      <span className="min-w-0 flex-1">
+        <span className="t-row block">{title}</span>
+        {sub !== undefined && sub !== null && (
+          <span dir={subDir} className="t-sub mt-0.5 block">
+            {sub}
+          </span>
+        )}
+      </span>
+      {trailing}
+    </>
+  );
+
+  const shape =
+    as === "card"
+      ? `press rounded-row border bg-card px-4 py-3 ${
+          selected ? "border-2 border-blue bg-sky" : "border-line"
+        }`
+      : `press px-4 py-3 ${selected ? "bg-sky" : ""}`;
+
+  const className = `flex min-h-16 w-full items-center gap-3 text-start ${shape}`;
+
+  if (!onClick) return <div className={className}>{inner}</div>;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      role={role}
+      {...(role === "radio"
+        ? { "aria-checked": selected }
+        : role === "checkbox"
+          ? { "aria-checked": selected }
+          : { "aria-pressed": selected })}
+      className={className}
+    >
+      {inner}
+    </button>
+  );
 }
 
-export function SectionHeading({ children }: { children: ReactNode }) {
-  return <h2 className="text-[18px] font-semibold">{children}</h2>;
+/** The chevron an IconRow uses when tapping it opens something. */
+export function RowChevron() {
+  return (
+    <ChevronRight
+      size={18}
+      strokeWidth={2}
+      aria-hidden="true"
+      className="shrink-0 text-slate rtl:rotate-180"
+    />
+  );
+}
+
+/** Half of a 2×2 grid: a Card with a 38px icon box. */
+export function Tile({
+  Icon,
+  title,
+  sub,
+  onClick,
+}: {
+  Icon: LucideIcon;
+  title: string;
+  sub: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="press flex flex-col items-start rounded-card border border-line bg-card p-3.5 text-start"
+    >
+      <IconBox Icon={Icon} size={38} />
+      <span className="t-row mt-2.5 block">{title}</span>
+      <span className="mt-0.5 block text-[12.5px] font-medium leading-snug text-slate">
+        {sub}
+      </span>
+    </button>
+  );
+}
+
+/** A 34px pill. Selected is sky on blue; unselected is a hairline on nothing. */
+export function Chip({
+  Icon,
+  label,
+  selected,
+  onClick,
+}: {
+  Icon?: LucideIcon;
+  label: string;
+  selected: boolean;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-pressed={selected}
+      className={`press tap flex h-[34px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold ${
+        selected
+          ? "bg-sky text-blue-ink"
+          : "border border-line bg-transparent text-slate"
+      }`}
+    >
+      {Icon && <Icon size={16} strokeWidth={2} aria-hidden="true" />}
+      {label}
+    </button>
+  );
+}
+
+/** The rail a Chip row scrolls in. Bleeds to the gutter and pads its end. */
+export function ChipRow({ children }: { children: ReactNode }) {
+  return (
+    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+      {children}
+      <span aria-hidden="true" className="w-3 shrink-0" />
+    </div>
+  );
 }
 
 /**
- * Full-width pill. Disabled is `--primary-soft` with white text, which is how
- * the submitted app renders the button before anything has been typed.
+ * 50px, radius 14, blue, with the arrow that says this goes somewhere.
+ * Disabled is sky-2 with white on it, which is how the reference renders the
+ * button before anything has been typed. Working keeps the blue and draws a
+ * line along the top edge.
  */
 export function PrimaryButton({
   children,
   onClick,
   disabled,
+  loading = false,
   arrow = true,
-  /** Keeps the arrow on a disabled button, as the reference does on Home. */
-  arrowWhenDisabled = false,
-  tone = "primary",
   type = "button",
 }: {
   children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  loading?: boolean;
   arrow?: boolean;
-  arrowWhenDisabled?: boolean;
-  tone?: "primary" | "danger";
   type?: "button" | "submit";
 }) {
-  const fill = disabled
-    ? "bg-primary-soft"
-    : tone === "danger"
-      ? "bg-danger"
-      : "bg-primary";
+  const dimmed = disabled && !loading;
   return (
     <button
       type={type}
       onClick={onClick}
-      disabled={disabled}
-      className={`flex h-[50px] w-full items-center justify-center gap-2 rounded-full px-5 text-[16px] font-semibold text-white ${fill}`}
+      disabled={disabled || loading}
+      className={`relative flex h-[50px] w-full items-center justify-center gap-2 overflow-hidden rounded-btn px-5 text-[16px] font-bold ${
+        dimmed ? "bg-sky-2 text-disabled-ink" : "bg-blue-fill text-white"
+      }`}
     >
+      {loading && (
+        <span aria-hidden="true" className="absolute inset-x-0 top-0 h-0.5 bg-white/35">
+          <span className="progress-line block h-0.5 bg-white" />
+        </span>
+      )}
       {children}
-      {arrow && (!disabled || arrowWhenDisabled) && <span aria-hidden="true">→</span>}
+      {arrow && !loading && (
+        <ArrowRight size={18} strokeWidth={2.25} aria-hidden="true" className="rtl:rotate-180" />
+      )}
     </button>
   );
 }
@@ -181,9 +418,148 @@ export function OutlineButton({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[50px] w-full items-center justify-center rounded-full border border-line bg-card px-5 text-[16px] font-semibold text-text"
+      className="flex h-[50px] w-full items-center justify-center rounded-btn border border-line bg-card px-5 text-[16px] font-bold text-ink"
     >
       {children}
     </button>
+  );
+}
+
+/** 11/800 label. Danger says how a threat arrives; blue says what one was. */
+export function Tag({
+  children,
+  tone = "blue",
+}: {
+  children: ReactNode;
+  tone?: "blue" | "danger";
+}) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-[6px] px-2 py-1 text-[11px] font-extrabold uppercase tracking-[0.02em] ${
+        tone === "danger" ? "bg-red-soft text-red-ink" : "bg-sky text-blue-ink"
+      }`}
+    >
+      {children}
+    </span>
+  );
+}
+
+export function SectionHeading({ children }: { children: ReactNode }) {
+  return <h2 className="t-h3">{children}</h2>;
+}
+
+/** The label above a form field, and above a list that needs naming. */
+export function FieldLabel({ children }: { children: ReactNode }) {
+  return <p className="t-row">{children}</p>;
+}
+
+/**
+ * Uppercase and tracked. The reference app uses this shape in exactly two
+ * places — Scan's "WHAT CAN YOU ANALYZE?" and the danger card's "IN IMMEDIATE
+ * DANGER?" — and sentence case everywhere else, which is FieldLabel.
+ */
+export function SectionLabel({
+  children,
+  className = "text-slate",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <p className={`text-[12px] font-extrabold uppercase tracking-[0.08em] ${className}`}>
+      {children}
+    </p>
+  );
+}
+
+/** 44×26 for a form row, 40×24 for a checklist row. */
+export function Toggle({
+  on,
+  onChange,
+  label,
+  small = false,
+}: {
+  on: boolean;
+  onChange: () => void;
+  label: string;
+  small?: boolean;
+}) {
+  const w = small ? 40 : 44;
+  const h = small ? 24 : 26;
+  const knob = h - 6;
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onChange}
+      className={`press relative shrink-0 rounded-full ${on ? "bg-blue" : "bg-line"}`}
+      style={{ width: w, height: h }}
+    >
+      <span
+        className="absolute top-[3px] rounded-full bg-white transition-all duration-150 ease-out"
+        style={{
+          width: knob,
+          height: knob,
+          insetInlineStart: on ? w - knob - 3 : 3,
+        }}
+      />
+    </button>
+  );
+}
+
+export interface StepItem {
+  title?: string;
+  body: string;
+}
+
+/**
+ * The numbered vertical stepper Recover and Shield both use. The connector is
+ * drawn behind the circles, so a step of any height still joins the next one.
+ */
+export function Stepper({
+  steps,
+  firstDanger = false,
+}: {
+  steps: StepItem[];
+  /** The first step of "I lost money to fraud" is the one that cannot wait. */
+  firstDanger?: boolean;
+}) {
+  return (
+    <ol className="relative">
+      {steps.map((step, index) => {
+        const danger = firstDanger && index === 0;
+        const last = index === steps.length - 1;
+        return (
+          <li key={index} className="relative flex gap-3 pb-5 last:pb-0">
+            {!last && (
+              <span
+                aria-hidden="true"
+                className="absolute top-7 w-0.5 bg-line"
+                style={{ insetInlineStart: 13, bottom: 0 }}
+              />
+            )}
+            <span
+              className={`relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${
+                danger ? "bg-red-fill text-white" : "bg-sky text-blue-ink"
+              }`}
+            >
+              <bdi className="tnum">{index + 1}</bdi>
+            </span>
+            <span className="min-w-0 flex-1 pt-0.5">
+              {step.title && <span className="t-row block">{step.title}</span>}
+              <span
+                className={`block text-[14px] font-medium leading-relaxed text-slate ${
+                  step.title ? "mt-1" : ""
+                }`}
+              >
+                {step.body}
+              </span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }

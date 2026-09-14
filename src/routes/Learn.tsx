@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
-import { Card, Header, OutlineButton, Page, PrimaryButton, SectionLabel } from "../components/Shell";
+import {
+  Card,
+  Header,
+  OutlineButton,
+  Page,
+  PrimaryButton,
+  Tag,
+} from "../components/Shell";
 import { useI18n } from "../i18n";
 import { questions, type Question } from "../lib/plans";
 import type { Route } from "../lib/router";
@@ -51,17 +58,15 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
       <>
         <Page>
           <Header title={t("tool.learn")} />
-          <div className="fade-in mt-12 text-center">
-            <p className="text-[13px] font-medium uppercase tracking-wider text-text-2">
-              {t("learn.your_score")}
-            </p>
-            <p className="mt-2 text-[44px] font-bold leading-none">
+          <div className="reveal mt-10 text-center">
+            <p className="t-sub">{t("learn.your_score")}</p>
+            <p className="tnum mt-2 text-[28px] font-extrabold leading-none">
               <bdi>
                 {score} / {set.length}
               </bdi>
             </p>
           </div>
-          <div className="mt-10 space-y-3">
+          <div className="mt-8 space-y-2.5">
             <PrimaryButton onClick={() => navigate("scan")}>{t("learn.try_scanner")}</PrimaryButton>
             <OutlineButton onClick={restart}>{t("learn.restart")}</OutlineButton>
           </div>
@@ -77,68 +82,70 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
     <>
       <Page>
         <Header title={t("tool.learn")} />
-        <p className="mt-0.5 text-[14px] text-text-2">{t("tool.learn_sub")}</p>
+        <p className="t-sub -mt-1">{t("tool.learn_sub")}</p>
 
-        <div className="mt-5 flex items-center gap-3">
-          <SectionLabel>
-            {t("learn.question")} <bdi>{index + 1}</bdi> / <bdi>{set.length}</bdi>
-          </SectionLabel>
-          <span className="h-1 flex-1 rounded-full bg-line">
+        {/* Six dots. Where you are, and how much is left, without a number. */}
+        <div
+          className="mt-5 flex items-center gap-1.5"
+          role="progressbar"
+          aria-valuemin={1}
+          aria-valuemax={set.length}
+          aria-valuenow={index + 1}
+          aria-label={t("learn.question")}
+        >
+          {set.map((item, dot) => (
             <span
-              className="block h-1 rounded-full bg-primary transition-all"
-              style={{ width: `${((index + (given ? 1 : 0)) / set.length) * 100}%` }}
+              key={item.id}
+              aria-hidden="true"
+              className={`h-1.5 w-1.5 rounded-full ${dot === index ? "bg-blue" : "bg-line"}`}
             />
-          </span>
+          ))}
         </div>
 
         {/* A quiz message is quoted text, never a link — the same rule the
             verdict screen follows for the message being analysed. */}
-        <Card className="mt-2.5 px-4 py-3.5">
-          <p dir="auto" className="whitespace-pre-wrap break-words text-[15px] leading-relaxed">
+        <Card className="mt-3">
+          <Tag>{t("type.message")}</Tag>
+          <p
+            dir="auto"
+            className="mt-2.5 whitespace-pre-wrap break-words rounded-btn bg-mist p-3.5 text-[15px] font-medium leading-relaxed"
+          >
             {question.message}
           </p>
         </Card>
 
         <div className="mt-3 grid grid-cols-2 gap-2.5">
-          <button
-            type="button"
-            disabled={Boolean(given)}
+          <ChoiceButton
+            label={t("learn.scam")}
+            tone="red"
+            chosen={given === "scam"}
+            locked={Boolean(given)}
             onClick={() => answer("scam")}
-            className={`h-[50px] rounded-full border text-[15px] font-semibold ${
-              given === "scam"
-                ? "border-primary bg-primary text-white"
-                : "border-line bg-card text-text"
-            }`}
-          >
-            {t("learn.scam")}
-          </button>
-          <button
-            type="button"
-            disabled={Boolean(given)}
+          />
+          <ChoiceButton
+            label={t("learn.legitimate")}
+            tone="green"
+            chosen={given === "legitimate"}
+            locked={Boolean(given)}
             onClick={() => answer("legitimate")}
-            className={`min-h-12 rounded-full border text-[15px] font-semibold ${
-              given === "legitimate"
-                ? "border-primary bg-primary text-white"
-                : "border-line bg-card text-text"
-            }`}
-          >
-            {t("learn.legitimate")}
-          </button>
+          />
         </div>
 
         {given && (
-          <div className="fade-in mt-5">
+          <div className="reveal mt-5">
             <p
-              className={`flex items-center gap-2 font-semibold ${
-                right ? "text-success" : "text-danger"
-              }`}
+              className={`t-row flex items-center gap-2 ${right ? "text-green" : "text-red-ink"}`}
             >
-              {right ? <Check size={18} strokeWidth={1.75} aria-hidden="true" /> : <X size={18} strokeWidth={1.75} aria-hidden="true" />}
+              {right ? (
+                <Check size={18} strokeWidth={2.25} aria-hidden="true" />
+              ) : (
+                <X size={18} strokeWidth={2.25} aria-hidden="true" />
+              )}
               {t(right ? "learn.correct" : "learn.incorrect")}
             </p>
-            <Card className="mt-2.5 px-4 py-3.5">
-              <SectionLabel>{t("learn.tell")}</SectionLabel>
-              <p dir="auto" className="mt-2 text-[15px] leading-snug">
+            <Card className="mt-2.5">
+              <p className="t-row">{t("learn.tell")}</p>
+              <p dir="auto" className="t-body mt-1.5">
                 {question.tell}
               </p>
             </Card>
@@ -152,5 +159,35 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
       </Page>
       <BottomNav active="home" navigate={navigate} />
     </>
+  );
+}
+
+/** Outline until it is chosen, then filled in its own colour. */
+function ChoiceButton({
+  label,
+  tone,
+  chosen,
+  locked,
+  onClick,
+}: {
+  label: string;
+  tone: "red" | "green";
+  chosen: boolean;
+  locked: boolean;
+  onClick: () => void;
+}) {
+  const outline = tone === "red" ? "border-red text-red-ink" : "border-green text-green";
+  const filled = tone === "red" ? "bg-red-fill text-white" : "bg-green-fill text-white";
+  return (
+    <button
+      type="button"
+      disabled={locked}
+      onClick={onClick}
+      className={`press h-[50px] rounded-btn border text-[16px] font-bold ${
+        chosen ? `border-transparent ${filled}` : `bg-card ${outline}`
+      }`}
+    >
+      {label}
+    </button>
   );
 }

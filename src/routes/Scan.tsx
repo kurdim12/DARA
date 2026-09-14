@@ -1,49 +1,55 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  AlertTriangle,
   Briefcase,
-  ClipboardPaste,
+  CheckCircle2,
   Globe,
   Link2,
   MessageSquare,
   Phone,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { ANALYSIS_TYPES, MAX_INPUT_CHARS, type AnalysisType, type AnalyzeResponse } from "../../shared/types";
+import type {
+  AnalysisType,
+  AnalyzeImage,
+  AnalyzeResponse,
+  Category,
+} from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { HighlightedMessage } from "../components/HighlightedMessage";
+import { ScannerCard } from "../components/ScannerCard";
+import { TypeChips, TYPE_META } from "../components/TypeChips";
 import {
   Card,
   Header,
+  IconBox,
   OutlineButton,
   Page,
   PrimaryButton,
   SectionLabel,
 } from "../components/Shell";
 import { analyze, AppError } from "../lib/api";
-import { LEVEL_LABEL, LEVEL_TONE, levelFor } from "../lib/level";
+import { LEVEL_FILL, LEVEL_LABEL, levelFor } from "../lib/level";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
 /** Eight characters is short enough for a phone number, long enough to mean something. */
 const MIN_INPUT = 8;
 
-const TYPES: Record<AnalysisType, { label: TextKey; placeholder: TextKey; Icon: LucideIcon }> = {
-  message: { label: "type.message", placeholder: "scan.ph_message", Icon: MessageSquare },
-  link: { label: "type.link", placeholder: "scan.ph_link", Icon: Link2 },
-  call: { label: "type.call", placeholder: "scan.ph_call", Icon: Phone },
-  job: { label: "type.job", placeholder: "scan.ph_job", Icon: Briefcase },
-  website: { label: "type.website", placeholder: "scan.ph_website", Icon: Globe },
-};
-
-const WHAT: TextKey[] = [
-  "scan.what_1",
-  "scan.what_2",
-  "scan.what_3",
-  "scan.what_4",
-  "scan.what_5",
+const WHAT: { key: TextKey; Icon: LucideIcon }[] = [
+  { key: "scan.what_1", Icon: MessageSquare },
+  { key: "scan.what_2", Icon: Link2 },
+  { key: "scan.what_3", Icon: Phone },
+  { key: "scan.what_4", Icon: Briefcase },
+  { key: "scan.what_5", Icon: Globe },
 ];
 
-const WHAT_ICONS: LucideIcon[] = [MessageSquare, Link2, Phone, Briefcase, Globe];
+export interface Seed {
+  text: string;
+  run: boolean;
+  type?: AnalysisType;
+  image?: AnalyzeImage | null;
+}
 
 type Stage =
   | { name: "input" }
@@ -54,18 +60,19 @@ export function Scan({
   navigate,
   seed,
   onSeedUsed,
+  onReport,
 }: {
   navigate: (route: Route) => void;
-  /**
-   * Text carried over from Home or Protect, the chip it should land on, and
-   * whether to check it straight away.
-   */
-  seed: { text: string; run: boolean; type?: AnalysisType } | null;
+  /** Text or a screenshot carried over from Home or Protect, and whether to run it. */
+  seed: Seed | null;
   onSeedUsed: () => void;
+  /** Opens Report with the verdict's own category already chosen. */
+  onReport: (prefill: { category: Category; messageText: string }) => void;
 }) {
   const { t, lang } = useI18n();
   const [type, setType] = useState<AnalysisType>("message");
   const [text, setText] = useState("");
+  const [image, setImage] = useState<AnalyzeImage | null>(null);
   const [stage, setStage] = useState<Stage>({ name: "input" });
   const [errorKey, setErrorKey] = useState<TextKey | null>(null);
   const ran = useRef(false);
@@ -75,32 +82,31 @@ export function Scan({
     ran.current = true;
     setText(seed.text);
     if (seed.type) setType(seed.type);
+    if (seed.image) setImage(seed.image);
     onSeedUsed();
-    if (seed.run) void run(seed.text, seed.type);
+    if (seed.run) void run(seed.text, seed.type, seed.image ?? null);
     // run() is stable for this purpose; re-running on every render would loop.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seed]);
 
-  async function run(value: string, forced?: AnalysisType) {
+  async function run(value: string, forced?: AnalysisType, picture?: AnalyzeImage | null) {
     const trimmed = value.trim();
-    if (trimmed.length < MIN_INPUT) return;
+    const shot = picture === undefined ? image : picture;
+    if (!shot && trimmed.length < MIN_INPUT) return;
     setErrorKey(null);
     setStage({ name: "loading" });
     try {
-      const result = await analyze(trimmed, lang, undefined, undefined, forced ?? type);
-      setStage({ name: "result", result, input: trimmed });
+      const result = await analyze(trimmed, lang, undefined, shot ?? undefined, forced ?? type);
+      setStage({
+        name: "result",
+        result,
+        // A screenshot has no pasted text behind it; what the engine could read
+        // out of the image is the thing to quote back.
+        input: trimmed || result.extracted_text || "",
+      });
     } catch (error) {
       setErrorKey(error instanceof AppError ? error.key : "error.generic");
       setStage({ name: "input" });
-    }
-  }
-
-  async function paste() {
-    try {
-      const clip = await navigator.clipboard.readText();
-      if (clip) setText(clip.slice(0, MAX_INPUT_CHARS));
-    } catch {
-      // Clipboard access is refused on some browsers. Typing still works.
     }
   }
 
@@ -110,8 +116,10 @@ export function Scan({
         result={stage.result}
         input={stage.input}
         navigate={navigate}
+        onReport={onReport}
         onAgain={() => {
           setText("");
+          setImage(null);
           setStage({ name: "input" });
         }}
       />
@@ -119,97 +127,56 @@ export function Scan({
   }
 
   const busy = stage.name === "loading";
+  const ready = image !== null || text.trim().length >= MIN_INPUT;
 
   return (
     <>
       <Page>
         <Header title={t("scan.title")} />
 
-        {busy && (
-          <div className="mt-1 h-0.5 w-full overflow-hidden rounded-full bg-line">
-            <div className="scan-line h-0.5 bg-primary" />
-          </div>
-        )}
+        <TypeChips value={type} onChange={setType} />
 
-        <div className="no-scrollbar -mx-4 mt-3 flex gap-2 overflow-x-auto px-4">
-          {ANALYSIS_TYPES.map((option) => {
-            const { label, Icon } = TYPES[option];
-            const selected = option === type;
-            return (
-              <button
-                key={option}
-                type="button"
-                onClick={() => setType(option)}
-                aria-pressed={selected}
-                className={`flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-[15px] font-medium ${
-                  selected
-                    ? "border-primary bg-primary text-white"
-                    : "border-line bg-card text-text-2"
-                }`}
-              >
-                <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
-                {t(label)}
-              </button>
-            );
-          })}
+        <div className="mt-3">
+          <ScannerCard
+            variant="scan"
+            text={text}
+            onText={setText}
+            disabled={busy}
+            placeholder={t(TYPE_META[type].placeholder)}
+            label={t(TYPE_META[type].label)}
+            image={image}
+            onImage={(next) => {
+              setImage(next);
+              if (next) setErrorKey(null);
+            }}
+            onError={setErrorKey}
+          />
         </div>
 
-        <Card className="mt-2.5 px-4 py-3.5">
-          <textarea
-            dir={text.length > 0 ? "auto" : undefined}
-            value={text}
-            disabled={busy}
-            maxLength={MAX_INPUT_CHARS}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={t(TYPES[type].placeholder)}
-            rows={4}
-            className="min-h-[140px] w-full resize-none bg-transparent text-[15px] leading-relaxed outline-none placeholder:text-text-2"
-          />
-          <div className="mt-2 flex items-center justify-between border-t border-line pt-3">
-            <button
-              type="button"
-              onClick={paste}
-              className="flex min-h-9 items-center gap-2 rounded-full border border-line px-3 text-[13px] font-medium text-text-2"
-            >
-              <ClipboardPaste size={16} strokeWidth={1.75} aria-hidden="true" />
-              {t("scan.paste")}
-            </button>
-            <span className="text-[13px] text-text-2">
-              <bdi>
-                {text.length} / {MAX_INPUT_CHARS}
-              </bdi>
-            </span>
-          </div>
-        </Card>
-
         {errorKey && (
-          <p role="alert" className="mt-4 rounded-card bg-danger-soft p-3 text-[14px] text-danger">
+          <p
+            role="alert"
+            className="mt-3 rounded-btn bg-red-soft p-3 text-[14px] font-medium text-red-ink"
+          >
             {t(errorKey)}
           </p>
         )}
 
-        <div className="mt-4">
-          <PrimaryButton
-            disabled={busy || text.trim().length < MIN_INPUT}
-            arrow={!busy}
-            onClick={() => void run(text)}
-          >
+        <div className="mt-3">
+          <PrimaryButton disabled={!ready} loading={busy} onClick={() => void run(text)}>
             {busy ? t("scan.analyzing") : t("home.analyze")}
           </PrimaryButton>
         </div>
 
-        <Card className="mt-7 px-4 py-3.5">
+        <Card className="mt-7">
           <SectionLabel>{t("scan.what")}</SectionLabel>
-          <ul className="mt-3 space-y-3">
-            {WHAT.map((key, index) => {
-              const Icon = WHAT_ICONS[index];
-              return (
-                <li key={key} className="flex items-center gap-3 text-[14px]">
-                  <Icon size={20} strokeWidth={1.75} className="shrink-0 text-primary" aria-hidden="true" />
-                  {t(key)}
-                </li>
-              );
-            })}
+          <ul className="mt-2">
+            {WHAT.map(({ key, Icon }) => (
+              <li key={key} className="flex items-center gap-3 py-2">
+                <Icon size={20} strokeWidth={1.9} className="shrink-0 text-blue" aria-hidden="true" />
+                <span className="t-body">{t(key)}</span>
+              </li>
+            ))}
           </ul>
         </Card>
       </Page>
@@ -223,48 +190,56 @@ function Result({
   input,
   navigate,
   onAgain,
+  onReport,
 }: {
   result: AnalyzeResponse;
   input: string;
   navigate: (route: Route) => void;
   onAgain: () => void;
+  onReport: (prefill: { category: Category; messageText: string }) => void;
 }) {
   const { t } = useI18n();
   const level = levelFor(result);
-  const tone = LEVEL_TONE[level];
+  const fill = LEVEL_FILL[level];
 
   return (
     <>
       <Page>
         <Header title={t("scan.title")} />
 
-        <Card className={`fade-in mt-3 border-s-[3px] px-4 py-4 ${tone.border} ${tone.soft}`}>
-          <p className={`text-[26px] font-bold leading-tight ${tone.text}`}>
-            {t(LEVEL_LABEL[level])}
-          </p>
-          <p dir="auto" className="mt-2 leading-snug">
+        {/* The one memorable moment: the verdict, in one colour, with the red
+            flags underlined inside the message the person actually received. */}
+        <div className={`reveal relative rounded-card px-4 py-5 ${fill.bg} ${fill.text}`}>
+          {result.cached && (
+            <span className="absolute end-3 top-3 rounded-full bg-white/25 px-2 py-1 text-[12px] font-bold">
+              {t("result.saved")}
+            </span>
+          )}
+          <p className="text-[26px] font-extrabold leading-tight">{t(LEVEL_LABEL[level])}</p>
+          {/* Full strength, not the 90% the spec asks for: 90% white over the
+              red and green fills lands at 4.15:1, under the 4.5 a jury reading
+              this over a shoulder needs. Weight carries the hierarchy instead. */}
+          <p dir="auto" className="mt-2 text-[15px] font-medium leading-snug">
             {result.headline}
           </p>
-        </Card>
+        </div>
 
-        <Card className="mt-2.5 px-4 py-3.5">
-          <SectionLabel>{t("result.input")}</SectionLabel>
-          <div className="mt-3">
+        <Card className="mt-2.5">
+          <p className="t-row">{t("result.input")}</p>
+          <div className="mt-2.5">
             <HighlightedMessage text={input} flags={result.red_flags} />
           </div>
 
           {result.red_flags.length > 0 && (
             <>
-              <div className="mt-5">
-                <SectionLabel>{t("result.why")}</SectionLabel>
-              </div>
-              <ol className="mt-3 space-y-3">
+              <p className="t-row mt-5">{t("result.why")}</p>
+              <ol className="mt-1">
                 {result.red_flags.map((flag, index) => (
-                  <li key={index} className="flex gap-3 text-[15px] leading-snug">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-danger-soft text-[12px] font-bold text-danger">
-                      <bdi>{index + 1}</bdi>
+                  <li key={index} className="flex items-start gap-3 py-2.5">
+                    <IconBox Icon={AlertTriangle} tone="red" size={34} />
+                    <span dir="auto" className="t-body flex-1 pt-1">
+                      {flag.why}
                     </span>
-                    <span dir="auto">{flag.why}</span>
                   </li>
                 ))}
               </ol>
@@ -273,12 +248,15 @@ function Result({
         </Card>
 
         {result.actions.length > 0 && (
-          <Card className="mt-2.5 px-4 py-3.5">
-            <SectionLabel>{t("result.what_now")}</SectionLabel>
-            <ul className="mt-3 space-y-3">
+          <Card className="mt-2.5">
+            <p className="t-row">{t("result.what_now")}</p>
+            <ul className="mt-1">
               {result.actions.map((action, index) => (
-                <li key={index} dir="auto" className="text-[15px] leading-snug">
-                  {action}
+                <li key={index} className="flex items-start gap-3 py-2.5">
+                  <IconBox Icon={CheckCircle2} tone="blue" size={34} />
+                  <span dir="auto" className="t-body flex-1 pt-1">
+                    {action}
+                  </span>
                 </li>
               ))}
             </ul>
@@ -286,19 +264,16 @@ function Result({
         )}
 
         <div className="mt-5 space-y-2.5">
-          <PrimaryButton onClick={() => navigate("report")}>
+          <PrimaryButton
+            onClick={() => onReport({ category: result.category, messageText: input })}
+          >
             {t("result.report_cta")}
           </PrimaryButton>
           <OutlineButton onClick={onAgain}>{t("result.scan_another")}</OutlineButton>
         </div>
 
-        <p className="mt-5 flex items-center gap-2 text-[13px] text-text-2">
-          <span>{t("result.powered")}</span>
-          {result.cached && (
-            <span className="rounded-full border border-line px-2 py-0.5">
-              {t("result.saved")}
-            </span>
-          )}
+        <p className="mt-5 text-center text-[12px] font-semibold text-slate">
+          {t("result.powered")}
         </p>
       </Page>
       <BottomNav active="scan" navigate={navigate} />

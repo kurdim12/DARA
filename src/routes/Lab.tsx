@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { AnalyzeResponse, Lang } from "../../shared/types";
 import { HighlightedMessage } from "../components/HighlightedMessage";
-import { Page, PrimaryButton, SectionTitle } from "../components/Layout";
+import { Page, PrimaryButton, SectionLabel } from "../components/Shell";
 import { useI18n } from "../i18n";
 
 /**
@@ -39,15 +39,15 @@ export function Lab() {
   }
 
   return (
-    <Page>
-      <h1 className="text-2xl font-bold">/lab</h1>
+    <Page withNav={false}>
+      <h1 className="t-title pt-14">/lab</h1>
 
       <textarea
         dir="auto"
         rows={7}
         value={text}
         onChange={(e) => setText(e.target.value)}
-        className="mt-4 w-full border-2 border-ink bg-paper p-3 text-base"
+        className="mt-4 w-full rounded-btn border border-line bg-card p-3 text-[15px]"
       />
 
       <div className="mt-3 flex gap-2">
@@ -59,8 +59,8 @@ export function Lab() {
               setEngineLang(option);
               setLang(option);
             }}
-            className={`border px-3 py-1.5 ${
-              lang === option ? "border-ink bg-ink text-paper" : "border-rule"
+            className={`rounded-full border px-3 py-1.5 ${
+              lang === option ? "border-blue bg-blue text-white" : "border-line"
             }`}
           >
             {option}
@@ -76,9 +76,9 @@ export function Lab() {
 
       {result && (
         <div className="mt-8">
-          <p className="text-[22px] font-bold">{result.verdict}</p>
-          <p className="mt-4 text-xl">{result.headline}</p>
-          <p className="mt-2 text-sm text-ink-2">
+          <p className="t-title">{result.verdict}</p>
+          <p className="mt-4 text-[17px]">{result.headline}</p>
+          <p className="t-sub mt-2">
             <bdi>
               {result.confidence}% · {result.category} · {result.model} ·{" "}
               {result.latency_ms} ms
@@ -106,8 +106,8 @@ export function Lab() {
 
       {raw && (
         <div className="mt-8">
-          <SectionTitle>Raw</SectionTitle>
-          <pre dir="ltr" className="overflow-x-auto border border-rule p-3 text-xs">
+          <SectionLabel>Raw</SectionLabel>
+          <pre dir="ltr" className="mt-2 overflow-x-auto rounded-btn border border-line p-3 text-[12px]">
             {raw}
           </pre>
         </div>

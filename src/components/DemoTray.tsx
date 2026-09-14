@@ -19,14 +19,14 @@ export function DemoTray({
   const staged = stagedMessages();
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-ink/40" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end bg-black/50" onClick={onClose}>
       <div
-        className="max-h-[80dvh] w-full overflow-y-auto border-t-2 border-ink bg-paper p-5"
+        className="max-h-[80dvh] w-full overflow-y-auto rounded-t-scanner border-t border-line bg-card p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2>{t("demo.title")}</h2>
-          <button type="button" onClick={onClose} className="text-ink-2">
+          <h2 className="t-h3">{t("demo.title")}</h2>
+          <button type="button" onClick={onClose} className="tap t-sub">
             {t("demo.close")}
           </button>
         </div>
@@ -36,12 +36,12 @@ export function DemoTray({
           latest commit, the phone is holding a cached copy — close the tab or
           the installed app and open it again.
         */}
-        <p className="mt-1 text-[12px] text-ink-2">
+        <p className="tnum mt-1 text-[12px] text-slate">
           build <bdi>{__BUILD_ID__}</bdi>
         </p>
 
         {staged.length === 0 ? (
-          <p className="mt-4 text-base text-ink-2">
+          <p className="t-sub mt-4">
             No staged messages — every case marked <code>demo: true</code> in
             content/eval-cases.json still has placeholder text.
           </p>
@@ -53,14 +53,14 @@ export function DemoTray({
                   type="button"
                   onClick={() => onPick(item.text)}
                   dir="auto"
-                  className="w-full border border-rule p-3 text-start text-base leading-snug"
+                  className="w-full rounded-row border border-line p-3 text-start text-[15px] leading-snug"
                 >
-                  <span className="block text-xs uppercase tracking-widest text-ink-2">
+                  <span className="block text-[11px] font-bold uppercase tracking-widest text-slate">
                     {item.id}
                     {/* No saved verdict yet means no airplane-mode fallback for
                         this one — worth knowing before a rehearsal. */}
                     {!hasCachedVerdict(item.id) && (
-                      <span className="ms-2 text-ink-2">no saved result</span>
+                      <span className="ms-2 text-slate">no saved result</span>
                     )}
                   </span>
                   <span className="mt-1 line-clamp-2 block">{item.text}</span>
@@ -70,7 +70,7 @@ export function DemoTray({
           </ul>
         )}
 
-        <label className="mt-6 flex items-center gap-3 text-base">
+        <label className="mt-6 flex items-center gap-3 text-[15px]">
           <input
             type="checkbox"
             checked={testMode}
@@ -78,7 +78,7 @@ export function DemoTray({
               setTestMode(e.target.checked);
               setTestModeState(e.target.checked);
             }}
-            className="size-5 accent-black"
+            className="size-5 accent-[var(--blue)]"
           />
           {t("demo.test_mode")}
         </label>
@@ -89,13 +89,13 @@ export function DemoTray({
             clearLocalHistory();
             setTestModeState(false);
           }}
-          className="mt-5 w-full border-2 border-ink px-4 py-2.5 text-base font-semibold"
+          className="mt-5 h-[50px] w-full rounded-btn border border-line text-[16px] font-bold"
         >
           {t("demo.reset")}
         </button>
 
         {cacheMeta.generated_at && (
-          <p className="mt-4 text-xs text-ink-2">
+          <p className="mt-4 text-[12px] text-slate">
             <bdi>
               {cacheMeta.model} · {cacheMeta.generated_at}
             </bdi>

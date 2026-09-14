@@ -297,5 +297,8 @@
   "learn.finish": "اعرض نتيجتك",
   "learn.your_score": "نتيجتك",
   "learn.try_scanner": "جرّب الفاحص",
-  "learn.restart": "ابدأ من جديد"
+  "learn.restart": "ابدأ من جديد",
+  "home.paste_clipboard": "الصق من الحافظة",
+  "scan.screenshot": "افحص لقطة شاشة",
+  "shield.verify_tag": "قيد التحقق"
 }

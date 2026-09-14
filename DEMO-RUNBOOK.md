@@ -27,6 +27,10 @@ mark rather than a screenshot of the page.
 are Arabic, so if you are demoing in Arabic, tap **عر** first — the whole app
 flips, including the nav order.
 
+**5. Know where Scan is.** The bottom bar reads Home · Report · **Scan** ·
+Recover · Shield, and Scan is the raised navy circle in the middle. That circle
+is the one control to reach for if anything goes sideways.
+
 ---
 
 ## The three messages, in order
@@ -115,8 +119,12 @@ Two things to point at on the way:
 
 ## If you have another minute
 
-- **Recover** → *I lost money to fraud* — seven steps, the first one being *Stop
-  further payments now*.
+- **Recover** → *I lost money to fraud* — five steps down a numbered spine, the
+  first one red because minutes count: *Stop further payments now*. The last
+  step is the blue button that files the report.
+- **Scan a screenshot**, on Home under the box or as a pill on the Scan screen.
+  Pick a screenshot of a message from the phone's gallery and it is read and
+  checked the same way pasted text is. Have one in the gallery before you go.
 - **Home → Learn** — the six-question quiz. Three of the six are legitimate
   messages, on purpose.
 - The **moon** button, on any screen. The whole app has a dark theme.

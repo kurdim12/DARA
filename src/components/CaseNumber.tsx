@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { useI18n } from "../i18n";
 
 /**
@@ -36,20 +37,23 @@ export function CaseNumber({ value }: { value: string }) {
   }
 
   return (
-    <div className="mt-8 rounded-card border border-line bg-card py-7 text-center">
-      <span className="block text-[13px] font-medium uppercase tracking-wider text-text-2">
-        {t("report.case")}
-      </span>
-      <bdi ref={numberRef} className="mt-2 block text-[30px] font-bold tracking-tight">
-        {value}
-      </bdi>
+    <div className="mt-6 text-center">
+      <p className="t-sub">{t("report.case")}</p>
       <button
         type="button"
         onClick={copy}
         aria-live="polite"
-        className="mt-4 min-h-11 rounded-full border border-line px-5 text-[15px] font-semibold"
+        aria-label={copied ? t("report.copied") : t("report.copy")}
+        // A mist pill on a mist page is not a pill. The card colour and a
+        // hairline give the number the same shape against the page it sits on.
+        className="mt-2 inline-flex min-h-12 items-center gap-3 rounded-full border border-line bg-card px-5 py-2"
       >
-        {copied ? t("report.copied") : t("report.copy")}
+        <bdi ref={numberRef} className="tnum text-[28px] font-extrabold tracking-tight">
+          {value}
+        </bdi>
+        <span className="text-slate" aria-hidden="true">
+          {copied ? <Check size={20} strokeWidth={2.25} /> : <Copy size={20} strokeWidth={2} />}
+        </span>
       </button>
     </div>
   );

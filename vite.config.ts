@@ -5,9 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { VitePWA } from "vite-plugin-pwa";
 
-// paper / ink are the two brand colours the install prompt and splash use.
-// Keep them in step with src/styles/theme.css.
-const PAPER = "#F7F8FA";
+// The install prompt and the splash screen. Navy is the app's chrome, mist is
+// the page it opens onto. Keep both in step with src/styles/tokens.css.
+const NAVY = "#0B2A6F";
+const MIST = "#F4F6FB";
 
 /**
  * The commit this bundle was built from, so anyone holding a phone can answer
@@ -51,8 +52,8 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         orientation: "portrait",
-        theme_color: PAPER,
-        background_color: PAPER,
+        theme_color: NAVY,
+        background_color: MIST,
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },

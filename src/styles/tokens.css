@@ -1,0 +1,91 @@
+/*
+ * The approved palette. Every colour in the app resolves to one of these; no
+ * screen defines its own.
+ *
+ * Meaning is fixed: navy is the brand ground, blue is the one interactive
+ * colour, red is danger, amber is caution, green is only ever a Safe verdict.
+ * Nothing else is coloured.
+ */
+:root {
+  --navy: #0b2a6f;
+  --blue: #1d5bd6;
+  --sky: #e9f0ff;
+  --sky-2: #d6e3ff;
+  --ink: #14213d;
+  --slate: #5b6478;
+  --mist: #f4f6fb;
+  --card: #ffffff;
+  --line: #e6eaf2;
+  --red: #d92d20;
+  --red-soft: #feecea;
+  --amber: #f59e0b;
+  --amber-soft: #fff4e0;
+  --green: #12805c;
+
+  --shadow-navy: 0 16px 40px rgba(11, 42, 111, 0.18);
+  --shadow-red: 0 16px 40px rgba(217, 45, 32, 0.22);
+
+  /*
+   * Fills and inks. The palette above is unchanged; these say which member of
+   * it to use where, because one hex cannot be both a surface and small text
+   * on that surface and clear 4.5:1 in both themes.
+   *
+   * A jury reads this phone over someone's shoulder. A label it cannot read is
+   * a label that is not there.
+   */
+
+  /* Solid surfaces that carry white text. Fixed across themes, like --navy:
+     the dark variants of red/blue/green are lighter so they can be read AS
+     text on a dark page, and white on them falls to 3.5:1 or worse. */
+  --blue-fill: #1d5bd6;
+  --red-fill: #d92d20;
+  --green-fill: #12805c;
+
+  /* Small text on a tinted surface of the same hue. */
+  --blue-ink: #1d5bd6; /* on --sky: chips, tags, step numbers */
+  --red-ink: #b42318; /* on --red-soft: channel tags, error lines */
+  --amber-ink: #b45309; /* on --card/--mist: the Verify pill */
+  --amber-on-white: #b45309; /* the danger card's button is white in both themes */
+  --on-amber: #14213d; /* text on a solid --amber fill, both themes */
+  /*
+   * The label on a disabled button. White on the pale light --sky-2 already
+   * reads as "not yet"; on the dark one it reads as a live button, which is
+   * the one thing a disabled primary must never do.
+   */
+  --disabled-ink: #ffffff;
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --navy: #0b2a6f;
+  --blue: #4f86f0;
+  --sky: #16264a;
+  --sky-2: #1f3566;
+  --ink: #f3f5fa;
+  --slate: #a3aabb;
+  --mist: #0e1220;
+  --card: #171c2b;
+  --line: #262d40;
+  --red: #f0574c;
+  --red-soft: #3a1e1e;
+  --amber: #f5b341;
+  --amber-soft: #3a2e14;
+  --green: #3cc48f;
+
+  --shadow-navy: 0 16px 40px rgba(0, 0, 0, 0.45);
+  --shadow-red: 0 16px 40px rgba(0, 0, 0, 0.45);
+
+  --blue-fill: #1d5bd6;
+  --red-fill: #d92d20;
+  --green-fill: #12805c;
+
+  --blue-ink: #7fa8f7;
+  --red-ink: #f5837b;
+  --amber-ink: var(--amber);
+  --amber-on-white: #b45309;
+  --on-amber: #14213d;
+  --disabled-ink: rgba(255, 255, 255, 0.38);
+
+  color-scheme: dark;
+}
