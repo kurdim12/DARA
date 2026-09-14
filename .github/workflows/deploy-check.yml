@@ -58,6 +58,24 @@ jobs:
           # Vite's asset hash is content-addressed, so building this commit
           # here and comparing the hash to the one the live site serves says
           # whether THIS EXACT commit is deployed — not just "something recent".
+          # Edge caching is the other way a device can see an old page while
+          # CI sees a new one: a long-lived copy of / sitting in one region's
+          # cache. These headers say whether that is happening.
+          echo "=== response headers on / ==="
+          curl -sS --max-time 20 -D - -o /dev/null "$TARGET/" \
+            | grep -iE "^(cache-control|age|cf-cache-status|etag|last-modified|date):" || echo "(none of interest)"
+          echo
+
+          echo "=== response headers on the JS bundle ==="
+          ASSET=$(curl -sS --max-time 20 "$TARGET/" | grep -o '/assets/[^"]*\.js' | head -1)
+          echo "asset: $ASSET"
+          curl -sS --max-time 20 -D - -o /dev/null "$TARGET$ASSET" \
+            | grep -iE "^(cache-control|age|cf-cache-status):" || echo "(none of interest)"
+          echo
+
+          echo "=== /api/reset reachable (the escape hatch) ==="
+          curl -sS --max-time 20 -o /dev/null -w "http=%{http_code}\n" "$TARGET/api/reset"
+
           echo "=== asset hash, live vs this commit ==="
           npm run build >/dev/null 2>&1 || echo "(build failed — see below)"
           LOCAL=$(grep -o 'src="/assets/[^"]*"' dist/client/index.html | head -1)

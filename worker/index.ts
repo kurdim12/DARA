@@ -367,6 +367,67 @@ app.get("/api/report/:case_number", async (c) => {
 });
 
 /**
+ * The escape hatch for a phone that will not let go of an old build.
+ *
+ * The app is a PWA: its service worker precaches index.html and answers every
+ * navigation from that cache, so a browser holding a stale worker keeps showing
+ * the old UI no matter how many times the origin is redeployed — and a query
+ * string does not help, because the navigation route matches regardless of one.
+ *
+ * This page is reachable because it sits under /api/, which is in the service
+ * worker's navigateFallbackDenylist (vite.config.ts). A stale worker does not
+ * intercept it, so the request reaches the network and this code — served fresh
+ * — can unregister the worker, delete its caches, and send the browser back to
+ * a genuinely current app.
+ */
+app.get("/api/reset", (c) => {
+  return c.html(`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DARA' — reset this device</title>
+<style>
+  body { margin:0; min-height:100dvh; display:flex; align-items:center; justify-content:center;
+         background:#F7F8FA; color:#111827; font:16px/1.5 system-ui, sans-serif; padding:24px; }
+  main { max-width:22rem; text-align:center; }
+  h1 { font-size:20px; margin:0 0 8px; }
+  p { margin:0; color:#4B5563; }
+  code { font-size:13px; color:#4B5563; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Clearing this device's copy</h1>
+  <p id="status">Working…</p>
+</main>
+<script>
+(async function () {
+  var done = [];
+  try {
+    if ("serviceWorker" in navigator) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      for (var i = 0; i < regs.length; i++) { await regs[i].unregister(); }
+      done.push(regs.length + " service worker(s) removed");
+    }
+  } catch (e) { done.push("service workers: " + e.message); }
+  try {
+    if (window.caches) {
+      var names = await caches.keys();
+      await Promise.all(names.map(function (n) { return caches.delete(n); }));
+      done.push(names.length + " cache(s) cleared");
+    }
+  } catch (e) { done.push("caches: " + e.message); }
+  document.getElementById("status").textContent =
+    done.join(" \u00b7 ") + " \u2014 opening the app\u2026";
+  setTimeout(function () { location.replace("/?fresh=" + Date.now()); }, 1400);
+})();
+</script>
+</body>
+</html>`);
+});
+
+/**
  * The Community Reports feed: the last four reports explicitly marked public.
  *
  * It selects the type and the description and nothing else — never a contact,
