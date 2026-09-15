@@ -15,7 +15,6 @@ import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import {
   Card,
-  FieldLabel,
   Header,
   IconRow,
   ListCard,
@@ -112,9 +111,7 @@ export function Shield({
           </div>
         </div>
 
-        <div className="mt-6">
-          <FieldLabel>{t("shield.helplines")}</FieldLabel>
-        </div>
+        <h2 className="t-h3 mt-7">{t("shield.helplines")}</h2>
         <ListCard className="mt-2.5">
           {lines.map((line) => (
             <IconRow
@@ -148,9 +145,9 @@ export function Shield({
           <span aria-hidden="true" className="h-px flex-1 bg-line" />
         </div>
 
-        <div className="mt-6">
-          <FieldLabel>{t("shield.what_happened")}</FieldLabel>
-          <p className="t-sub mt-1">{t("shield.what_sub")}</p>
+        <div className="mt-7">
+          <h2 className="t-h3">{t("shield.what_happened")}</h2>
+          <p className="t-sub mt-1.5">{t("shield.what_sub")}</p>
         </div>
         <div className="mt-2.5 space-y-2">
           {situations(lang).map((situation) => (
@@ -196,7 +193,7 @@ export function Shield({
 function AnonNote() {
   const { t } = useI18n();
   return (
-    <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[12.5px] font-semibold leading-snug text-green">
+    <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[12.5px] font-semibold leading-snug text-green-ink">
       <EyeOff size={14} strokeWidth={2} aria-hidden="true" className="shrink-0" />
       {t("shield.anon_note")}
     </p>

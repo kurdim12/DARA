@@ -59,22 +59,26 @@ export function Home({
     <>
       <BleedPage>
         {/* The hero. The only navy surface in the app, and the reason the
-            status bar is navy on this screen. */}
+            status bar is navy on this screen. A gradient and one soft light
+            rather than a flat slab — the difference between a brand and a
+            colour swatch. */}
         <div
-          className="relative overflow-hidden bg-navy text-white"
+          className="relative overflow-hidden text-white"
           style={{
+            background:
+              "linear-gradient(160deg, var(--navy) 0%, var(--navy) 38%, var(--navy-deep) 100%)",
             paddingTop: "max(54px, env(safe-area-inset-top))",
             paddingInline: 20,
-            paddingBottom: 78,
+            paddingBottom: 80,
           }}
         >
           <span
             aria-hidden="true"
-            className="pointer-events-none absolute -end-16 -top-10 size-56 rounded-full bg-white/[0.06]"
-          />
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -bottom-24 -start-12 size-52 rounded-full bg-white/[0.05]"
+            className="pointer-events-none absolute -end-20 -top-24 size-72 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0) 70%)",
+            }}
           />
 
           <div className="relative flex items-start justify-between gap-3">
@@ -82,8 +86,8 @@ export function Home({
             <Pills onNavy />
           </div>
 
-          <h1 className="t-hero relative mt-6">{t("home.h1")}</h1>
-          <p className="relative mt-2 max-w-[300px] text-[14px] font-medium leading-snug text-white/85">
+          <h1 className="t-hero relative mt-7">{t("home.h1")}</h1>
+          <p className="relative mt-2.5 max-w-[310px] text-[14.5px] font-medium leading-[1.45] text-white/75">
             {t("home.sub")}
           </p>
         </div>
@@ -118,7 +122,7 @@ export function Home({
             </p>
           )}
 
-          <h2 className="t-h3 mt-7">{t("home.tools")}</h2>
+          <h2 className="t-h3 mt-9">{t("home.tools")}</h2>
           <div className="mt-3 grid grid-cols-2 gap-2.5">
             {TOOLS.map(({ route, title, sub, Icon }) => (
               <Tile
@@ -131,7 +135,7 @@ export function Home({
             ))}
           </div>
 
-          <h2 className="t-h3 mt-7">{t("home.threats")}</h2>
+          <h2 className="t-h3 mt-9">{t("home.threats")}</h2>
           <ListCard className="mt-3">
             {threats.map((threat) => (
               <ThreatRow key={threat.id} threat={threat} count={counts[threat.category] ?? 0} />
@@ -146,17 +150,18 @@ export function Home({
             </button>
           </ListCard>
 
-          <h2 className="t-h3 mt-7">{t("home.how")}</h2>
-          <ListCard className="mt-3">
+          <h2 className="t-h3 mt-9">{t("home.how")}</h2>
+          <ol className="mt-4 space-y-4">
             {(["how.1", "how.2", "how.3"] as TextKey[]).map((key, index) => (
-              <div key={key} className="flex min-h-16 items-center gap-3 px-4 py-3">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-sky text-[13px] font-extrabold text-blue-ink">
-                  <bdi className="tnum">{index + 1}</bdi>
+              <li key={key} className="flex gap-3.5">
+                <span className="tnum w-5 shrink-0 pt-0.5 text-[15px] font-extrabold leading-tight text-blue">
+                  <bdi>{index + 1}</bdi>
                 </span>
-                <p className="t-body flex-1">{t(key)}</p>
-              </div>
+                <p className="t-body flex-1 text-slate">{t(key)}</p>
+              </li>
             ))}
-          </ListCard>
+          </ol>
+
         </Gutter>
 
         {trayOpen && (

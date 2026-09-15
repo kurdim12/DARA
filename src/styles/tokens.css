@@ -8,12 +8,13 @@
  */
 :root {
   --navy: #0b2a6f;
+  --navy-deep: #061539;
   --blue: #1d5bd6;
   --sky: #e9f0ff;
   --sky-2: #d6e3ff;
   --ink: #14213d;
   --slate: #5b6478;
-  --mist: #f4f6fb;
+  --mist: #eef1f7;
   --card: #ffffff;
   --line: #e6eaf2;
   --red: #d92d20;
@@ -45,6 +46,7 @@
   --blue-ink: #1d5bd6; /* on --sky: chips, tags, step numbers */
   --red-ink: #b42318; /* on --red-soft: channel tags, error lines */
   --amber-ink: #b45309; /* on --card/--mist: the Verify pill */
+  --green-ink: #0f6b4e; /* green text on the page ground, which is not white */
   --amber-on-white: #b45309; /* the danger card's button is white in both themes */
   --on-amber: #14213d; /* text on a solid --amber fill, both themes */
   /*
@@ -59,6 +61,7 @@
 
 :root[data-theme="dark"] {
   --navy: #0b2a6f;
+  --navy-deep: #061539;
   --blue: #4f86f0;
   --sky: #16264a;
   --sky-2: #1f3566;
@@ -83,6 +86,7 @@
   --blue-ink: #7fa8f7;
   --red-ink: #f5837b;
   --amber-ink: var(--amber);
+  --green-ink: var(--green);
   --amber-on-white: #b45309;
   --on-amber: #14213d;
   --disabled-ink: rgba(255, 255, 255, 0.38);

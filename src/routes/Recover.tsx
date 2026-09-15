@@ -3,7 +3,6 @@ import { Banknote, Fingerprint, KeyRound, Smartphone, UserX } from "lucide-react
 import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import {
-  FieldLabel,
   Header,
   IconRow,
   Page,
@@ -57,7 +56,7 @@ export function Recover({ navigate }: { navigate: (route: Route) => void }) {
     <>
       <Page>
         <Header title={t("recover.title")} />
-        <FieldLabel>{t("recover.what")}</FieldLabel>
+        <h2 className="t-h3">{t("recover.what")}</h2>
 
         <div className="mt-2.5 space-y-2">
           {plans(lang).map((plan) => (

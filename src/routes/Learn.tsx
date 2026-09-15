@@ -82,7 +82,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
     <>
       <Page>
         <Header title={t("tool.learn")} />
-        <p className="t-sub -mt-1">{t("tool.learn_sub")}</p>
+        <p className="t-sub -mt-1.5">{t("tool.learn_sub")}</p>
 
         {/* Six dots. Where you are, and how much is left, without a number. */}
         <div
@@ -134,7 +134,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
         {given && (
           <div className="reveal mt-5">
             <p
-              className={`t-row flex items-center gap-2 ${right ? "text-green" : "text-red-ink"}`}
+              className={`t-row flex items-center gap-2 ${right ? "text-green-ink" : "text-red-ink"}`}
             >
               {right ? (
                 <Check size={18} strokeWidth={2.25} aria-hidden="true" />

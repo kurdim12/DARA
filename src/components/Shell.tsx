@@ -51,6 +51,18 @@ export function BleedPage({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Cancels the page gutter, so one block can run to the screen edge inside a
+ * page that is otherwise inset. The verdict band is the only thing that does.
+ */
+export function Bleed({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ marginInline: "calc(-1 * max(16px, env(safe-area-inset-left)))" }}>
+      {children}
+    </div>
+  );
+}
+
 /** The 16px gutter, for a block inside a BleedPage. */
 export function Gutter({
   children,
@@ -297,7 +309,11 @@ export function RowChevron() {
   );
 }
 
-/** Half of a 2×2 grid: a Card with a 38px icon box. */
+/**
+ * Half of a 2×2 grid. The icon sits on the card, not in a tinted chip: four
+ * chips in a square is the single most templated thing a phone screen can do,
+ * and the icon reads better without one.
+ */
 export function Tile({
   Icon,
   title,
@@ -313,11 +329,13 @@ export function Tile({
     <button
       type="button"
       onClick={onClick}
-      className="press flex flex-col items-start rounded-card border border-line bg-card p-3.5 text-start"
+      className="press flex min-h-[104px] flex-col items-start rounded-card border border-line bg-card p-4 text-start"
     >
-      <IconBox Icon={Icon} size={38} />
-      <span className="t-row mt-2.5 block">{title}</span>
-      <span className="mt-0.5 block text-[12.5px] font-medium leading-snug text-slate">
+      <Icon size={24} strokeWidth={1.9} className="text-blue" aria-hidden="true" />
+      <span className="mt-3.5 block text-[16px] font-extrabold leading-tight tracking-[-0.2px]">
+        {title}
+      </span>
+      <span className="mt-1 block text-[12.5px] font-medium leading-snug text-slate">
         {sub}
       </span>
     </button>
@@ -356,7 +374,7 @@ export function Chip({
 /** The rail a Chip row scrolls in. Bleeds to the gutter and pads its end. */
 export function ChipRow({ children }: { children: ReactNode }) {
   return (
-    <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4">
+    <div className="no-scrollbar chip-rail -mx-4 flex gap-2 overflow-x-auto px-4">
       {children}
       <span aria-hidden="true" className="w-3 shrink-0" />
     </div>
@@ -391,7 +409,7 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={`relative flex h-[50px] w-full items-center justify-center gap-2 overflow-hidden rounded-btn px-5 text-[16px] font-bold ${
-        dimmed ? "bg-sky-2 text-disabled-ink" : "bg-blue-fill text-white"
+        dimmed ? "bg-sky text-slate" : "bg-blue-fill text-white"
       }`}
     >
       {loading && (

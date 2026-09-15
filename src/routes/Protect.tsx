@@ -34,7 +34,7 @@ export function Protect({
     <>
       <Page>
         <Header title={t("tool.protect")} />
-        <p className="t-sub -mt-1">{t("tool.protect_sub")}</p>
+        <p className="t-sub -mt-1.5">{t("tool.protect_sub")}</p>
 
         <div className="mt-4 space-y-2.5">
           <CheckField
@@ -122,7 +122,7 @@ function CheckField({
           disabled={empty}
           onClick={() => onSubmit(value.trim())}
           className={`h-9 shrink-0 rounded-full px-4 text-[14px] font-bold ${
-            empty ? "bg-sky-2 text-disabled-ink" : "bg-blue-fill text-white"
+            empty ? "bg-sky text-slate" : "bg-blue-fill text-white"
           }`}
         >
           {cta}

@@ -1,13 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  AlertTriangle,
-  Briefcase,
-  CheckCircle2,
-  Globe,
-  Link2,
-  MessageSquare,
-  Phone,
-} from "lucide-react";
+import { Briefcase, Check, Globe, Link2, MessageSquare, Phone } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
   AnalysisType,
@@ -20,9 +12,9 @@ import { HighlightedMessage } from "../components/HighlightedMessage";
 import { ScannerCard } from "../components/ScannerCard";
 import { TypeChips, TYPE_META } from "../components/TypeChips";
 import {
+  Bleed,
   Card,
   Header,
-  IconBox,
   OutlineButton,
   Page,
   PrimaryButton,
@@ -207,63 +199,73 @@ function Result({
       <Page>
         <Header title={t("scan.title")} />
 
-        {/* The one memorable moment: the verdict, in one colour, with the red
-            flags underlined inside the message the person actually received. */}
-        <div className={`reveal relative rounded-card px-4 py-5 ${fill.bg} ${fill.text}`}>
-          {result.cached && (
-            <span className="absolute end-3 top-3 rounded-full bg-white/25 px-2 py-1 text-[12px] font-bold">
-              {t("result.saved")}
-            </span>
-          )}
-          <p className="text-[26px] font-extrabold leading-tight">{t(LEVEL_LABEL[level])}</p>
-          {/* Full strength, not the 90% the spec asks for: 90% white over the
-              red and green fills lands at 4.15:1, under the 4.5 a jury reading
-              this over a shoulder needs. Weight carries the hierarchy instead. */}
-          <p dir="auto" className="mt-2 text-[15px] font-medium leading-snug">
-            {result.headline}
-          </p>
+        {/* The one memorable moment: the verdict, in one colour, edge to edge,
+            with the red flags underlined inside the message the person
+            actually received. Everything below it is quiet on purpose. */}
+        <Bleed>
+          <div className={`reveal relative px-5 py-7 ${fill.bg} ${fill.text}`}>
+            {result.cached && (
+              <span className="absolute end-4 top-4 rounded-full bg-white/25 px-2.5 py-1 text-[12px] font-bold">
+                {t("result.saved")}
+              </span>
+            )}
+            <p className="text-[34px] font-extrabold leading-[1.05] tracking-[-1px]">
+              {t(LEVEL_LABEL[level])}
+            </p>
+            <p dir="auto" className="mt-2.5 text-[15px] font-medium leading-[1.45]">
+              {result.headline}
+            </p>
+          </div>
+        </Bleed>
+
+        <p className="t-eyebrow mt-6">{t("result.input")}</p>
+        <div className="mt-2.5">
+          <HighlightedMessage text={input} flags={result.red_flags} />
         </div>
 
-        <Card className="mt-2.5">
-          <p className="t-row">{t("result.input")}</p>
-          <div className="mt-2.5">
-            <HighlightedMessage text={input} flags={result.red_flags} />
-          </div>
-
-          {result.red_flags.length > 0 && (
-            <>
-              <p className="t-row mt-5">{t("result.why")}</p>
-              <ol className="mt-1">
-                {result.red_flags.map((flag, index) => (
-                  <li key={index} className="flex items-start gap-3 py-2.5">
-                    <IconBox Icon={AlertTriangle} tone="red" size={34} />
-                    <span dir="auto" className="t-body flex-1 pt-1">
-                      {flag.why}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            </>
-          )}
-        </Card>
+        {result.red_flags.length > 0 && (
+          <>
+            <p className="t-eyebrow mt-7">{t("result.why")}</p>
+            {/* Numbered to match the superscripts in the message above. That
+                pairing is the explanation — the same warning icon three times
+                over says nothing about which mark it belongs to. */}
+            <ol className="mt-3 space-y-3.5">
+              {result.red_flags.map((flag, index) => (
+                <li key={index} className="flex items-start gap-3">
+                  <span className="mt-px flex size-[22px] shrink-0 items-center justify-center rounded-full bg-red-soft text-[12px] font-extrabold text-red-ink">
+                    <bdi className="tnum">{index + 1}</bdi>
+                  </span>
+                  <span dir="auto" className="t-body flex-1">
+                    {flag.why}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
 
         {result.actions.length > 0 && (
-          <Card className="mt-2.5">
-            <p className="t-row">{t("result.what_now")}</p>
-            <ul className="mt-1">
+          <>
+            <p className="t-eyebrow mt-7">{t("result.what_now")}</p>
+            <ul className="mt-3 space-y-3.5">
               {result.actions.map((action, index) => (
-                <li key={index} className="flex items-start gap-3 py-2.5">
-                  <IconBox Icon={CheckCircle2} tone="blue" size={34} />
-                  <span dir="auto" className="t-body flex-1 pt-1">
+                <li key={index} className="flex items-start gap-3">
+                  <Check
+                    size={18}
+                    strokeWidth={2.75}
+                    aria-hidden="true"
+                    className="mt-0.5 shrink-0 text-blue"
+                  />
+                  <span dir="auto" className="t-body flex-1">
                     {action}
                   </span>
                 </li>
               ))}
             </ul>
-          </Card>
+          </>
         )}
 
-        <div className="mt-5 space-y-2.5">
+        <div className="mt-8 space-y-2.5">
           <PrimaryButton
             onClick={() => onReport({ category: result.category, messageText: input })}
           >

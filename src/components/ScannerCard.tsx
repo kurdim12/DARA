@@ -96,8 +96,8 @@ export function ScannerCard({
         placeholder={placeholder}
         aria-label={label}
         rows={variant === "home" ? 3 : 4}
-        className="w-full resize-none rounded-btn bg-mist p-3 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-slate"
-        style={{ minHeight: variant === "home" ? 96 : 140 }}
+        className="w-full resize-none rounded-btn border border-line bg-mist p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-slate"
+        style={{ minHeight: variant === "home" ? 84 : 118 }}
       />
 
       {image && (
@@ -139,10 +139,10 @@ export function ScannerCard({
         </div>
       ) : null}
 
-      {submit && <div className="mt-3">{submit}</div>}
+      {submit && <div className="mt-3.5">{submit}</div>}
 
       {variant === "home" ? (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[12px] font-semibold text-slate">
+        <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px] font-semibold text-slate">
           <button type="button" onClick={() => void paste()} className="tap flex items-center gap-1.5">
             <ClipboardPaste size={14} strokeWidth={2} aria-hidden="true" />
             {t("home.paste_clipboard")}
