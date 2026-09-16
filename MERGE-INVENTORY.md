@@ -189,3 +189,45 @@ The QR strings stay hidden until that tool works, per the brief.
 
 34 strings of 661.
 
+
+## 9. After Phase 2: where every feature lives now
+
+Section 3 is the Phase 0 snapshot and is left as it was. This is what the merges
+table changed, and what it did not.
+
+| Reference feature | Entry point now |
+| --- | --- |
+| Documented campaigns, with source and date | Radar tab → **Documented campaigns**, and the three newest on Home |
+| The Jordan radar's numbers | Radar tab → **Radar**, with its "not a national statistic" line |
+| Pattern families | Radar tab → **Common patterns** |
+| Official entities directory | Home → **Official institutions** (the Protect screen), lookup on top |
+| Two-minute drill | Home → **Two-minute drill** (the Learn screen) |
+| Extortion shield, triage first, quick exit on every view | Help tab → **Extortion shield** |
+| Recover, one list ordered by urgency | Help tab → **Recover**, and Home → **Recover** |
+| Always-anonymous report, channel + entity + attached text | Report tab |
+| Receipt with the case number | Shown when a report is sent, and on Home as **Latest report** |
+| Clipboard consent | The sentence under **Paste from clipboard**, in the scan box |
+| Screenshot analysis | **Scan a screenshot**, in the scan box on Home and Scan |
+| Jordan layer on a result | Inside a scan result |
+| PWA, installable, offline shell | Add to Home Screen |
+
+Still with no home in this app, all from the reference side:
+
+| Missing | What it would take |
+| --- | --- |
+| **Trust page** (`ft.tp.*`, 40+ strings already ported) | A screen and a nav entry. Its copy states accuracy figures for the reference's own classifier — which this app does not run — so those rows cannot be shown here as written, and the honesty gate should be pointed at the file before it renders. |
+| **On-device lite classifier** (`cls.*`) | A 346 KB model chunk plus inference, and a measured accuracy number of our own. Not a today job. |
+| **"My checks" history, off by default** (`ft.hist.*`) | A local store, a toggle, and a screen. Small. |
+| **Share target** (`GET /scan?title&text&url` in the manifest) | A manifest entry and Scan reading three query parameters. Smallest of the four, and it is the one that puts DARA' in the phone's own share sheet. |
+| **"My reports"**, the full list | Home shows the latest; `src/lib/storage.ts` already keeps up to 20. A list screen is small. |
+| **QR** | Stays hidden until it works, per the brief. Its strings are ported and its code is not deleted. |
+
+Two other facts worth knowing before the demo:
+
+- **`/threats` still exists and nothing links to it.** Radar's *Common patterns*
+  segment renders the same list, so the screen is a duplicate that is now only
+  reachable by typing the URL. Its code is left in place.
+- **The English directory falls back to Arabic for 49 of its 55 entries.** The
+  reference build wrote `never_en` for six bodies and `never_ar` for all of
+  them, so English mode shows the Arabic line rather than nothing. Translating
+  the other 49 is content work, which this phase was told not to do.
