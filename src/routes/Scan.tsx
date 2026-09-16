@@ -7,6 +7,7 @@ import {
   Link2,
   MessageSquare,
   Phone,
+  RefreshCw,
   ShieldAlert,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -106,9 +107,10 @@ export function Scan({
       setStage({
         name: "result",
         result,
-        // A screenshot has no pasted text behind it; what the engine could read
-        // out of the image is the thing to quote back.
-        input: trimmed || result.extracted_text || "",
+        // A screenshot has no pasted text behind it. What the OCR step read is
+        // both what the engine judged and what the flags point into, so it is
+        // the thing to show.
+        input: result.extracted_text || trimmed,
       });
     } catch (error) {
       setErrorKey(error instanceof AppError ? error.key : "error.generic");
@@ -123,6 +125,13 @@ export function Scan({
         input={stage.input}
         navigate={navigate}
         onReport={onReport}
+        /* A corrected transcription re-enters as ordinary text — no image, so
+           the OCR step is not repeated and not paid for twice. */
+        onRescan={(corrected) => {
+          setImage(null);
+          setText(corrected);
+          void run(corrected, undefined, null);
+        }}
         onAgain={() => {
           setText("");
           setImage(null);
@@ -190,14 +199,20 @@ function Result({
   navigate,
   onAgain,
   onReport,
+  onRescan,
 }: {
   result: AnalyzeResponse;
   input: string;
   navigate: (route: Route) => void;
   onAgain: () => void;
   onReport: (prefill: { category: Category; messageText: string }) => void;
+  /** Re-runs the ordinary text pipeline on a corrected transcription. */
+  onRescan: (text: string) => void;
 }) {
   const { t, lang } = useI18n();
+  // Seeded from the transcription, and reset whenever a new one arrives.
+  const [draft, setDraft] = useState(input);
+  useEffect(() => setDraft(input), [input]);
   const level = levelFor(result);
   const fill = LEVEL_FILL[level];
   const facts: { key: TextKey; value: string }[] = [];
@@ -252,8 +267,41 @@ function Result({
           </div>
         </Bleed>
 
+        {/* 1b. For a screenshot: what the OCR step actually read, above the
+               verdict's own evidence and editable. A transcription can be
+               wrong, and a verdict built on a misread line should be
+               correctable by the person holding the phone rather than
+               defended. Re-checking runs the ordinary text pipeline. */}
+        {result.input_kind === "image" && (
+          <Card className="mt-6">
+            <p className="t-eyebrow">{t("ocr.title")}</p>
+            <textarea
+              dir="auto"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              rows={4}
+              aria-label={t("ocr.title")}
+              className="mt-2.5 w-full resize-none rounded-btn border border-line bg-paper p-3.5 text-[15px] leading-relaxed text-ink outline-none"
+            />
+            <p className="t-sub mt-2">{t("ocr.note")}</p>
+            <button
+              type="button"
+              disabled={draft.trim().length === 0 || draft.trim() === input.trim()}
+              onClick={() => onRescan(draft.trim())}
+              className="press tap mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-btn border border-line bg-paper text-[14px] font-bold text-ink disabled:text-ink-2"
+            >
+              <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
+              {t("ocr.rescan")}
+            </button>
+          </Card>
+        )}
+
         {/* 2. The message, with every flag underlined where it sits. The one
-               thing on this screen a jury follows with their eyes. */}
+               thing on this screen a jury follows with their eyes.
+
+               For a screenshot this is the transcription, which is exactly why
+               the flags land: the engine judged this text, so every quote it
+               returned exists inside it. */}
         <p className="t-eyebrow mt-6">
           {result.input_kind === "image" ? t("res.from_image") : t("res.message")}
         </p>

@@ -35,6 +35,9 @@ function errorKeyForStatus(status: number, code?: string): TextKey {
   if (status === 429 || code === "rate_limited") return "error.rate_limited";
   if (status === 415 || code === "bad_image") return "error.bad_image";
   if (code === "image_too_large") return "error.image_too_large";
+  // Nobody could read the screenshot. The screen says so and asks for the
+  // text, which is the honest answer — never a verdict on an unread image.
+  if (status === 422 || code === "ocr_failed") return "error.ocr_failed";
   return "error.generic";
 }
 
