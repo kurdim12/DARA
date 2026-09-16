@@ -225,3 +225,29 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   `/fonts/*.woff2` falls through to the SPA catch-all and returns index.html
   with a 200, which is exactly what the step had been reporting as a pass — for
   two font files Phase 1 had replaced.
+- **The emergency button states the number it dials.** `shield.call_now` read
+  "Call 911 Now" while its `href` came from `content/verified.json`. One flag
+  gated both, which is what the honesty gate's exception said — but the flag is
+  shared and the value is not, so verifying a different line would have shipped
+  a button labelled 911 that dialled something else. The label now carries
+  `{0}`, filled from the same record, and the gate's exception for that key is
+  deleted rather than reworded. Checked by flipping `verified` to true
+  locally: the button reads "اتصل بـ 911 الآن" with `tel:911`, and the flag is
+  back to false — only Abdelrahman flips those.
+- **The confirmation sentence points at Help, not "the Shield tab".** The merge
+  moved the extortion shield under Help; the sentence had kept the old nav.
+- **Which result button is red follows `report_recommended`.** A green "looks
+  safe" verdict with a red "Report this message" under it says danger where the
+  screen has just said there is none, so on a safe result "Check another" is
+  the primary and reporting is the outline. Both are always present.
+- **`test/keys.test.ts` guards every interpolated i18n key.** The result screen
+  builds keys from server values — `pressure.${method}`, `goal.${goal}`,
+  `evidence.${type}`, `url.${signal}` — and `t()` falls through to the raw key,
+  so a gap prints `pressure.threat` onto the verdict. Every value
+  `postValidate` can emit is now checked for wording in both languages, along
+  with key parity and blank strings.
+- **The result's screenshots are rendered from a fixture, not the engine.**
+  With no API key on the deployment there is no way to produce a real verdict,
+  so `docs/screens/merge-3/result-*.png` come from an intercepted
+  `/api/analyze`. They are layout evidence and nothing else; see the README in
+  that folder.

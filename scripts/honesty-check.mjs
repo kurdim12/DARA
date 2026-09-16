@@ -94,8 +94,6 @@ const NUMBER_LIKE = /(\+\d{3}|\d[\d\s-]{3,})/;
 const APPROVED = {
   "error.too_long":
     "The 2,000 is DARA's own input cap — a true statement about itself, not a fact about the world.",
-  "shield.call_now":
-    "Contains 911. The button carrying it renders only when content/verified.json marks the emergency contact verified, and Shield has no other path to it; while that flag is false the screen shows 'Emergency number pending verification' instead. The number in this label is therefore gated by the same flag as the number it dials.",
   "authority.cybercrime_unit":
     "A label in the 'relevant authority (for your reference)' list. Naming a body is not a claim that anything was sent to it, and the confirmation screen says in so many words that nothing was.",
   "report.pilot_note":

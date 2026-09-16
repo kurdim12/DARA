@@ -119,7 +119,18 @@ export function Shield({
                 className="flex h-12 w-full items-center justify-center gap-2 rounded-btn bg-white-brush px-5 text-[16px] font-extrabold text-red"
               >
                 <Phone size={18} strokeWidth={1.75} aria-hidden="true" />
-                {t("shield.call_now")}
+                {/* The label states the number it dials, rather than naming one
+                    of its own. Both come from the same verified record now. */}
+                {t("shield.call_now").split("{0}").flatMap((part, index) =>
+                  index === 0
+                    ? [part]
+                    : [
+                        <bdi key={index} dir="ltr" className="tnum">
+                          {emergency.number}
+                        </bdi>,
+                        part,
+                      ],
+                )}
               </a>
             ) : (
               // No number has been checked against an official source, so there
