@@ -60,7 +60,7 @@ export function Lab() {
               setLang(option);
             }}
             className={`rounded-full border px-3 py-1.5 ${
-              lang === option ? "border-blue bg-blue text-white" : "border-line"
+              lang === option ? "border-ink bg-ink text-white-brush" : "border-line"
             }`}
           >
             {option}

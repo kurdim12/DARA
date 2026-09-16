@@ -3,40 +3,33 @@
 @import "./fonts.css";
 
 @theme {
-  --color-navy: var(--navy);
-  --color-navy-deep: var(--navy-deep);
-  --color-blue: var(--blue);
-  --color-blue-fill: var(--blue-fill);
-  --color-blue-ink: var(--blue-ink);
-  --color-sky: var(--sky);
-  --color-sky-2: var(--sky-2);
-  --color-ink: var(--ink);
-  --color-slate: var(--slate);
-  --color-mist: var(--mist);
-  --color-card: var(--card);
-  --color-line: var(--line);
   --color-red: var(--red);
+  --color-red-deep: var(--red-deep);
   --color-red-soft: var(--red-soft);
   --color-red-ink: var(--red-ink);
-  --color-red-fill: var(--red-fill);
+  --color-white-brush: var(--white);
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-line: var(--line);
   --color-amber: var(--amber);
-  --color-amber-soft: var(--amber-soft);
+  --color-amber-fill: var(--amber-fill);
+  --color-on-amber: var(--on-amber);
   --color-amber-ink: var(--amber-ink);
   --color-amber-on-white: var(--amber-on-white);
-  --color-on-amber: var(--on-amber);
-  --color-disabled-ink: var(--disabled-ink);
   --color-green: var(--green);
   --color-green-fill: var(--green-fill);
-  --color-green-ink: var(--green-ink);
 
-  /* Cards 18, the scanner card 20, rows 16, buttons 14, chips 999. */
-  --radius-card: 18px;
-  --radius-scanner: 20px;
-  --radius-row: 16px;
-  --radius-btn: 14px;
+  --radius-card: 16px;
+  --radius-row: 14px;
+  --radius-btn: 12px;
   --radius-box: 12px;
+  --radius-scanner: 18px;
 
-  --font-sans: "Manrope", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  /* Cairo carries display in both scripts; body splits Rubik / Almarai. */
+  --font-display: "Cairo", system-ui, sans-serif;
+  --font-sans: "Rubik", "Almarai", system-ui, sans-serif;
 }
 
 /*
@@ -65,7 +58,7 @@
   body,
   #root {
     min-height: 100%;
-    background: var(--mist);
+    background: var(--paper);
   }
 
   body {
@@ -73,15 +66,14 @@
     color: var(--ink);
     font-family: var(--font-sans);
     font-size: 15px;
-    font-weight: 500;
-    line-height: 1.5;
+    font-weight: 400;
+    line-height: 1.55;
     -webkit-text-size-adjust: 100%;
   }
 
-  /* Arabic sets a step lighter and a line looser than Latin at the same size. */
+  /* Arabic body is Almarai and sets a line looser than Rubik at the same size. */
   html[lang="ar"] body {
-    font-weight: 400;
-    line-height: 1.65;
+    line-height: 1.75;
   }
 
   button,
@@ -93,7 +85,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--blue);
+    outline: 2px solid var(--red);
     outline-offset: 2px;
   }
 }
@@ -106,93 +98,89 @@
  * wins — utilities are layered after components.
  */
 @layer components {
-  .t-hero {
-    font-size: 33px;
-    font-weight: 800;
-    letter-spacing: -1.1px;
+  .t-hero,
+  .t-title,
+  .t-h3,
+  .t-verdict {
+    font-family: var(--font-display);
+  }
+
+  .t-verdict {
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
     line-height: 1.1;
   }
 
-  .t-title {
-    font-size: 24px;
+  .t-hero {
+    font-size: 30px;
     font-weight: 800;
     letter-spacing: -0.4px;
+    line-height: 1.2;
+  }
+
+  .t-title {
+    font-size: 23px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
     line-height: 1.25;
   }
 
   .t-h3 {
-    font-size: 20px;
+    font-size: 19px;
     font-weight: 800;
-    letter-spacing: -0.4px;
-    line-height: 1.25;
-  }
-
-  /* The small tracked label above a section. Used sparingly. */
-  .t-eyebrow {
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--slate);
+    letter-spacing: -0.2px;
+    line-height: 1.3;
   }
 
   .t-row {
     font-size: 15px;
-    font-weight: 700;
-    line-height: 1.35;
+    font-weight: 600;
+    line-height: 1.4;
   }
 
   .t-body {
     font-size: 15px;
-    font-weight: 500;
-    line-height: 1.5;
+    font-weight: 400;
+    line-height: 1.55;
   }
 
   .t-sub {
     font-size: 13px;
-    font-weight: 500;
-    line-height: 1.45;
-    color: var(--slate);
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--ink-2);
   }
 
   .t-meta {
     font-size: 12px;
     font-weight: 600;
-    line-height: 1.3;
+    line-height: 1.35;
   }
 
-  html[lang="ar"] .t-hero,
-  html[lang="ar"] .t-title,
-  html[lang="ar"] .t-h3 {
-    font-weight: 700;
+  .t-eyebrow {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-2);
   }
 
-  html[lang="ar"] .t-row {
-    font-weight: 600;
-  }
-
+  /* Almarai has no 600, and Arabic reads heavier at the same weight. */
+  html[lang="ar"] .t-row,
   html[lang="ar"] .t-meta {
-    font-weight: 500;
+    font-weight: 700;
   }
 
   html[lang="ar"] .t-body,
   html[lang="ar"] .t-sub {
-    font-weight: 400;
-    line-height: 1.65;
+    line-height: 1.75;
   }
 }
 
-/*
- * The only shadow in the app. Three places carry it: the scanner card, the
- * raised Scan button, and the Shield danger card. Everything else is a 1px
- * line, which is what keeps a screen of cards from reading as clutter.
- */
+/* The only shadow in the app, under the raised Scan button. Nothing else. */
 .lift {
-  box-shadow: var(--shadow-navy);
-}
-
-.lift-red {
-  box-shadow: var(--shadow-red);
+  box-shadow: var(--shadow-scan);
 }
 
 /*

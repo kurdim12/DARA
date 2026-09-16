@@ -22,7 +22,7 @@ export function Page({
 }) {
   return (
     <main
-      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-mist"
+      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-paper"
       style={{
         paddingInlineStart: "max(16px, env(safe-area-inset-left))",
         paddingInlineEnd: "max(16px, env(safe-area-inset-right))",
@@ -37,13 +37,13 @@ export function Page({
 }
 
 /**
- * A page that paints to the edges — Home, whose hero is full-bleed navy. The
- * gutters move inside it, onto whatever needs them.
+ * A page that paints to the edges. The gutters move inside it, onto whatever
+ * needs them.
  */
 export function BleedPage({ children }: { children: ReactNode }) {
   return (
     <main
-      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-mist"
+      className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col bg-paper"
       style={{ paddingBottom: "calc(var(--nav-total) + var(--scan-lift) + 24px)" }}
     >
       {children}
@@ -105,7 +105,7 @@ export function Header({
         >
           <ChevronRight
             size={22}
-            strokeWidth={2}
+            strokeWidth={1.75}
             aria-hidden="true"
             className="rotate-180 rtl:rotate-0"
           />
@@ -118,20 +118,16 @@ export function Header({
 }
 
 /** Language, then theme. 32px each, hairline border. */
-export function Pills({ onNavy = false }: { onNavy?: boolean }) {
+export function Pills() {
   const { t, lang, toggle } = useI18n();
   const { theme, toggle: toggleTheme } = useTheme();
-
-  const skin = onNavy
-    ? "border-white/35 text-white"
-    : "border-line bg-card text-ink";
 
   return (
     <div className="flex shrink-0 items-center gap-2">
       <button
         type="button"
         onClick={toggle}
-        className={`tap flex size-8 items-center justify-center rounded-full border ${skin}`}
+        className="tap flex size-8 items-center justify-center rounded-full border border-line bg-card text-ink"
       >
         {/* The name is built from both, so what a reader hears contains what a
             sighted user sees — an aria-label alone contradicts the glyph. */}
@@ -144,12 +140,12 @@ export function Pills({ onNavy = false }: { onNavy?: boolean }) {
         type="button"
         onClick={toggleTheme}
         aria-label={t("a11y.theme")}
-        className={`tap flex size-8 items-center justify-center rounded-full border ${skin}`}
+        className="tap flex size-8 items-center justify-center rounded-full border border-line bg-card text-ink"
       >
         {theme === "light" ? (
-          <Moon size={15} strokeWidth={2} aria-hidden="true" />
+          <Moon size={15} strokeWidth={1.75} aria-hidden="true" />
         ) : (
-          <Sun size={15} strokeWidth={2} aria-hidden="true" />
+          <Sun size={15} strokeWidth={1.75} aria-hidden="true" />
         )}
       </button>
     </div>
@@ -192,18 +188,18 @@ export function ListCard({
   );
 }
 
-export type IconTone = "blue" | "amber" | "red";
+export type IconTone = "neutral" | "amber" | "red";
 
 const ICON_BOX: Record<IconTone, string> = {
-  blue: "bg-sky text-blue",
-  amber: "bg-amber-soft text-amber",
+  neutral: "bg-line text-ink",
+  amber: "bg-line text-amber",
   red: "bg-red-soft text-red",
 };
 
 /** The 40px rounded square an IconRow leads with. */
 export function IconBox({
   Icon,
-  tone = "blue",
+  tone = "neutral",
   size = 40,
 }: {
   Icon: LucideIcon;
@@ -216,7 +212,7 @@ export function IconBox({
       className={`flex shrink-0 items-center justify-center rounded-box ${ICON_BOX[tone]}`}
       style={{ width: size, height: size }}
     >
-      <Icon size={Math.round(size / 2)} strokeWidth={1.9} />
+      <Icon size={Math.round(size / 2)} strokeWidth={1.75} />
     </span>
   );
 }
@@ -228,7 +224,7 @@ export function IconBox({
  */
 export function IconRow({
   Icon,
-  tone = "blue",
+  tone = "neutral",
   title,
   sub,
   lead,
@@ -272,9 +268,9 @@ export function IconRow({
   const shape =
     as === "card"
       ? `press rounded-row border bg-card px-4 py-3 ${
-          selected ? "border-2 border-blue bg-sky" : "border-line"
+          selected ? "border-2 border-ink bg-line" : "border-line"
         }`
-      : `press px-4 py-3 ${selected ? "bg-sky" : ""}`;
+      : `press px-4 py-3 ${selected ? "bg-line" : ""}`;
 
   const className = `flex min-h-16 w-full items-center gap-3 text-start ${shape}`;
 
@@ -302,9 +298,9 @@ export function RowChevron() {
   return (
     <ChevronRight
       size={18}
-      strokeWidth={2}
+      strokeWidth={1.75}
       aria-hidden="true"
-      className="shrink-0 text-slate rtl:rotate-180"
+      className="shrink-0 text-ink-2 rtl:rotate-180"
     />
   );
 }
@@ -331,18 +327,18 @@ export function Tile({
       onClick={onClick}
       className="press flex min-h-[104px] flex-col items-start rounded-card border border-line bg-card p-4 text-start"
     >
-      <Icon size={24} strokeWidth={1.9} className="text-blue" aria-hidden="true" />
+      <Icon size={24} strokeWidth={1.75} className="text-ink" aria-hidden="true" />
       <span className="mt-3.5 block text-[16px] font-extrabold leading-tight tracking-[-0.2px]">
         {title}
       </span>
-      <span className="mt-1 block text-[12.5px] font-medium leading-snug text-slate">
+      <span className="mt-1 block text-[12.5px] font-medium leading-snug text-ink-2">
         {sub}
       </span>
     </button>
   );
 }
 
-/** A 34px pill. Selected is sky on blue; unselected is a hairline on nothing. */
+/** A 34px pill. Selected is ink on a tint; unselected is a hairline on nothing. */
 export function Chip({
   Icon,
   label,
@@ -361,11 +357,11 @@ export function Chip({
       aria-pressed={selected}
       className={`press tap flex h-[34px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-[13px] font-bold ${
         selected
-          ? "bg-sky text-blue-ink"
-          : "border border-line bg-transparent text-slate"
+          ? "bg-line text-ink"
+          : "border border-line bg-transparent text-ink-2"
       }`}
     >
-      {Icon && <Icon size={16} strokeWidth={2} aria-hidden="true" />}
+      {Icon && <Icon size={16} strokeWidth={1.75} aria-hidden="true" />}
       {label}
     </button>
   );
@@ -382,10 +378,11 @@ export function ChipRow({ children }: { children: ReactNode }) {
 }
 
 /**
- * 50px, radius 14, blue, with the arrow that says this goes somewhere.
- * Disabled is sky-2 with white on it, which is how the reference renders the
- * button before anything has been typed. Working keeps the blue and draws a
- * line along the top edge.
+ * The one red action on a screen, with the arrow that says this goes
+ * somewhere.
+ * Disabled is a hairline tint with secondary ink on it — visibly not yet,
+ * without looking broken. Working keeps the red and draws a line along the
+ * top edge.
  */
 export function PrimaryButton({
   children,
@@ -409,7 +406,7 @@ export function PrimaryButton({
       onClick={onClick}
       disabled={disabled || loading}
       className={`relative flex h-[50px] w-full items-center justify-center gap-2 overflow-hidden rounded-btn px-5 text-[16px] font-bold ${
-        dimmed ? "bg-sky text-slate" : "bg-blue-fill text-white"
+        dimmed ? "bg-line text-ink-2" : "bg-red text-white-brush"
       }`}
     >
       {loading && (
@@ -419,7 +416,7 @@ export function PrimaryButton({
       )}
       {children}
       {arrow && !loading && (
-        <ArrowRight size={18} strokeWidth={2.25} aria-hidden="true" className="rtl:rotate-180" />
+        <ArrowRight size={18} strokeWidth={1.75} aria-hidden="true" className="rtl:rotate-180" />
       )}
     </button>
   );
@@ -443,18 +440,18 @@ export function OutlineButton({
   );
 }
 
-/** 11/800 label. Danger says how a threat arrives; blue says what one was. */
+/** 11/800 label. Danger says how a threat arrives; neutral says what one was. */
 export function Tag({
   children,
-  tone = "blue",
+  tone = "neutral",
 }: {
   children: ReactNode;
-  tone?: "blue" | "danger";
+  tone?: "neutral" | "danger";
 }) {
   return (
     <span
       className={`inline-flex items-center rounded-[6px] px-2 py-1 text-[11px] font-extrabold uppercase tracking-[0.02em] ${
-        tone === "danger" ? "bg-red-soft text-red-ink" : "bg-sky text-blue-ink"
+        tone === "danger" ? "bg-red-soft text-red-ink" : "bg-line text-ink"
       }`}
     >
       {children}
@@ -478,7 +475,7 @@ export function FieldLabel({ children }: { children: ReactNode }) {
  */
 export function SectionLabel({
   children,
-  className = "text-slate",
+  className = "text-ink-2",
 }: {
   children: ReactNode;
   className?: string;
@@ -512,7 +509,7 @@ export function Toggle({
       aria-checked={on}
       aria-label={label}
       onClick={onChange}
-      className={`press relative shrink-0 rounded-full ${on ? "bg-blue" : "bg-line"}`}
+      className={`press relative shrink-0 rounded-full ${on ? "bg-ink" : "bg-line"}`}
       style={{ width: w, height: h }}
     >
       <span
@@ -560,7 +557,7 @@ export function Stepper({
             )}
             <span
               className={`relative z-10 flex size-7 shrink-0 items-center justify-center rounded-full text-[13px] font-extrabold ${
-                danger ? "bg-red-fill text-white" : "bg-sky text-blue-ink"
+                danger ? "bg-red text-white-brush" : "bg-line text-ink"
               }`}
             >
               <bdi className="tnum">{index + 1}</bdi>
@@ -568,7 +565,7 @@ export function Stepper({
             <span className="min-w-0 flex-1 pt-0.5">
               {step.title && <span className="t-row block">{step.title}</span>}
               <span
-                className={`block text-[14px] font-medium leading-relaxed text-slate ${
+                className={`block text-[14px] font-medium leading-relaxed text-ink-2 ${
                   step.title ? "mt-1" : ""
                 }`}
               >

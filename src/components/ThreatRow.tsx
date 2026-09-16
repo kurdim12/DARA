@@ -31,7 +31,7 @@ export function ThreatRow({
       />
       <div className="flex flex-wrap items-center gap-2">
         <Tag tone="danger">{t(`tag.${threat.channel}` as "tag.sms")}</Tag>
-        <span className="t-meta text-slate">
+        <span className="t-meta text-ink-2">
           {count > 0 ? (
             <>
               <bdi className="tnum">{count}</bdi>{" "}

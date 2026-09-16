@@ -1,20 +1,32 @@
-import { House, ScanLine, Send, User, Wrench } from "lucide-react";
+import { House, LifeBuoy, Radar, ScanLine, Send } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
 /**
- * Home · Report · Scan · Recover · Shield. Scan sits in the middle because it
- * is what the app is for, and it is raised out of the bar so a thumb finds it
- * without looking. The order mirrors in RTL on its own — this is a flex row.
+ * Home · Scan · Radar · Report · Help.
+ *
+ * Scan sits in the middle, raised out of the bar in the brand red, because it
+ * is what the app is for and a thumb should find it without looking. Help is
+ * where تعافي and درع الابتزاز both live. The order mirrors in RTL on its own
+ * — this is a flex row.
  */
 const TABS: { route: Route; label: TextKey; Icon: LucideIcon }[] = [
   { route: "home", label: "nav.home", Icon: House },
-  { route: "report", label: "nav.report", Icon: Send },
   { route: "scan", label: "nav.scan", Icon: ScanLine },
-  { route: "recover", label: "nav.recover", Icon: Wrench },
-  { route: "shield", label: "nav.shield", Icon: User },
+  { route: "radar", label: "nav.radar", Icon: Radar },
+  { route: "report", label: "nav.report", Icon: Send },
+  { route: "help", label: "nav.help", Icon: LifeBuoy },
 ];
+
+/** Screens that are not tabs still light the tab they belong under. */
+const BELONGS_TO: Partial<Record<Route, Route>> = {
+  threats: "radar",
+  recover: "help",
+  shield: "help",
+  protect: "home",
+  learn: "home",
+};
 
 export function BottomNav({
   active,
@@ -24,6 +36,7 @@ export function BottomNav({
   navigate: (route: Route) => void;
 }) {
   const { t } = useI18n();
+  const current = BELONGS_TO[active] ?? active;
 
   return (
     <nav
@@ -35,7 +48,7 @@ export function BottomNav({
         style={{ height: "var(--nav-inner)" }}
       >
         {TABS.map(({ route, label, Icon }) => {
-          const current = active === route;
+          const on = current === route;
           const raised = route === "scan";
 
           return (
@@ -43,21 +56,21 @@ export function BottomNav({
               <button
                 type="button"
                 onClick={() => navigate(route)}
-                aria-current={current ? "page" : undefined}
+                aria-current={on ? "page" : undefined}
                 className={`flex size-full flex-col items-center justify-center gap-1 px-1 ${
-                  current ? "text-blue" : "text-slate"
+                  on ? "text-ink" : "text-ink-2"
                 }`}
               >
                 {raised ? (
                   // A spacer the size of the icon it replaces, so the label
                   // lands where every other label lands however tall the bar
-                  // ends up on a given phone. The circle itself is positioned
-                  // against the bar's top edge.
+                  // ends up on a given phone. The circle is positioned against
+                  // the bar's top edge.
                   <>
-                    <span aria-hidden="true" className="block h-[22px] w-[22px]" />
+                    <span aria-hidden="true" className="block size-[22px]" />
                     <span
                       aria-hidden="true"
-                      className="lift absolute left-1/2 flex items-center justify-center rounded-full bg-navy text-white"
+                      className="lift absolute left-1/2 flex items-center justify-center rounded-full bg-red text-white-brush"
                       style={{
                         top: "calc(var(--scan-lift) * -1)",
                         width: "var(--scan-size)",
@@ -65,13 +78,15 @@ export function BottomNav({
                         transform: "translateX(-50%)",
                       }}
                     >
-                      <Icon size={26} strokeWidth={1.9} />
+                      <Icon size={26} strokeWidth={1.75} />
                     </span>
                   </>
                 ) : (
-                  <Icon size={22} strokeWidth={1.9} aria-hidden="true" />
+                  <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
                 )}
-                <span className="text-[11px] font-semibold leading-none">{t(label)}</span>
+                <span className={`text-[11px] leading-none ${on ? "font-bold" : "font-medium"}`}>
+                  {t(label)}
+                </span>
               </button>
             </li>
           );

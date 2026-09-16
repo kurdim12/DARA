@@ -136,9 +136,9 @@ export function Report({
           <div className="reveal mt-6 flex flex-col items-center text-center">
             <span
               aria-hidden="true"
-              className="flex size-16 items-center justify-center rounded-full bg-sky text-green"
+              className="flex size-16 items-center justify-center rounded-full bg-line text-green"
             >
-              <CheckCircle2 size={32} strokeWidth={2} />
+              <CheckCircle2 size={32} strokeWidth={1.75} />
             </span>
             <h2 className="t-title mt-4">{t("report.received")}</h2>
           </div>
@@ -212,10 +212,10 @@ export function Report({
                   <span
                     aria-hidden="true"
                     className={`flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 ${
-                      selected ? "border-blue" : "border-line"
+                      selected ? "border-ink" : "border-line"
                     }`}
                   >
-                    {selected && <span className="size-[11px] rounded-full bg-blue" />}
+                    {selected && <span className="size-[11px] rounded-full bg-ink" />}
                   </span>
                 }
               />
@@ -233,7 +233,7 @@ export function Report({
           placeholder={t("report.what_ph")}
           rows={4}
           maxLength={2000}
-          className="mt-2.5 min-h-[120px] w-full resize-none rounded-btn border border-line bg-mist p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-slate"
+          className="mt-2.5 min-h-[120px] w-full resize-none rounded-btn border border-line bg-paper p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-ink-2"
         />
 
         {!anonymous && (
@@ -246,7 +246,7 @@ export function Report({
               value={contact}
               onChange={(e) => setContact(e.target.value)}
               placeholder={t("report.contact_ph")}
-              className="mt-2.5 h-12 w-full rounded-btn border border-line bg-mist px-3.5 text-[15px] font-medium text-ink outline-none placeholder:text-slate"
+              className="mt-2.5 h-12 w-full rounded-btn border border-line bg-paper px-3.5 text-[15px] font-medium text-ink outline-none placeholder:text-ink-2"
             />
           </div>
         )}
@@ -315,9 +315,9 @@ function CommunityFeed() {
         <div key={row.case_number} className="px-4 py-3.5">
           <div className="flex items-center gap-2">
             <Tag>{t(`threat.${row.threat_type}` as TextKey)}</Tag>
-            <span className="t-meta text-slate">{t("report.anonymous_tag")}</span>
+            <span className="t-meta text-ink-2">{t("report.anonymous_tag")}</span>
           </div>
-          <p dir="auto" className="mt-2 line-clamp-2 text-[14px] font-medium leading-snug text-slate">
+          <p dir="auto" className="mt-2 line-clamp-2 text-[14px] font-medium leading-snug text-ink-2">
             {row.description}
           </p>
         </div>

@@ -36,7 +36,7 @@ export function DemoTray({
           latest commit, the phone is holding a cached copy — close the tab or
           the installed app and open it again.
         */}
-        <p className="tnum mt-1 text-[12px] text-slate">
+        <p className="tnum mt-1 text-[12px] text-ink-2">
           build <bdi>{__BUILD_ID__}</bdi>
         </p>
 
@@ -55,12 +55,12 @@ export function DemoTray({
                   dir="auto"
                   className="w-full rounded-row border border-line p-3 text-start text-[15px] leading-snug"
                 >
-                  <span className="block text-[11px] font-bold uppercase tracking-widest text-slate">
+                  <span className="block text-[11px] font-bold uppercase tracking-widest text-ink-2">
                     {item.id}
                     {/* No saved verdict yet means no airplane-mode fallback for
                         this one — worth knowing before a rehearsal. */}
                     {!hasCachedVerdict(item.id) && (
-                      <span className="ms-2 text-slate">no saved result</span>
+                      <span className="ms-2 text-ink-2">no saved result</span>
                     )}
                   </span>
                   <span className="mt-1 line-clamp-2 block">{item.text}</span>
@@ -78,7 +78,7 @@ export function DemoTray({
               setTestMode(e.target.checked);
               setTestModeState(e.target.checked);
             }}
-            className="size-5 accent-[var(--blue)]"
+            className="size-5 accent-[var(--ink)]"
           />
           {t("demo.test_mode")}
         </label>
@@ -95,7 +95,7 @@ export function DemoTray({
         </button>
 
         {cacheMeta.generated_at && (
-          <p className="mt-4 text-[12px] text-slate">
+          <p className="mt-4 text-[12px] text-ink-2">
             <bdi>
               {cacheMeta.model} · {cacheMeta.generated_at}
             </bdi>

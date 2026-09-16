@@ -86,7 +86,7 @@ export function ScannerCard({
   );
 
   return (
-    <div className="lift rounded-scanner border border-line bg-card p-4">
+    <div className="rounded-scanner border border-line bg-card p-4">
       <textarea
         dir={text.length > 0 ? "auto" : undefined}
         value={text}
@@ -96,12 +96,12 @@ export function ScannerCard({
         placeholder={placeholder}
         aria-label={label}
         rows={variant === "home" ? 3 : 4}
-        className="w-full resize-none rounded-btn border border-line bg-mist p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-slate"
+        className="w-full resize-none rounded-btn border border-line bg-paper p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-ink-2"
         style={{ minHeight: variant === "home" ? 84 : 118 }}
       />
 
       {image && (
-        <div className="mt-3 flex items-center gap-3 rounded-btn bg-mist p-2.5">
+        <div className="mt-3 flex items-center gap-3 rounded-btn bg-paper p-2.5">
           <img
             src={previewUrl(image)}
             alt=""
@@ -112,9 +112,9 @@ export function ScannerCard({
             type="button"
             onClick={() => onImage(null)}
             aria-label={t("detect.image_remove")}
-            className="tap flex size-8 items-center justify-center rounded-full text-slate"
+            className="tap flex size-8 items-center justify-center rounded-full text-ink-2"
           >
-            <X size={18} strokeWidth={2} aria-hidden="true" />
+            <X size={18} strokeWidth={1.75} aria-hidden="true" />
           </button>
         </div>
       )}
@@ -131,7 +131,7 @@ export function ScannerCard({
               onClick={() => fileRef.current?.click()}
             />
           </div>
-          <span className="tnum shrink-0 text-[12px] font-semibold text-slate">
+          <span className="tnum shrink-0 text-[12px] font-semibold text-ink-2">
             <bdi>
               {text.length} / {MAX_INPUT_CHARS}
             </bdi>
@@ -142,9 +142,9 @@ export function ScannerCard({
       {submit && <div className="mt-3.5">{submit}</div>}
 
       {variant === "home" ? (
-        <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px] font-semibold text-slate">
+        <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px] font-semibold text-ink-2">
           <button type="button" onClick={() => void paste()} className="tap flex items-center gap-1.5">
-            <ClipboardPaste size={14} strokeWidth={2} aria-hidden="true" />
+            <ClipboardPaste size={14} strokeWidth={1.75} aria-hidden="true" />
             {t("home.paste_clipboard")}
           </button>
           <button
@@ -152,7 +152,7 @@ export function ScannerCard({
             onClick={() => fileRef.current?.click()}
             className="tap flex items-center gap-1.5"
           >
-            <ImageUp size={14} strokeWidth={2} aria-hidden="true" />
+            <ImageUp size={14} strokeWidth={1.75} aria-hidden="true" />
             {reading ? t("detect.loading_image") : t("scan.screenshot")}
           </button>
         </div>
@@ -176,9 +176,9 @@ function OutlinePill({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[34px] items-center gap-1.5 rounded-full border border-line px-3 text-[13px] font-bold text-slate"
+      className="flex h-[34px] items-center gap-1.5 rounded-full border border-line px-3 text-[13px] font-bold text-ink-2"
     >
-      <Icon size={15} strokeWidth={2} aria-hidden="true" />
+      <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
       {label}
     </button>
   );

@@ -44,15 +44,15 @@ export function CaseNumber({ value }: { value: string }) {
         onClick={copy}
         aria-live="polite"
         aria-label={copied ? t("report.copied") : t("report.copy")}
-        // A mist pill on a mist page is not a pill. The card colour and a
+        // A paper pill on a paper page is not a pill. The card colour and a
         // hairline give the number the same shape against the page it sits on.
         className="mt-2 inline-flex min-h-12 items-center gap-3 rounded-full border border-line bg-card px-5 py-2"
       >
         <bdi ref={numberRef} className="tnum text-[28px] font-extrabold tracking-tight">
           {value}
         </bdi>
-        <span className="text-slate" aria-hidden="true">
-          {copied ? <Check size={20} strokeWidth={2.25} /> : <Copy size={20} strokeWidth={2} />}
+        <span className="text-ink-2" aria-hidden="true">
+          {copied ? <Check size={20} strokeWidth={1.75} /> : <Copy size={20} strokeWidth={1.75} />}
         </span>
       </button>
     </div>

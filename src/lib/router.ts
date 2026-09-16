@@ -7,6 +7,8 @@ export type Route =
   | "recover"
   | "shield"
   | "threats"
+  | "radar"
+  | "help"
   | "protect"
   | "learn"
   | "lab";
@@ -16,6 +18,8 @@ const PATHS: Record<Route, string> = {
   scan: "/scan",
   report: "/report",
   threats: "/threats",
+  radar: "/radar",
+  help: "/help",
   protect: "/protect",
   learn: "/learn",
   recover: "/recover",

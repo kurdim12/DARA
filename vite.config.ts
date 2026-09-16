@@ -5,10 +5,10 @@ import tailwindcss from "@tailwindcss/vite";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import { VitePWA } from "vite-plugin-pwa";
 
-// The install prompt and the splash screen. Navy is the app's chrome, mist is
-// the page it opens onto. Keep both in step with src/styles/tokens.css.
-const NAVY = "#0B2A6F";
-const MIST = "#F4F6FB";
+// The install prompt and the splash screen. Paper is the page the app opens
+// onto; red belongs to the icon, not the chrome. Keep both in step with
+// src/styles/tokens.css.
+const PAPER = "#FBF8F8";
 
 /**
  * The commit this bundle was built from, so anyone holding a phone can answer
@@ -43,8 +43,8 @@ export default defineConfig({
         // The app opens in English and the wordmark reads DARA', so the home
         // screen should too. It was still Arabic-first here from the build
         // before the rebuild.
-        name: "DARA'",
-        short_name: "DARA'",
+        name: "درع DARA'",
+        short_name: "درع",
         description: "Check any message, link or number before you act.",
         lang: "en",
         dir: "ltr",
@@ -52,8 +52,8 @@ export default defineConfig({
         scope: "/",
         display: "standalone",
         orientation: "portrait",
-        theme_color: NAVY,
-        background_color: MIST,
+        theme_color: PAPER,
+        background_color: PAPER,
         icons: [
           { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
           { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },

@@ -300,5 +300,13 @@
   "learn.restart": "Start again",
   "home.paste_clipboard": "Paste from clipboard",
   "scan.screenshot": "Scan a screenshot",
-  "shield.verify_tag": "Verify"
+  "shield.verify_tag": "Verify",
+  "nav.radar": "Radar",
+  "nav.help": "Help",
+  "help.title": "Help",
+  "help.sub": "Choose what you need right now.",
+  "help.recover": "Recover",
+  "help.recover_sub": "Step by step, after something has already happened.",
+  "help.shield": "Extortion shield",
+  "help.shield_sub": "Private steps if someone is threatening you."
 }

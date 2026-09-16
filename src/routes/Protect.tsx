@@ -38,14 +38,14 @@ export function Protect({
 
         <div className="mt-4 space-y-2.5">
           <CheckField
-            icon={<Phone size={20} strokeWidth={1.9} aria-hidden="true" />}
+            icon={<Phone size={20} strokeWidth={1.75} aria-hidden="true" />}
             label={t("protect.check_sender")}
             placeholder={t("protect.check_sender_ph")}
             cta={t("protect.check_cta")}
             onSubmit={(value) => onCheck(value, "call")}
           />
           <CheckField
-            icon={<Globe size={20} strokeWidth={1.9} aria-hidden="true" />}
+            icon={<Globe size={20} strokeWidth={1.75} aria-hidden="true" />}
             label={t("protect.check_website")}
             placeholder={t("protect.check_website_ph")}
             cta={t("protect.check_cta")}
@@ -55,7 +55,7 @@ export function Protect({
 
         <div className="mt-7 flex items-baseline justify-between gap-3">
           <FieldLabel>{t("protect.checklist")}</FieldLabel>
-          <span className="t-meta shrink-0 text-slate">
+          <span className="t-meta shrink-0 text-ink-2">
             <bdi className="tnum">
               {done} / {items.length}
             </bdi>{" "}
@@ -71,7 +71,7 @@ export function Protect({
               <IconRow
                 key={item.id}
                 title={
-                  <span className={on ? "text-slate line-through" : undefined}>{item.title}</span>
+                  <span className={on ? "text-ink-2 line-through" : undefined}>{item.title}</span>
                 }
                 sub={item.body}
                 trailing={<Toggle small on={on} onChange={flip} label={item.title} />}
@@ -82,7 +82,7 @@ export function Protect({
 
         <p className="t-sub mt-3">{t("protect.session_note")}</p>
       </Page>
-      <BottomNav active="home" navigate={navigate} />
+      <BottomNav active="protect" navigate={navigate} />
     </>
   );
 }
@@ -106,7 +106,7 @@ function CheckField({
   return (
     <Card>
       <p className="t-row flex items-center gap-2">
-        <span className="text-blue">{icon}</span>
+        <span className="text-ink">{icon}</span>
         {label}
       </p>
       <div className="mt-3 flex items-center gap-2">
@@ -115,14 +115,14 @@ function CheckField({
           value={value}
           onChange={(e) => setValue(e.target.value)}
           placeholder={placeholder}
-          className="h-11 min-w-0 flex-1 rounded-btn border border-line bg-mist px-3.5 text-[15px] font-medium text-ink outline-none placeholder:text-slate"
+          className="h-11 min-w-0 flex-1 rounded-btn border border-line bg-paper px-3.5 text-[15px] font-medium text-ink outline-none placeholder:text-ink-2"
         />
         <button
           type="button"
           disabled={empty}
           onClick={() => onSubmit(value.trim())}
           className={`h-9 shrink-0 rounded-full px-4 text-[14px] font-bold ${
-            empty ? "bg-sky text-slate" : "bg-blue-fill text-white"
+            empty ? "bg-line text-ink-2" : "bg-ink text-white-brush"
           }`}
         >
           {cta}

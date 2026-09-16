@@ -300,5 +300,13 @@
   "learn.restart": "ابدأ من جديد",
   "home.paste_clipboard": "الصق من الحافظة",
   "scan.screenshot": "افحص لقطة شاشة",
-  "shield.verify_tag": "قيد التحقق"
+  "shield.verify_tag": "قيد التحقق",
+  "nav.radar": "الرادار",
+  "nav.help": "حماية",
+  "help.title": "حماية",
+  "help.sub": "اختر ما تحتاجه الآن.",
+  "help.recover": "تعافي",
+  "help.recover_sub": "خطوة بخطوة، بعد أن يكون شيء قد حدث.",
+  "help.shield": "درع الابتزاز",
+  "help.shield_sub": "خطوات خاصة إن كان أحد يهددك."
 }

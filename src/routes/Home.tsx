@@ -58,41 +58,26 @@ export function Home({
   return (
     <>
       <BleedPage>
-        {/* The hero. The only navy surface in the app, and the reason the
-            status bar is navy on this screen. A gradient and one soft light
-            rather than a flat slab — the difference between a brand and a
-            colour swatch. */}
+        {/* The mark, the question, and the box you paste into. Paper, not a
+            coloured slab: red belongs on the tile, the one action, a danger
+            verdict, a flagged span and the shield — nowhere else. */}
         <div
-          className="relative overflow-hidden text-white"
           style={{
-            background:
-              "linear-gradient(160deg, var(--navy) 0%, var(--navy) 38%, var(--navy-deep) 100%)",
             paddingTop: "max(54px, env(safe-area-inset-top))",
             paddingInline: 20,
-            paddingBottom: 80,
+            paddingBottom: 20,
           }}
         >
-          <span
-            aria-hidden="true"
-            className="pointer-events-none absolute -end-20 -top-24 size-72 rounded-full"
-            style={{
-              background:
-                "radial-gradient(circle, rgba(255,255,255,0.13) 0%, rgba(255,255,255,0) 70%)",
-            }}
-          />
-
-          <div className="relative flex items-start justify-between gap-3">
+          <div className="flex items-start justify-between gap-3">
             <Logo onLongPress={() => setTrayOpen(true)} />
-            <Pills onNavy />
+            <Pills />
           </div>
 
-          <h1 className="t-hero relative mt-7">{t("home.h1")}</h1>
-          <p className="relative mt-2.5 max-w-[310px] text-[14.5px] font-medium leading-[1.45] text-white/75">
-            {t("home.sub")}
-          </p>
+          <h1 className="t-hero mt-6">{t("home.h1")}</h1>
+          <p className="t-body mt-2 max-w-[310px] text-ink-2">{t("home.sub")}</p>
         </div>
 
-        <Gutter className="relative z-10 -mt-14">
+        <Gutter>
           <ScannerCard
             variant="home"
             text={text}
@@ -143,10 +128,10 @@ export function Home({
             <button
               type="button"
               onClick={() => navigate("threats")}
-              className="flex min-h-12 w-full items-center justify-center gap-1 text-[15px] font-bold text-blue"
+              className="flex min-h-12 w-full items-center justify-center gap-1 text-[15px] font-bold text-ink"
             >
               {t("home.threats_all")}
-              <ChevronRight size={16} strokeWidth={2.25} className="rtl:rotate-180" aria-hidden="true" />
+              <ChevronRight size={16} strokeWidth={1.75} className="rtl:rotate-180" aria-hidden="true" />
             </button>
           </ListCard>
 
@@ -154,10 +139,10 @@ export function Home({
           <ol className="mt-4 space-y-4">
             {(["how.1", "how.2", "how.3"] as TextKey[]).map((key, index) => (
               <li key={key} className="flex gap-3.5">
-                <span className="tnum w-5 shrink-0 pt-0.5 text-[15px] font-extrabold leading-tight text-blue">
+                <span className="tnum w-5 shrink-0 pt-0.5 text-[15px] font-extrabold leading-tight text-ink">
                   <bdi>{index + 1}</bdi>
                 </span>
-                <p className="t-body flex-1 text-slate">{t(key)}</p>
+                <p className="t-body flex-1 text-ink-2">{t(key)}</p>
               </li>
             ))}
           </ol>

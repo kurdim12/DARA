@@ -1,95 +1,87 @@
 /*
- * The approved palette. Every colour in the app resolves to one of these; no
- * screen defines its own.
+ * The درع palette, sampled from the logo file itself
+ * (public/brand/dara-mark.png). The hex is the truth; the closest Pantone
+ * reference for the red is 186 C.
  *
- * Meaning is fixed: navy is the brand ground, blue is the one interactive
- * colour, red is danger, amber is caution, green is only ever a Safe verdict.
- * Nothing else is coloured.
+ * Red is the brand and the alarm, and it is allowed in exactly five places:
+ * the logo tile, the one primary action on a screen, a danger verdict, a
+ * flagged span inside a message, and the extortion shield. Nowhere else.
+ * There is no blue in this app.
  */
 :root {
-  --navy: #0b2a6f;
-  --navy-deep: #061539;
-  --blue: #1d5bd6;
-  --sky: #e9f0ff;
-  --sky-2: #d6e3ff;
-  --ink: #14213d;
-  --slate: #5b6478;
-  --mist: #eef1f7;
+  --red: #c40c29;
+  --red-deep: #9e0a21;
+  --red-soft: #fbe9ec;
+  /* The brush white. Text on red is this, never pure #FFFFFF. */
+  --white: #f7f4f3;
+  --paper: #fbf8f8;
   --card: #ffffff;
-  --line: #e6eaf2;
-  --red: #d92d20;
-  --red-soft: #feecea;
-  --amber: #f59e0b;
-  --amber-soft: #fff4e0;
-  --green: #12805c;
+  --ink: #141414;
+  --ink-2: #5a5654;
+  --line: #eae4e2;
+  /* "Suspicious" only. */
+  --amber: #b7791f;
+  /* "Looks clean" only. */
+  --green: #2e6b4f;
 
-  --shadow-navy: 0 16px 40px rgba(11, 42, 111, 0.18);
-  --shadow-red: 0 16px 40px rgba(217, 45, 32, 0.22);
-
-  /*
-   * Fills and inks. The palette above is unchanged; these say which member of
-   * it to use where, because one hex cannot be both a surface and small text
-   * on that surface and clear 4.5:1 in both themes.
-   *
-   * A jury reads this phone over someone's shoulder. A label it cannot read is
-   * a label that is not there.
-   */
-
-  /* Solid surfaces that carry white text. Fixed across themes, like --navy:
-     the dark variants of red/blue/green are lighter so they can be read AS
-     text on a dark page, and white on them falls to 3.5:1 or worse. */
-  --blue-fill: #1d5bd6;
-  --red-fill: #d92d20;
-  --green-fill: #12805c;
-
-  /* Small text on a tinted surface of the same hue. */
-  --blue-ink: #1d5bd6; /* on --sky: chips, tags, step numbers */
-  --red-ink: #b42318; /* on --red-soft: channel tags, error lines */
-  --amber-ink: #b45309; /* on --card/--mist: the Verify pill */
-  --green-ink: #0f6b4e; /* green text on the page ground, which is not white */
-  --amber-on-white: #b45309; /* the danger card's button is white in both themes */
-  --on-amber: #14213d; /* text on a solid --amber fill, both themes */
-  /*
-   * The label on a disabled button. White on the pale light --sky-2 already
-   * reads as "not yet"; on the dark one it reads as a live button, which is
-   * the one thing a disabled primary must never do.
-   */
-  --disabled-ink: #ffffff;
+  /* The one shadow in the app, under the raised Scan button. */
+  --shadow-scan: 0 10px 24px rgba(196, 12, 41, 0.34);
 
   color-scheme: light;
 }
 
 :root[data-theme="dark"] {
-  --navy: #0b2a6f;
-  --navy-deep: #061539;
-  --blue: #4f86f0;
-  --sky: #16264a;
-  --sky-2: #1f3566;
-  --ink: #f3f5fa;
-  --slate: #a3aabb;
-  --mist: #0e1220;
-  --card: #171c2b;
-  --line: #262d40;
-  --red: #f0574c;
-  --red-soft: #3a1e1e;
-  --amber: #f5b341;
-  --amber-soft: #3a2e14;
-  --green: #3cc48f;
+  --red: #c40c29;
+  --red-deep: #9e0a21;
+  --red-soft: #3a1a1f;
+  --white: #f7f4f3;
+  --paper: #141212;
+  --card: #1c1919;
+  --ink: #f2eeec;
+  --ink-2: #b3aca9;
+  --line: #2c2727;
+  --amber: #d99b3c;
+  --green: #4f9c78;
 
-  --shadow-navy: 0 16px 40px rgba(0, 0, 0, 0.45);
-  --shadow-red: 0 16px 40px rgba(0, 0, 0, 0.45);
-
-  --blue-fill: #1d5bd6;
-  --red-fill: #d92d20;
-  --green-fill: #12805c;
-
-  --blue-ink: #7fa8f7;
-  --red-ink: #f5837b;
-  --amber-ink: var(--amber);
-  --green-ink: var(--green);
-  --amber-on-white: #b45309;
-  --on-amber: #14213d;
-  --disabled-ink: rgba(255, 255, 255, 0.38);
+  --shadow-scan: 0 10px 24px rgba(0, 0, 0, 0.55);
 
   color-scheme: dark;
+}
+
+/*
+ * Contrast partners. The palette above is unchanged; these say which member of
+ * it to use where, because one hex cannot be both a surface and small text on
+ * that surface. Both were measured, light and dark.
+ *
+ * --red is right as a surface in both themes — --white on it is 5.6:1 — but as
+ * TEXT on the dark card it falls to 2.85:1, so dark lifts it. --amber is 3.4:1
+ * as text on paper, so light darkens it. --green needs neither: 6.0:1 light,
+ * 5.7:1 dark.
+ */
+:root {
+  --red-ink: var(--red); /* red text and icons: 6.1:1 on --card */
+  --amber-ink: #8a5a14;
+
+  /*
+   * Verdict surfaces. Fixed across themes, the way --red already is: the dark
+   * theme lifts --amber and --green so they can be read AS text on a dark
+   * page, and a lifted fill carries no legible label — white on the dark amber
+   * is 2.2:1. The suspicious card takes ink, the clean one takes the brush
+   * white, and both read the same in either theme.
+   */
+  --amber-fill: #b7791f;
+  --green-fill: #2e6b4f;
+  --on-amber: #141414;
+  /* The danger card's button is the brush white in BOTH themes, so amber text
+     on it needs the dark amber in both — the lifted one is 2.2:1 there. */
+  --amber-on-white: #8a5a14;
+}
+
+:root[data-theme="dark"] {
+  --red-ink: #ee5560; /* 5.1:1 on --card, 4.5:1 on --red-soft */
+  --amber-ink: var(--amber);
+  --amber-fill: #b7791f;
+  --green-fill: #2e6b4f;
+  --on-amber: #141414;
+  --amber-on-white: #8a5a14;
 }

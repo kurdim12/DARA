@@ -11,6 +11,7 @@ import { Protect } from "./routes/Protect";
 import { Learn } from "./routes/Learn";
 import { Recover } from "./routes/Recover";
 import { Shield } from "./routes/Shield";
+import { Help } from "./routes/Help";
 import { Lab } from "./routes/Lab";
 
 export default function App() {
@@ -58,7 +59,12 @@ function Screens() {
         />
       );
     case "threats":
+    // Radar lands on Known Threats until Phase 2 folds the documented
+    // campaigns into it. Every tab reaches a real screen; none is a stub.
+    case "radar":
       return <Threats navigate={navigate} />;
+    case "help":
+      return <Help navigate={navigate} />;
     case "report":
       return <Report navigate={navigate} prefill={prefill} />;
     case "protect":

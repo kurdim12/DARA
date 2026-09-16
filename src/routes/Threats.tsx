@@ -29,7 +29,7 @@ export function Threats({ navigate }: { navigate: (route: Route) => void }) {
           ))}
         </ListCard>
       </Page>
-      <BottomNav active="home" navigate={navigate} />
+      <BottomNav active="threats" navigate={navigate} />
     </>
   );
 }

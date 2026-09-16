@@ -165,7 +165,7 @@ export function Scan({
           <ul className="mt-2">
             {WHAT.map(({ key, Icon }) => (
               <li key={key} className="flex items-center gap-3 py-2">
-                <Icon size={20} strokeWidth={1.9} className="shrink-0 text-blue" aria-hidden="true" />
+                <Icon size={20} strokeWidth={1.75} className="shrink-0 text-ink" aria-hidden="true" />
                 <span className="t-body">{t(key)}</span>
               </li>
             ))}
@@ -252,9 +252,9 @@ function Result({
                 <li key={index} className="flex items-start gap-3">
                   <Check
                     size={18}
-                    strokeWidth={2.75}
+                    strokeWidth={1.75}
                     aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-blue"
+                    className="mt-0.5 shrink-0 text-ink"
                   />
                   <span dir="auto" className="t-body flex-1">
                     {action}
@@ -274,7 +274,7 @@ function Result({
           <OutlineButton onClick={onAgain}>{t("result.scan_another")}</OutlineButton>
         </div>
 
-        <p className="mt-5 text-center text-[12px] font-semibold text-slate">
+        <p className="mt-5 text-center text-[12px] font-semibold text-ink-2">
           {t("result.powered")}
         </p>
       </Page>

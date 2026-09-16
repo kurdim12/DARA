@@ -49,7 +49,7 @@ const SITUATION_ICON: Record<string, LucideIcon> = {
 
 /** The file's own tone names, in the palette's. */
 const TONE: Record<Contact["tone"], IconTone> = {
-  primary: "blue",
+  primary: "neutral",
   warn: "amber",
   danger: "red",
 };
@@ -86,8 +86,8 @@ export function Shield({
       <Page>
         <Header title={t("shield.title")} />
 
-        <div className="lift-red rounded-scanner bg-red-fill px-4 py-4 text-white">
-          <SectionLabel className="flex items-center gap-2 text-white">
+        <div className="rounded-scanner bg-red px-4 py-4 text-white-brush">
+          <SectionLabel className="flex items-center gap-2 text-white-brush">
             <span aria-hidden="true" className="pulse-dot size-2 rounded-full bg-white" />
             {t("shield.danger_title")}
           </SectionLabel>
@@ -96,15 +96,15 @@ export function Shield({
             {emergency?.number ? (
               <a
                 href={`tel:${emergency.number.replace(/\s/g, "")}`}
-                className="flex h-12 w-full items-center justify-center gap-2 rounded-btn bg-white px-5 text-[16px] font-extrabold text-red-fill"
+                className="flex h-12 w-full items-center justify-center gap-2 rounded-btn bg-white-brush px-5 text-[16px] font-extrabold text-red"
               >
-                <Phone size={18} strokeWidth={2.25} aria-hidden="true" />
+                <Phone size={18} strokeWidth={1.75} aria-hidden="true" />
                 {t("shield.call_now")}
               </a>
             ) : (
               // No number has been checked against an official source, so there
               // is nothing to dial. The card still says what it is for.
-              <p className="flex min-h-12 w-full items-center justify-center rounded-btn bg-white px-5 py-2 text-center text-[15px] font-extrabold text-amber-on-white">
+              <p className="flex min-h-12 w-full items-center justify-center rounded-btn bg-white-brush px-5 py-2 text-center text-[15px] font-extrabold text-amber-on-white">
                 {t("shield.pending_emergency")}
               </p>
             )}
@@ -124,9 +124,9 @@ export function Shield({
                 line.number ? (
                   <a
                     href={`tel:${line.number.replace(/\s/g, "")}`}
-                    className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-full bg-navy px-3.5 text-[13px] font-bold text-white"
+                    className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-bold text-white-brush"
                   >
-                    <Phone size={15} strokeWidth={2.25} aria-hidden="true" />
+                    <Phone size={15} strokeWidth={1.75} aria-hidden="true" />
                     {t("shield.call")}
                   </a>
                 ) : (
@@ -176,8 +176,8 @@ export function Shield({
           <Card className="mt-6 flex items-start gap-3">
             <FileText
               size={20}
-              strokeWidth={1.9}
-              className="mt-0.5 shrink-0 text-blue"
+              strokeWidth={1.75}
+              className="mt-0.5 shrink-0 text-ink"
               aria-hidden="true"
             />
             <p className="t-sub flex-1">{law}</p>
@@ -194,7 +194,7 @@ function AnonNote() {
   const { t } = useI18n();
   return (
     <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[12.5px] font-semibold leading-snug text-green-ink">
-      <EyeOff size={14} strokeWidth={2} aria-hidden="true" className="shrink-0" />
+      <EyeOff size={14} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
       {t("shield.anon_note")}
     </p>
   );
@@ -230,14 +230,14 @@ function Steps({
             <button
               type="button"
               onClick={onExit}
-              className="flex h-[34px] shrink-0 items-center rounded-full bg-navy px-3.5 text-[13px] font-bold text-white"
+              className="flex h-[34px] shrink-0 items-center rounded-full bg-ink px-3.5 text-[13px] font-bold text-white-brush"
             >
               {t("shield.exit")}
             </button>
           }
         />
 
-        <p className="t-body text-slate">{situation.intro}</p>
+        <p className="t-body text-ink-2">{situation.intro}</p>
 
         <div className="mt-6">
           <Stepper steps={situation.steps.map((step) => ({ body: step }))} />

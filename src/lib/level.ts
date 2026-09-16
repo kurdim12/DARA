@@ -27,14 +27,14 @@ export const LEVEL_LABEL: Record<Level, TextKey> = {
 };
 
 /**
- * Colour is meaning here: red is danger, amber is caution, blue is a low
- * finding and green is only ever Safe. The verdict card is a solid fill, so
- * each level also names the text colour that is legible on it — white
- * everywhere except amber, which no white text clears 4.5:1 against.
+ * Colour is meaning here, and there are only three: red is a scam, amber is
+ * suspicious — which is where the brief maps both medium and low — and green
+ * is only ever a clean result. Each level names the text colour legible on its
+ * fill; amber takes ink, because nothing white clears 4.5:1 on it.
  */
 export const LEVEL_FILL: Record<Level, { bg: string; text: string }> = {
-  high: { bg: "bg-red-fill", text: "text-white" },
-  medium: { bg: "bg-amber", text: "text-on-amber" },
-  low: { bg: "bg-blue-fill", text: "text-white" },
-  safe: { bg: "bg-green-fill", text: "text-white" },
+  high: { bg: "bg-red", text: "text-white-brush" },
+  medium: { bg: "bg-amber-fill", text: "text-on-amber" },
+  low: { bg: "bg-amber-fill", text: "text-on-amber" },
+  safe: { bg: "bg-green-fill", text: "text-white-brush" },
 };

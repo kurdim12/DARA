@@ -71,7 +71,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
             <OutlineButton onClick={restart}>{t("learn.restart")}</OutlineButton>
           </div>
         </Page>
-        <BottomNav active="home" navigate={navigate} />
+        <BottomNav active="learn" navigate={navigate} />
       </>
     );
   }
@@ -97,7 +97,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
             <span
               key={item.id}
               aria-hidden="true"
-              className={`h-1.5 w-1.5 rounded-full ${dot === index ? "bg-blue" : "bg-line"}`}
+              className={`h-1.5 w-1.5 rounded-full ${dot === index ? "bg-ink" : "bg-line"}`}
             />
           ))}
         </div>
@@ -108,7 +108,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
           <Tag>{t("type.message")}</Tag>
           <p
             dir="auto"
-            className="mt-2.5 whitespace-pre-wrap break-words rounded-btn bg-mist p-3.5 text-[15px] font-medium leading-relaxed"
+            className="mt-2.5 whitespace-pre-wrap break-words rounded-btn bg-paper p-3.5 text-[15px] font-medium leading-relaxed"
           >
             {question.message}
           </p>
@@ -137,9 +137,9 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
               className={`t-row flex items-center gap-2 ${right ? "text-green-ink" : "text-red-ink"}`}
             >
               {right ? (
-                <Check size={18} strokeWidth={2.25} aria-hidden="true" />
+                <Check size={18} strokeWidth={1.75} aria-hidden="true" />
               ) : (
-                <X size={18} strokeWidth={2.25} aria-hidden="true" />
+                <X size={18} strokeWidth={1.75} aria-hidden="true" />
               )}
               {t(right ? "learn.correct" : "learn.incorrect")}
             </p>
@@ -157,7 +157,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
           </div>
         )}
       </Page>
-      <BottomNav active="home" navigate={navigate} />
+      <BottomNav active="learn" navigate={navigate} />
     </>
   );
 }
@@ -177,7 +177,7 @@ function ChoiceButton({
   onClick: () => void;
 }) {
   const outline = tone === "red" ? "border-red text-red-ink" : "border-green text-green";
-  const filled = tone === "red" ? "bg-red-fill text-white" : "bg-green-fill text-white";
+  const filled = tone === "red" ? "bg-red text-white-brush" : "bg-green-fill text-white-brush";
   return (
     <button
       type="button"
