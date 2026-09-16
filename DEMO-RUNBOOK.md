@@ -104,9 +104,6 @@ contact field, because the app does not ask for one. Pick the channel, leave
 Submit. The case number comes up large. Then read this out, slowly:
 
 > بلاغك محفوظ في منصة درع (نسخة تجريبية). لم يُرسَل إلى أي جهة. افتح تبويب
-> الحماية لتعرف كيف تصل إلى الجهة المعنية بنفسك.
-
-> بلاغك محفوظ في منصة درع (نسخة تجريبية). لم يُرسَل إلى أي جهة. افتح تبويب
 > «تعافي» لتعرف كيف تصل إلى الجهة المعنية بنفسك.
 
 *Your report is stored on the DARA' platform (pilot). It has not been forwarded
