@@ -154,6 +154,50 @@ Token usage is now captured and returned (`usage.input_tokens` /
 `usage.output_tokens`) so cost per image call is measured rather than
 estimated — it was not recorded anywhere before.
 
+## Second run, after the fix — and the cost question
+
+Run `35132945381`, same six fixtures against the deployed Worker at `a6bc1a3`.
+6/6 correct again, transcriptions accurate again.
+
+| # | Wall | Verdict | usage in/out |
+|---|---|---|---|
+| 2 | 12,803 ms | `scam` 98 · `fake_job` | 133 / 464 |
+| 3 | 14,055 ms | `scam` 98 · `impersonation_bank` | 133 / 483 |
+| 4 | 10,505 ms | `scam` 99 · `otp_theft` | 133 / 488 |
+| 5 | 8,799 ms | `likely_safe` 90 | 133 / 390 |
+| 6 | 9,764 ms | `likely_safe` 90 | 133 / 395 |
+
+### Eleven live scans across both runs
+
+`7,908 · 8,799 · 9,500 · 9,764 · 10,505 · 11,391 · 11,504 · 11,544 · 12,803 ·
+13,400 · 14,055 ms` — median 11,391, max 14,055.
+
+- **Over a 12 s wall: 3 of 11 (27%).**
+- Over the current 25 s wall: 0 of 11, with 10.9 s of headroom.
+
+The second run's slowest was 14.1 s, higher than the first run's 13.4 s. The
+case against 12 s is stronger with more samples, not weaker.
+
+### Cost per image call — NOT established, and here is why
+
+`usage.input_tokens` comes back as **133 for every single image**, identical
+across a 31 KB fixture and a 4 KB one. A screenshot cannot be 133 input tokens;
+that is roughly the text prompt on its own. The gateway is not reporting image
+tokens in the Anthropic-shaped `usage` field.
+
+The image is definitely reaching the model — each transcription is specific and
+correct — so this is an accounting gap, not a delivery one. **Cost per image
+call therefore cannot be honestly computed from what the API returns here.**
+Output tokens do look real: 390-488 per call, consistent with the verdict size.
+
+Two ways to get the real number, neither guessed:
+1. The OpenRouter dashboard's activity page, which only the account holder can
+   open, shows actual charge per generation.
+2. OpenRouter's `GET /api/v1/generation?id=…` returns the real cost for a
+   completion id. Capturing that id and querying it would make cost a
+   measurement. That is a change worth making in Phase 2, where the whole point
+   is comparing two providers on cost.
+
 ### Fixture caveat
 
 These are **rendered**, not captured from a real phone: crisp text, no camera
