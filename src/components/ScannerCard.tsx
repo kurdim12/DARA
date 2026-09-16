@@ -125,8 +125,8 @@ export function ScannerCard({
       {chips && <div className="mt-3">{chips}</div>}
 
       {variant === "scan" ? (
-        <div className="mt-3 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
+          <div className="flex min-w-0 items-center gap-2">
             <OutlinePill Icon={ClipboardPaste} label={t("scan.paste")} onClick={() => void paste()} />
             <OutlinePill
               Icon={ImageUp}
@@ -186,7 +186,7 @@ function OutlinePill({
     <button
       type="button"
       onClick={onClick}
-      className="flex h-[34px] items-center gap-1.5 rounded-full border border-line px-3 text-[13px] font-bold text-ink-2"
+      className="flex h-[34px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-line px-3 text-[13px] font-bold text-ink-2"
     >
       <Icon size={15} strokeWidth={1.75} aria-hidden="true" />
       {label}
