@@ -23,7 +23,7 @@
 const CATALOGUE = "https://openrouter.ai/api/v1/models";
 
 function parseArgs(argv) {
-  const args = { vendor: null, maxIn: null, json: false, top: false, limit: 40 };
+  const args = { vendor: null, maxIn: null, json: false, top: false, limit: 40, ocr: false, match: null };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--vendor") args.vendor = argv[++i].split(",").map((v) => v.trim());
     else if (argv[i] === "--max-in") args.maxIn = Number(argv[++i]);
@@ -32,6 +32,10 @@ function parseArgs(argv) {
     // the catalogue offers, and the frontier tier is what "best model" means.
     else if (argv[i] === "--top") args.top = true;
     else if (argv[i] === "--limit") args.limit = Number(argv[++i]);
+    // An OCR provider only ever transcribes. It is never handed a tool, so
+    // requiring tool support would hide models that can do the job.
+    else if (argv[i] === "--ocr") args.ocr = true;
+    else if (argv[i] === "--match") args.match = argv[++i].toLowerCase();
   }
   return args;
 }
@@ -42,13 +46,14 @@ function perMillion(value) {
   return Number.isFinite(n) ? n * 1_000_000 : null;
 }
 
-export function candidates(models, { vendor = null, maxIn = null, top = false } = {}) {
+export function candidates(models, { vendor = null, maxIn = null, top = false, ocr = false, match = null } = {}) {
   return models
     .filter((m) => {
       const params = m.supported_parameters ?? [];
       const inputs = m.architecture?.input_modalities ?? [];
-      if (!params.includes("tools")) return false;
+      if (!ocr && !params.includes("tools")) return false;
       if (!inputs.includes("image")) return false;
+      if (match && !String(m.id).toLowerCase().includes(match)) return false;
       if (vendor && !vendor.includes(String(m.id).split("/")[0])) return false;
       const input = perMillion(m.pricing?.prompt);
       if (maxIn !== null && (input === null || input > maxIn)) return false;
@@ -87,7 +92,13 @@ async function main() {
     process.exit(1);
   }
   const { data } = await res.json();
-  const rows = candidates(data, { vendor: args.vendor, maxIn: args.maxIn, top: args.top });
+  const rows = candidates(data, {
+    vendor: args.vendor,
+    maxIn: args.maxIn,
+    top: args.top,
+    ocr: args.ocr,
+    match: args.match,
+  });
 
   if (args.json) {
     console.log(JSON.stringify(rows, null, 2));
@@ -95,7 +106,11 @@ async function main() {
   }
 
   console.log(`${data.length} models in the catalogue.`);
-  console.log(`${rows.length} of them support both tool calling and image input.\n`);
+  console.log(
+    args.ocr
+      ? `${rows.length} of them accept image input${args.match ? ` and match "${args.match}"` : ""}.\n`
+      : `${rows.length} of them support both tool calling and image input.\n`,
+  );
   console.log(
     args.top
       ? `Most expensive first — the frontier tier, which is what "best" usually means.\n`

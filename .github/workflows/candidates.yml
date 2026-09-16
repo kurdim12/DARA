@@ -23,6 +23,13 @@ on:
         description: Show the frontier tier (most expensive first) rather than the cheapest
         type: boolean
         default: true
+      ocr:
+        description: Only require image input, not tool calling (for OCR providers)
+        type: boolean
+        default: false
+      match:
+        description: Only ids containing this substring (blank = all)
+        default: ""
 
 jobs:
   list:
@@ -38,9 +45,13 @@ jobs:
           VENDOR: ${{ inputs.vendor }}
           MAX_IN: ${{ inputs.max_in }}
           TOP: ${{ inputs.top }}
+          OCR: ${{ inputs.ocr }}
+          MATCH: ${{ inputs.match }}
         run: |
           ARGS=""
           [ -n "$VENDOR" ] && ARGS="$ARGS --vendor $VENDOR"
           [ -n "$MAX_IN" ] && ARGS="$ARGS --max-in $MAX_IN"
           [ "$TOP" = "true" ] && ARGS="$ARGS --top"
+          [ "$OCR" = "true" ] && ARGS="$ARGS --ocr"
+          [ -n "$MATCH" ] && ARGS="$ARGS --match $MATCH"
           node scripts/candidates.mjs $ARGS | tee "$GITHUB_STEP_SUMMARY"
