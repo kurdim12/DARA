@@ -175,3 +175,46 @@ export async function fetchRadar(): Promise<RadarData> {
   if (!res.ok) throw new AppError("radar.error");
   return (await res.json()) as RadarData;
 }
+
+export interface JordanLayer {
+  official_match?: { name_ar: string; name_en: string };
+  claimed_entity_mismatch?: { entity_id: string; official_domain: string };
+  domain_age_days?: number | null;
+  urlhaus_listed?: boolean | null;
+  tld?: string;
+  tld_risk?: "high" | "medium" | "low";
+  reports_count?: number;
+  last_reported_at?: string;
+  campaign_id?: string;
+  operator?: "zain" | "orange" | "umniah" | "landline" | "foreign" | "unknown";
+}
+
+export interface LookupResult {
+  query: string;
+  kind: "domain" | "number" | "alias" | "unknown";
+  hint: "official" | "known_scam" | "suspicious" | "unknown";
+  jordan_layer: JordanLayer;
+}
+
+/** Check one domain, number or alias against what DARA' can actually confirm. */
+export async function lookup(query: string): Promise<LookupResult> {
+  const q = query.trim();
+  if (!q) throw new AppError("radar.bad_query");
+  let res: Response;
+  try {
+    res = await fetch("/api/lookup", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ q }),
+    });
+  } catch {
+    throw new AppError(
+      typeof navigator !== "undefined" && navigator.onLine === false
+        ? "error.offline"
+        : "radar.lookup_error",
+    );
+  }
+  if (res.status === 400) throw new AppError("radar.bad_query");
+  if (!res.ok) throw new AppError(errorKeyForStatus(res.status));
+  return (await res.json()) as LookupResult;
+}
