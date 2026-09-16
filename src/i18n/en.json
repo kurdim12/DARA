@@ -79,6 +79,7 @@
   "educate.try": "Try a check",
   "error.bad_image": "That image type isn't supported. Use JPG, PNG, or WebP.",
   "error.generic": "The check couldn't finish. Try again.",
+  "error.image_slow": "Checking the screenshot took too long. Try again, or paste the message text instead.",
   "error.image_too_large": "That image is too large. Use one under 3 MB.",
   "error.offline": "No internet connection. Checking needs a connection.",
   "error.rate_limited": "That's a lot of checks. Wait a minute and try again.",

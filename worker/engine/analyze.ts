@@ -147,6 +147,12 @@ export function buildRequestBody(
 export interface AnalyzeResult extends PostValidated {
   model: string;
   latency_ms: number;
+  /**
+   * What the call actually consumed. Reported so cost per scan — an image one
+   * especially, where the picture dominates the input — is a measurement
+   * rather than an estimate. Token counts name no vendor.
+   */
+  usage: { input_tokens: number; output_tokens: number };
 }
 
 async function runOne(args: AnalyzeArgs, budgetMs: number): Promise<AnalyzeResult> {
@@ -201,7 +207,15 @@ async function runOne(args: AnalyzeArgs, budgetMs: number): Promise<AnalyzeResul
   const validated = postValidate(toolUse.input as RawVerdict, args.text, {
     hasImage: Boolean(args.image),
   });
-  return { ...validated, model: args.model, latency_ms };
+  return {
+    ...validated,
+    model: args.model,
+    latency_ms,
+    usage: {
+      input_tokens: message.usage?.input_tokens ?? 0,
+      output_tokens: message.usage?.output_tokens ?? 0,
+    },
+  };
 }
 
 /**

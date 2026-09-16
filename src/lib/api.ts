@@ -13,6 +13,16 @@ import type { TextKey } from "../i18n";
 /** A live check that takes longer than this falls back to a saved result. */
 const SLOW_MS = 12_000;
 
+/**
+ * The client's backstop for a screenshot scan.
+ *
+ * Deliberately longer than the Worker's own image wall so the Worker's
+ * reasoned error wins the race and this only fires when nothing answers.
+ * Six live screenshots measured 7.9s-13.4s end to end on a datacentre
+ * connection, so anything near 12s here would cut off scans that work.
+ */
+const IMAGE_CEILING_MS = 30_000;
+
 export class AppError extends Error {
   constructor(readonly key: TextKey) {
     super(key);
@@ -68,19 +78,30 @@ export async function analyze(
   image?: AnalyzeImage,
   type?: AnalysisType,
 ): Promise<AnalyzeResponse> {
-  // A screenshot has no saved verdict behind it and takes longer to read, so
-  // it goes straight through with no race against the slow mark.
+  // A screenshot has no saved verdict behind it, so there is nothing to race
+  // against the slow mark — a cached fallback cannot exist for a picture
+  // nobody has checked before. What it does need is a ceiling: this path used
+  // to build an AbortController and never abort it, so a stalled connection
+  // left a spinner running with no end and no message.
+  //
+  // The ceiling sits ABOVE the Worker's own image wall on purpose. The Worker
+  // gives up first and answers with a reason the screen can show; this timer
+  // is only the backstop for a request that never gets an answer at all.
   if (image) {
     const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), IMAGE_CEILING_MS);
     try {
       return await postAnalyze(text, lang, channel, controller.signal, image, type);
     } catch (error) {
       if (error instanceof AppError) throw error;
+      if (controller.signal.aborted) throw new AppError("error.image_slow");
       throw new AppError(
         typeof navigator !== "undefined" && navigator.onLine === false
           ? "error.offline"
           : "error.generic",
       );
+    } finally {
+      clearTimeout(timer);
     }
   }
 

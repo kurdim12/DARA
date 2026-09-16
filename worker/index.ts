@@ -283,6 +283,7 @@ app.post("/api/analyze", async (c) => {
       input_kind: image ? "image" : "text",
       model: result.model,
       latency_ms: result.latency_ms,
+      usage: result.usage,
     };
 
     if (result.extracted_text) response.extracted_text = result.extracted_text;

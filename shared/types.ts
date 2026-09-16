@@ -185,6 +185,8 @@ export interface AnalyzeResponse {
   pressure_methods: PressureMethod[];
   /** Screenshots only: what the engine could actually read, and what it saw. */
   extracted_text?: string;
+  /** Tokens the call consumed. No vendor name, just the counts. */
+  usage?: { input_tokens: number; output_tokens: number };
   evidence_items?: EvidenceItem[];
   url_analysis?: UrlAnalysis;
   known_threat_match?: KnownThreatMatch;
