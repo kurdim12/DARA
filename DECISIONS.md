@@ -392,3 +392,17 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   used by both `/api/health` and the scan, so presence and use can never
   disagree — health green with the scan 503ing is the worst failure this could
   have on demo day. A deployment carrying the old secret keeps working.
+
+## فحص moves to the middle
+
+- **Tab order is now الرئيسية · بلاغاتي · فحص · الرادار · تعافي.** Phase 1 rendered
+  the brief's ordered list, which put فحص second, and flagged that the same
+  paragraph called it "the raised centre button" — the brief contradicted
+  itself and only Abdelrahman could say which half was meant. He chose the
+  centre. A raised red circle sitting 78px off centre reads as a bug to
+  everyone who never saw the list.
+- **Measured, not assumed: 0.0px off centre in both directions.** The row is a
+  flex row, so RTL mirrors it for free and only فحص's neighbours swap sides. A
+  test pins the order, pins that the raised tab is the exact middle of an
+  odd-length row, and pins that BottomNav and DEMO-RUNBOOK.md describe the same
+  bar — the runbook was still on the old order and the test caught it.

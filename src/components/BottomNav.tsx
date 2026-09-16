@@ -4,25 +4,26 @@ import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
 /**
- * الرئيسية · فحص · بلاغاتي · الرادار · تعافي.
+ * الرئيسية · بلاغاتي · فحص · الرادار · تعافي.
  *
  * Scan is raised out of the bar in the brand red — 58px, lifted 30px — because
  * it is what the app is for and a thumb should find it without looking.
  *
- * It is NOT centred, and that is the brief's own conflict rather than a slip:
- * the tab order it gives puts فحص second of five, while the same paragraph
- * calls it "the raised centre button". Slot two is what the ordered list says,
- * so that is what this renders; moving it to slot three would centre it and
- * reorder the list. Flagged at the Phase 1 gate rather than decided here.
+ * It sits at slot three of five, so it is genuinely centred. The brief
+ * contradicted itself here: its ordered list put فحص second while the same
+ * paragraph called it "the raised centre button". Phase 1 rendered the list
+ * and flagged it; Abdelrahman chose the centre. A raised button 78px off
+ * centre reads as a mistake to everyone who has never seen the list.
  *
  * بلاغاتي holds the report form and the case numbers this device has sent.
  * تعافي holds the recovery steps, درع الابتزاز and the verified numbers. The
- * row mirrors in RTL on its own — it is a flex row.
+ * row mirrors in RTL on its own — it is a flex row, so فحص stays centred in
+ * both directions and only its neighbours swap sides.
  */
 const TABS: { route: Route; label: TextKey; Icon: LucideIcon }[] = [
   { route: "home", label: "nav.home", Icon: House },
-  { route: "scan", label: "nav.scan", Icon: ScanLine },
   { route: "report", label: "nav.report", Icon: Send },
+  { route: "scan", label: "nav.scan", Icon: ScanLine },
   { route: "radar", label: "nav.radar", Icon: Radar },
   { route: "help", label: "nav.help", Icon: LifeBuoy },
 ];

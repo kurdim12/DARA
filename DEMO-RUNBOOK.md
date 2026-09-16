@@ -32,9 +32,9 @@ English, tap **EN** in the top corner and the whole app flips, tab bar included;
 tap **عر** to come back. That choice lasts only as long as the tab is open, so a
 relaunch on stage always returns to Arabic.
 
-**5. Know the bar.** الرئيسية · فحص · بلاغاتي · الرادار · تعافي — and reading
-right-to-left, **فحص** is the raised red circle, second from the right. That
-circle is the one control to reach for if anything goes sideways.
+**5. Know the bar.** الرئيسية · بلاغاتي · فحص · الرادار · تعافي — and **فحص**
+is the raised red circle, dead centre, two tabs either side of it. That circle
+is the one control to reach for if anything goes sideways.
 
 ---
 
