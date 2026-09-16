@@ -83,7 +83,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
     <>
       <Page>
         <Header title={t("ft.tr.title")} />
-        <p className="t-sub -mt-1.5">{t("tool.learn_sub")}</p>
+        <p className="t-sub -mt-1.5">{t("ft.home.tool_train_sub")}</p>
 
         {/* Six dots. Where you are, and how much is left, without a number. */}
         <div
