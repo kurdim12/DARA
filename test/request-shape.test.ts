@@ -110,13 +110,18 @@ describe("buildRequestBody", () => {
     expect(image.source.data).toBe("AAAA");
   });
 
-  it("tells the engine a screenshot is the thing to analyze", () => {
-    const body = buildRequestBody({
-      ...base,
-      model: "claude-sonnet-5",
-      image: { media_type: "image/jpeg", data: "AAAA" },
-    });
-    expect(instructions(body)).toContain("SCREENSHOT:");
+  it("tells the engine when its text came from a screenshot", () => {
+    // The engine is no longer handed the picture — OCR reads it first — so
+    // what it needs to know is that the text may carry interface furniture
+    // and transcription errors, not that an image is attached.
+    const body = buildRequestBody({ ...base, model: "claude-sonnet-5", fromScreenshot: true });
+    expect(instructions(body)).toContain("SOURCE:");
+    expect(instructions(body)).toContain("transcribed from a screenshot");
+  });
+
+  it("says nothing about screenshots for a pasted message", () => {
+    const body = buildRequestBody({ ...base, model: "claude-sonnet-5" });
+    expect(instructions(body)).not.toContain("SOURCE:");
   });
 
   it("gives a screenshot verdict room for the text it read", () => {

@@ -21,10 +21,11 @@ describe("the gateway key", () => {
   });
 
   it("reports presence through the same accessor that the scan uses", () => {
-    // Two reads that could disagree would make /api/health lie: green on the
-    // phone, 503 on the scan. One accessor, used in both places.
-    expect(worker.match(/gatewayKey\(c\.env\)/g)).toHaveLength(2);
+    // Reads that could disagree would make /api/health lie: green on the
+    // phone, 503 on the scan. One accessor, everywhere the key is consulted —
+    // the count is not the point, the single source is.
     expect(worker).toMatch(/key_present: Boolean\(gatewayKey\(c\.env\)\)/);
+    expect(worker).toMatch(/ocr_ready: ocrReady\(gatewayKey\(c\.env\)\)/);
     expect(worker).toMatch(/const apiKey = gatewayKey\(c\.env\);/);
     // Nothing may reach past the accessor to a single name.
     expect(worker).not.toMatch(/c\.env\.(OPENROUTER|ANTHROPIC)_API_KEY/);

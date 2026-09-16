@@ -95,7 +95,7 @@ function asString(value: unknown): string {
 export function postValidate(
   raw: RawVerdict,
   originalText: string,
-  options?: { hasImage?: boolean },
+  options?: { fromScreenshot?: boolean },
 ): PostValidated {
   const verdict = VERDICTS.includes(raw.verdict as Verdict)
     ? (raw.verdict as Verdict)
@@ -209,10 +209,10 @@ export function postValidate(
     .filter((m, i, all) => all.indexOf(m) === i)
     .slice(0, 3);
 
-  // Only a screenshot can produce read text or seen evidence. If no image was
-  // sent, anything here was imagined and is dropped.
+  // Evidence items describe what was on a screen. For a pasted message there
+  // was no screen, so anything here was imagined and is dropped.
   const rawEvidence =
-    options?.hasImage && Array.isArray(raw.evidence_items) ? raw.evidence_items : [];
+    options?.fromScreenshot && Array.isArray(raw.evidence_items) ? raw.evidence_items : [];
   const evidence_items: EvidenceItem[] = [];
   let droppedEvidence = 0;
   for (const item of rawEvidence.slice(0, 6)) {
@@ -231,7 +231,9 @@ export function postValidate(
     evidence_items.push({ type, value, why });
   }
 
-  const extracted_text = options?.hasImage ? asString(raw.extracted_text) || null : null;
+  // The OCR step owns the transcription now; the engine never sees the image,
+  // so anything it puts here would be invention. Always dropped.
+  const extracted_text = null;
 
   return {
     verdict,

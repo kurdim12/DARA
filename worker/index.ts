@@ -32,6 +32,13 @@ import { governmentImpersonationSignal, inspectText, type UrlSignalCode } from "
 import { matchVerifiedPattern, patternById } from "./engine/match";
 import { allowRequest, type RateLimitBinding } from "./lib/ratelimit";
 import { caseNumberFor, idFromCaseNumber } from "./lib/reports";
+import { OcrFailed, ocrReady, transcribe, type Transcript } from "./ocr";
+
+/**
+ * The whole OCR step, both providers. Two 8s attempts plus overhead, kept
+ * clear of the 25s image wall so the engine still has room to answer.
+ */
+const OCR_WALL_MS = 18_000;
 
 export interface Env {
   DB: D1Database;
@@ -154,6 +161,8 @@ app.get("/api/health", async (c) => {
     ok: true,
     // Presence only. The key itself is never read into a response or a log.
     key_present: Boolean(gatewayKey(c.env)),
+    // Both OCR providers reach the same gateway, so one key readies both.
+    ocr_ready: ocrReady(gatewayKey(c.env)),
     // Which door the key opens. A key that is present but pointed at the wrong
     // gateway fails exactly like a missing one, and this is the only place to
     // see the difference from a phone.
@@ -223,8 +232,41 @@ app.post("/api/analyze", async (c) => {
     return c.json({ error: "server_error", message: "engine not configured" }, 503);
   }
 
+  /*
+   * image → OCR → the text pipeline.
+   *
+   * The vision model ONLY transcribes. From here down, a screenshot is a
+   * string, and every part that judges — the link parser, the engine, the
+   * validator, the Jordan layer, the campaign match — sees exactly what it
+   * sees for a pasted message. One pipeline, one set of rules.
+   *
+   * It also buys back the red underlines. The engine used to be handed the
+   * picture and told to leave red_flags empty, because the app cannot
+   * highlight a quote inside an image it never received. Now it receives the
+   * text, so the flagged spans land where they always did.
+   */
+  let transcript: Transcript | null = null;
+  if (image) {
+    try {
+      transcript = await transcribe({
+        image,
+        apiKey,
+        referer: new URL(c.req.url).origin,
+        signal: AbortSignal.timeout(OCR_WALL_MS),
+      });
+    } catch (error) {
+      // Never a verdict on an image nobody could read.
+      if (error instanceof OcrFailed) return c.json({ error: "ocr_failed" }, 422);
+      throw error;
+    }
+  }
+
+  // What everything downstream actually reasons over.
+  const subject = transcript ? transcript.text : text;
+  if (subject.length === 0) return c.json({ error: "ocr_failed" }, 422);
+
   // Deterministic, before the model is asked anything: parse only, never fetch.
-  const urlFacts = text ? inspectText(text) : null;
+  const urlFacts = subject ? inspectText(subject) : null;
   const linkFacts = urlFacts
     ? `hostname=${urlFacts.hostname}; registrable=${urlFacts.registrable}; https=${urlFacts.https}; signals=${urlFacts.signals.join(",") || "none"}`
     : undefined;
@@ -239,11 +281,13 @@ app.post("/api/analyze", async (c) => {
         .map((entry) => entry.trim())
         .filter(Boolean),
       thinking: c.env.ENGINE_THINKING,
-      text,
-      lang,
+      text: subject,
+      lang: transcript ? transcript.lang : lang,
       channel,
       type: analysisType,
-      image,
+      // Deliberately no image: the OCR step already read it, and the engine's
+      // job is to judge the text like any other text.
+      fromScreenshot: Boolean(transcript),
       linkFacts,
     });
 
@@ -286,14 +330,20 @@ app.post("/api/analyze", async (c) => {
       usage: result.usage,
     };
 
-    if (result.extracted_text) response.extracted_text = result.extracted_text;
+    if (transcript) {
+      response.extracted_text = transcript.text;
+      response.ocr = {
+        provider: transcript.provider,
+        lang: transcript.lang,
+        ms: transcript.ms,
+      };
+    }
 
     // The Jordan layer: facts about the domain or the number inside the
     // message, checked against the verified directory, the documented
     // campaigns and D1. It never blocks the verdict — if this fails the
     // screen simply has one block fewer.
     try {
-      const subject = result.extracted_text ?? text;
       const found = subject ? await layerForText(c.env.DB, subject) : null;
       if (found) {
         response.jordan_layer = {

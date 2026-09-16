@@ -82,6 +82,12 @@ export interface AnalyzeArgs {
   type?: string;
   /** A screenshot to read. Held for this request only; never written anywhere. */
   image?: AnalyzeImage;
+  /**
+   * The text came from a screenshot that the OCR step already read. The engine
+   * still judges text and only text — this just tells it the text may carry
+   * interface furniture and transcription errors.
+   */
+  fromScreenshot?: boolean;
   /** Deterministic link facts computed before the call, passed as context. */
   linkFacts?: string;
   /** Tried in order when the primary fails fast. Never tried after a timeout. */
@@ -101,7 +107,7 @@ export function buildRequestBody(
   const wantsThinking = args.thinking === "adaptive";
 
   const instructions = buildUserContent(args.text, args.lang, args.channel, {
-    hasImage: Boolean(args.image),
+    fromScreenshot: Boolean(args.fromScreenshot),
     linkFacts: args.linkFacts,
     type: args.type,
   });
@@ -205,7 +211,7 @@ async function runOne(args: AnalyzeArgs, budgetMs: number): Promise<AnalyzeResul
   }
 
   const validated = postValidate(toolUse.input as RawVerdict, args.text, {
-    hasImage: Boolean(args.image),
+    fromScreenshot: Boolean(args.fromScreenshot),
   });
   return {
     ...validated,

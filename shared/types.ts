@@ -184,7 +184,14 @@ export interface AnalyzeResponse {
   requested_action: string | null;
   pressure_methods: PressureMethod[];
   /** Screenshots only: what the engine could actually read, and what it saw. */
+  /** What the OCR step read off the screenshot. The verdict reasons over this. */
   extracted_text?: string;
+  /**
+   * Which provider read the image, and how long it took. Present only for a
+   * screenshot. A fallback is visible here rather than silent — but the UI
+   * names no vendor, so this is for the eval and the comparison table.
+   */
+  ocr?: { provider: string; lang: Lang; ms: number };
   /** Tokens the call consumed. No vendor name, just the counts. */
   usage?: { input_tokens: number; output_tokens: number };
   evidence_items?: EvidenceItem[];
