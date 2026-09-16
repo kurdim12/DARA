@@ -106,18 +106,44 @@ jobs:
           echo "=== /api/reset reachable (the escape hatch) ==="
           curl -sS --max-time 20 -o /dev/null -w "http=%{http_code}\n" "$TARGET/api/reset"
 
-          echo "=== asset hash, live vs this commit ==="
-          npm run build >/dev/null 2>&1 || echo "(build failed — see below)"
-          LOCAL=$(grep -o 'src="/assets/[^"]*"' dist/client/index.html | head -1)
-          LIVE=$(curl -sS --max-time 20 "$TARGET/" | grep -o 'src="/assets/[^"]*"' | head -1)
-          echo "this commit: $LOCAL"
-          echo "live:        $LIVE"
+          # vite.config.ts bakes the short commit SHA into the bundle as
+          # __BUILD_ID__, so the deployment can simply be asked which commit it
+          # was built from. That is a straight answer; the asset hash is not,
+          # because the SHA is IN the bundle and so a docs-only commit changes
+          # the hash without changing a line of app code.
+          echo "=== which commit is live ==="
+          curl -sS --max-time 20 -o /tmp/live.js "$TARGET$ASSET" || true
+          # A 7-hex run in minified output could coincidentally spell some
+          # other commit, so every candidate that is a real commit is printed,
+          # and the one chosen is an ancestor of HEAD — which a deployed build
+          # always is and a coincidence almost never is.
+          LIVE_SHA=""
+          for c in $(grep -oE '\b[0-9a-f]{7}\b' /tmp/live.js | sort -u); do
+            git cat-file -e "$c^{commit}" 2>/dev/null || continue
+            echo "candidate: $c $(git log -1 --format='%s' "$c" | cut -c1-60)"
+            if git merge-base --is-ancestor "$c" HEAD 2>/dev/null; then LIVE_SHA=$c; fi
+          done
+          HEAD_SHA=$(git rev-parse --short=7 HEAD)
+          echo "live:        ${LIVE_SHA:-(no build id found in the bundle)}"
+          echo "this commit: $HEAD_SHA"
+          if [ -n "$LIVE_SHA" ]; then
+            echo "live commit: $(git log -1 --format='%h %ad %s' --date=short "$LIVE_SHA" 2>/dev/null)"
+            BEHIND_BY=$(git rev-list --count "$LIVE_SHA..$HEAD_SHA" 2>/dev/null || echo "?")
+            echo "commits since: $BEHIND_BY"
+            echo "app code differs:"
+            git diff --stat "$LIVE_SHA..$HEAD_SHA" -- src worker shared content public index.html \
+              vite.config.ts wrangler.jsonc 2>/dev/null | tail -5 || true
+          fi
 
           echo "=== VERDICT ==="
           if ! grep -q '"counts"' /tmp/threats.txt 2>/dev/null; then
             echo "STALE: the live build predates the rebuild — /api/threats does not exist on it"
-          elif [ -n "$LOCAL" ] && [ "$LOCAL" = "$LIVE" ]; then
+          elif [ -z "$LIVE_SHA" ]; then
+            echo "UNKNOWN: no build id in the live bundle — check by hand"
+          elif [ "$LIVE_SHA" = "$HEAD_SHA" ]; then
             echo "CURRENT: the live site is serving this exact commit"
+          elif [ -z "$(git diff --name-only "$LIVE_SHA..$HEAD_SHA" -- src worker shared content public index.html vite.config.ts wrangler.jsonc 2>/dev/null)" ]; then
+            echo "CURRENT: the live site is $BEHIND_BY commit(s) back, and none of them touched the app"
           else
-            echo "BEHIND: the rebuild is live, but not this commit's build"
+            echo "BEHIND: app code has changed since the commit that is live"
           fi
