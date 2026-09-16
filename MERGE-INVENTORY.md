@@ -139,3 +139,53 @@ fail the build.
 4. **The campaign and entity records arrived already `verified: true`** from the
    reference build. This repo did not verify them; Abdelrahman owns
    re-confirming each source before the jury sees it.
+
+## 8. Arabic register: what is still colloquial
+
+The reference build's Arabic is colloquial Jordanian; this build's is simple
+فصحى. The merge brief allows fixing labels that mix registers on one screen,
+and says not to rewrite content — so Home's labels were changed and nothing
+else was. These are the ported strings that still read as عامية: a decision
+for Abdelrahman, not a bug. The trust page (`ft.tp.*`) and the drill
+(`ft.tr.*`) are the two largest blocks, and both are *content*, not labels.
+The QR strings stay hidden until that tool works, per the brief.
+
+| Key | Marker | Arabic |
+| --- | --- | --- |
+| `ft.hist.empty` | negation | ما في فحوصات محفوظة بعد |
+| `ft.hist.empty_sub` | particle | أول فحص بعد ما تشغّل الخيار بيسجّل هون. |
+| `ft.hist.note` | clause | محفوظة على جهازك فقط، وبتروح لما تمسح بيانات المتصفح. |
+| `ft.home.tool_qr_sub` | clause | اقرأ الرمز قبل ما تفتحه |
+| `ft.qr.denied` | particle | ما وصلنا إذن الكاميرا. فعّله من إعدادات المتصفح، أو الصق الرابط هون. |
+| `ft.qr.found` | ب-imperfect | الرمز بيحتوي: |
+| `ft.qr.warn` | ب-imperfect | لا تفتحه قبل الفحص. درع ما بيفتح الرابط، بيقرأه فقط. |
+| `ft.soon.auto_sms.what` | clause | درع يقرأ الرسائل الواردة على الجهاز نفسه وينبّهك على المريبة قبل ما تفتحها، بإذن صريح منك وبإمكانية إيقافه بأي لحظة. |
+| `ft.soon.campaign_alerts.what` | clause | إشعار لما تنزل حملة احتيال موثقة جديدة بالأردن، مع نص التحذير ومصدره. |
+| `ft.soon.note` | particle | هاي الميزة لسا ما اشتغلت. منكتبها هون لما تصير جاهزة فعلاً، بلا وعود بتواريخ. |
+| `ft.soon.partner_board.what` | particle | لوحة لجهة رسمية أو بنك: البلاغات المتعلقة باسمها مجمّعة بأرقام فقط، والنطاقات اللي تنتحلها الحملات. |
+| `ft.soon.video_check.what` | particle | فحص مقطع فيديو لشخصية عامة تظهر فيه: هل في علامات تزييف عميق، ومن وين انتشر المقطع أول مرة. |
+| `ft.tp.foot` | particle | إذا لقيت شي مكتوب هون مش مطابق للواقع، هاي مشكلة لازم تنحل، مش تفصيل. |
+| `ft.tp.intro` | ب-imperfect | درع ما بيحزر. كل نتيجة بتطلع من طبقات معروفة، وكل معلومة إلها مصدر مكتوب. وهاي الصفحة بتقول شو بنقيس فعلاً وشو لسا ما انقاس. |
+| `ft.tp.l_clf_what` | ب-imperfect | نموذج صغير بيقارن شكل الرسالة مع رسائل احتيال معروفة، وبيعطي إشارة مساعدة، مش قرار. إشارته بتظهر كدليل جنب باقي الأدلة. |
+| `ft.tp.l_honesty_what` | ب-imperfect | بتتحقق من جواب النموذج قبل ما يوصلك: كل علامة حمراء لازم تكون موجودة حرفياً بالنص، وأي رقم أو جهة ما إلها سند بتنشال. إذا الجواب ما مشي بالشكل المطلوب، بترجع رسالة خطأ مش نتيجة. |
+| `ft.tp.l_jordan_what` | ب-imperfect | بتقارن اللي وصلك مع دليل الجهات الرسمية، والحملات الموثقة بالأردن، وبلاغات درع نفسها، وسجلات النطاقات. كل استعلام ما جاوب بيظهر «تعذّر التحقق» بدل ما ينحسب سليم. |
+| `ft.tp.l_llm_what` | ب-imperfect | بيقرأ الرسالة كما يقرأها إنسان: مين المرسل، شو بيطلب، وين الاستعجال والتهديد. بيشتغل على خادم درع، ونص الرسالة بينمرّ عليه وقت الفحص فقط. |
+| `ft.tp.l_url_what` | ب-imperfect | بيفكّك الرابط لأجزائه ويقارن الجزء اللي بيقرّر وين بتروح، ويشوف إذا النطاق حديث أو بيقلّد اسم جهة معروفة. درع ما بيفتح الرابط أبداً. |
+| `ft.tp.m_caveat` | negation | الشريحة العربية هي تغريدات عربية من مجموعة عامة للرسائل المزعجة والعادية، لأنه ما في مجموعة عامة لرسائل احتيال أردنية. وفي {n} صف أردني اصطناعي استُخدمت بالتدريب فقط وما انقاس عليها شي. الأرقام فوق كلها من شريحة الاختبار المحجوزة. النصف السليم من تلك المجموعة أغلبه منشورات وكالات أخبار، وهذا جزء من سبب ارتفاع الرقم العربي. |
+| `ft.tp.m_none_line` | ب-imperfect | المصنّف الخفيف ما انقاس على مجموعة اختبار لهلأ، وما في رقم دقة نقدر نكتبه. لما ينقاس، بتطلع الأرقام هون كما هي، مع حجم المجموعة وتاريخ القياس. |
+| `ft.tp.p_noname` | negation | ما منطلب اسمك ولا رقم هاتفك. |
+| `ft.tp.p_pilot` | ب-imperfect | درع نسخة تجريبية، والبلاغات بتوصل منصة درع فقط. |
+| `ft.tp.p_text` | ب-imperfect | نص الرسالة ما بينحفظ إلا إذا اخترت تبعث بلاغ. |
+| `ft.tp.s_rdap` | ب-imperfect | RDAP: السجل الرسمي للنطاقات، منه بنعرف عمر النطاق ومُسجِّله. |
+| `ft.tp.sub` | ب-imperfect | شو بيقرأ، ومن وين |
+| `ft.tr.answer_scam` | particle | هاي رسالة احتيال موثقة. |
+| `ft.tr.empty` | ب-imperfect | ما في رسائل جاهزة للتمرين هلأ. بتظهر هون لما يتم ربط كل رسالة بحملة موثقة بمصدرها. |
+| `ft.tr.sub` | particle | ثلاث رسائل موثقة، شو رأيك بكل وحدة؟ |
+| `ft.tr.wrong` | particle | مش بالضبط |
+| `sh2.lookup_hint` | من-imperfect | نعرض بلاغات منصة درع عن هذه القيمة فقط. ما عندنا سجل للحسابات البنكية ولا للمعرّفات، وما منقدر نقول إن الحساب سليم. |
+| `sh2.lookup_label` | clause | تحقّق قبل ما تدفع |
+| `sh2.text_actions` | particle | شو تعمل هلّأ: |
+| `ui2.jl.official_match.body` | negation | قارنّا النطاق الذي في الرسالة بدليل الجهات الرسمية الذي راجعه الفريق، فوجدناه مطابقاً. معنى ذلك أن الرابط يعود للجهة نفسها، لا لنطاق يشبه اسمها. تبقى بقية الرسالة تستحق القراءة بهدوء: نطاق صحيح لا يجعل كل ما في الرسالة صحيحاً. |
+
+34 strings of 661.
+
