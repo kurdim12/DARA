@@ -457,7 +457,7 @@
   "report.includes": "The report includes the check result and the scam type.",
   "report.keep": "Keep this number to follow up",
   "report.pilot": "Pilot — reports are stored on the DARA' platform.",
-  "report.pilot_note": "Your report is stored on the DARA' platform (pilot). It has not been forwarded to any authority. Use the Help tab for how to reach the relevant authority yourself.",
+  "report.pilot_note": "Your report is stored on the DARA' platform (pilot). It has not been forwarded to any authority. Use the Recover tab for how to reach the relevant authority yourself.",
   "report.privacy": "We don't ask for your name or phone number.",
   "report.received": "Report received",
   "report.seeded": "Example added by the team",

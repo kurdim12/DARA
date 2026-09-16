@@ -25,7 +25,9 @@ interface I18n {
 const Ctx = createContext<I18n | null>(null);
 
 /**
- * English by default, as the submitted app opens.
+ * Arabic by default. DARA' is for a person in Jordan reading an Arabic SMS;
+ * opening in English asked every one of them to translate the app before they
+ * could use it. English is the switch, not the starting point.
  *
  * The choice is kept for this browsing session only — sessionStorage, not
  * localStorage — so a reload mid-demo does not switch the language back under
@@ -34,9 +36,9 @@ const Ctx = createContext<I18n | null>(null);
  */
 function initialLang(): Lang {
   try {
-    return sessionStorage.getItem(KEY) === "ar" ? "ar" : "en";
+    return sessionStorage.getItem(KEY) === "en" ? "en" : "ar";
   } catch {
-    return "en";
+    return "ar";
   }
 }
 

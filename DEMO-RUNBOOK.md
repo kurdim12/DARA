@@ -26,13 +26,15 @@ the venue's network is bad the same message still answers — labelled **نتي�
 **3. Add it to the home screen.** It opens without a browser bar, and the icon
 is the mark rather than a screenshot of the page.
 
-**4. Decide your language.** The app opens in **English**. The staged messages
-are Arabic, so if you are presenting in Arabic tap **عر** in the top corner
-first. The whole app flips, including the order of the tab bar.
+**4. Your language is already set.** The app opens in **Arabic**, right-to-left,
+from the first paint — you do not tap anything. If a judge asks to see it in
+English, tap **EN** in the top corner and the whole app flips, tab bar included;
+tap **عر** to come back. That choice lasts only as long as the tab is open, so a
+relaunch on stage always returns to Arabic.
 
-**5. Know the bar.** Home · Scan · Radar · Report · Help, and **Scan** is the
-raised red circle in the middle. That circle is the one control to reach for if
-anything goes sideways.
+**5. Know the bar.** الرئيسية · فحص · بلاغاتي · الرادار · تعافي — and reading
+right-to-left, **فحص** is the raised red circle, second from the right. That
+circle is the one control to reach for if anything goes sideways.
 
 ---
 
@@ -91,7 +93,7 @@ the model. The model reads the message. The layer checks it.
 
 ## 3. The report, and the sentence to read aloud
 
-From the result, tap **أبلغ عن هذه الرسالة**. The Report tab opens with the
+From the result, tap **أبلغ عن هذه الرسالة**. **بلاغاتي** opens with the
 threat type already chosen.
 
 The report is **always anonymous** — there is no toggle to leave on and no
@@ -104,14 +106,17 @@ Submit. The case number comes up large. Then read this out, slowly:
 > بلاغك محفوظ في منصة درع (نسخة تجريبية). لم يُرسَل إلى أي جهة. افتح تبويب
 > الحماية لتعرف كيف تصل إلى الجهة المعنية بنفسك.
 
+> بلاغك محفوظ في منصة درع (نسخة تجريبية). لم يُرسَل إلى أي جهة. افتح تبويب
+> «تعافي» لتعرف كيف تصل إلى الجهة المعنية بنفسك.
+
 *Your report is stored on the DARA' platform (pilot). It has not been forwarded
-to any authority. Use the Help tab for how to reach the relevant authority
+to any authority. Use the Recover tab for how to reach the relevant authority
 yourself.*
 
 That is the answer to the hardest question in the room, and the app says it
 before anyone asks. Do not soften it.
 
-Scroll down the Report tab afterwards: **بلاغات المجتمع** shows four reports,
+Scroll down **بلاغاتي** afterwards: **بلاغات المجتمع** shows four reports,
 each tagged **مثال أضافه الفريق**. Say they are seeded examples. (They are in
 English even in the Arabic build — they are literal rows in a migration.)
 

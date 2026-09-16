@@ -79,10 +79,16 @@ jobs:
           fi
           echo
 
-          # The rebuild opens in English and LTR; every earlier build shipped
-          # <html lang="ar" dir="rtl">.
+          # The app is Arabic-first: the served HTML must already say
+          # lang="ar" dir="rtl" before any JavaScript runs, or the first paint
+          # is left-to-right and the whole layout visibly flips a frame later.
           echo "=== root <html> tag ==="
-          curl -sS --max-time 20 "$TARGET/" | head -c 400 | tr -d '\n' | grep -o '<html[^>]*>' || echo "(no html tag found)"
+          HTML_TAG=$(curl -sS --max-time 20 "$TARGET/" | head -c 400 | tr -d '\n' | grep -o '<html[^>]*>' || echo "(none)")
+          echo "$HTML_TAG"
+          case "$HTML_TAG" in
+            *'lang="ar"'*'dir="rtl"'*) echo "ok — Arabic-first on the first paint" ;;
+            *) echo "WRONG — the served HTML is not Arabic-first" ;;
+          esac
           echo
 
           # Vite's asset hash is content-addressed, so building this commit

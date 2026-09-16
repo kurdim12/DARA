@@ -45,9 +45,12 @@ export default defineConfig({
         // before the rebuild.
         name: "درع DARA'",
         short_name: "درع",
-        description: "Check any message, link or number before you act.",
-        lang: "en",
-        dir: "ltr",
+        // The manifest says lang: "ar", so the install card has to be
+        // Arabic too — an Arabic-declared app describing itself in
+        // English is the first thing a judge would see on the phone.
+        description: "افحص أي رسالة أو رابط أو رقم قبل أن تتصرّف.",
+        lang: "ar",
+        dir: "rtl",
         start_url: "/",
         scope: "/",
         display: "standalone",

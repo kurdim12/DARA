@@ -360,3 +360,22 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   checking a link is opening it once. If the numbers stay unresolvable, the
   honest Shield screen is 911 plus "the directorate's page", not three numbers
   nobody has confirmed.
+
+## Arabic by default
+
+- **The app opens in Arabic, right-to-left, and English is the switch.** It had
+  been opening in English with عر as the way in, which asked a person in Amman
+  holding an Arabic SMS to translate the app before they could ask it anything.
+  `index.html` ships `lang="ar" dir="rtl"` so the FIRST PAINT is right-to-left —
+  deciding it in React only would draw the page the wrong way round and flip it
+  a frame later, the most visible bug an RTL app can have.
+- **The choice lives in sessionStorage, not localStorage.** A reload mid-demo
+  keeps the presenter's language, and closing the tab forgets it, so a relaunch
+  on stage always comes back to Arabic. No copy claims anything about storage.
+- **Making Arabic the default made the Arabic copy the copy that gets read, and
+  that exposed a live bug.** `report.pilot_note` — the pilot/no-authority
+  sentence a jury is most likely to read — sent people to "تبويب الحماية", and
+  its English twin to "the Help tab", months after the bar stopped having
+  either; the tab is تعافي. Both now name the tab that exists, and a test walks
+  every string that mentions a tab against the five in `BottomNav`, so copy
+  cannot point at a tab that is not there again.
