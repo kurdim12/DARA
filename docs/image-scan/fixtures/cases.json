@@ -1,0 +1,44 @@
+[
+  {
+    "id": "1-sms-fine",
+    "kind": "SMS",
+    "sender": "AMANAT",
+    "expect": "scam",
+    "body": "أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة بقيمة 45 ديناراً. ادفع خلال 24 ساعة لتجنب مضاعفة الغرامة: http://amanat-amman-pay.com/fine"
+  },
+  {
+    "id": "2-whatsapp-job",
+    "kind": "WhatsApp",
+    "sender": "+962 7X XXX XXXX",
+    "expect": "scam",
+    "body": "نستقطب الآن! عمل من المنزل، 800 دينار/شهر، لا خبرة مطلوبة! أرسل 50 ديناراً رسوم تسجيل للبدء فوراً."
+  },
+  {
+    "id": "3-bank-notification",
+    "kind": "إشعار",
+    "sender": "Bank",
+    "expect": "scam",
+    "body": "عزيزي العميل، تم تعليق حساب البنك العربي مؤقتاً. انقر هنا للتحقق: http://arabbank-secure.verify-now.com"
+  },
+  {
+    "id": "4-sms-otp-bait",
+    "kind": "SMS",
+    "sender": "Unknown",
+    "expect": "scam",
+    "body": "معك قسم الاحتيال في البنك. رصدنا حركة مشبوهة على حسابك. رح يوصلك رمز على هاتفك، اقرأه لي حتى نوقف العملية فوراً."
+  },
+  {
+    "id": "5-legit-otp",
+    "kind": "SMS",
+    "sender": "Bank",
+    "expect": "likely_safe",
+    "body": "رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبداً."
+  },
+  {
+    "id": "6-legit-delivery",
+    "kind": "SMS",
+    "sender": "Delivery",
+    "expect": "likely_safe",
+    "body": "شحنتك في طريقها إليك وسيتم التسليم اليوم بين الساعة 2 و 5 مساءً. سيتصل بك المندوب قبل الوصول."
+  }
+]

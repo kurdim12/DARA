@@ -1,0 +1,45 @@
+# Does a screenshot scan work on the deployed site?
+#
+# The machine this repo is edited from cannot reach the Worker or the model
+# gateway, so the only honest place to answer that is somewhere that can.
+# Posts each committed fixture to /api/analyze and prints what comes back.
+name: image-scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The deployed URL to check
+        default: https://dara.abdalrhmankurdi12.workers.dev
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Post each fixture and report
+        env:
+          TARGET: ${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}
+        run: |
+          echo "=== health ==="
+          curl -sS --max-time 20 "$TARGET/api/health"; echo; echo
+
+          for f in docs/image-scan/fixtures/*.jpg; do
+            name=$(basename "$f")
+            b64=$(base64 -w0 "$f")
+            bytes=$(wc -c < "$f")
+            payload=$(mktemp)
+            printf '{"text":"","lang":"ar","type":"message","image":{"media_type":"image/jpeg","data":"%s"}}' "$b64" > "$payload"
+
+            echo "=== $name ($((bytes/1024)) KB) ==="
+            start=$(date +%s%3N)
+            code=$(curl -sS --max-time 90 -o /tmp/out.json -w "%{http_code}" \
+              -X POST "$TARGET/api/analyze" \
+              -H 'content-type: application/json' \
+              --data-binary "@$payload" || echo "000")
+            end=$(date +%s%3N)
+            echo "http=$code  $((end-start))ms"
+            head -c 1200 /tmp/out.json; echo; echo
+            rm -f "$payload"
+          done
