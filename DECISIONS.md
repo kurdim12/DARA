@@ -299,3 +299,15 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   Sonnet, or omitting `thinking: disabled` where it belongs. A non-Claude model
   now gets neither field: both are Anthropic's, and through a gateway they
   reach a model that 400s on them or ignores them.
+- **The model is `openai/gpt-6-astra`, chosen from the live catalogue rather
+  than from memory.** 443 models on OpenRouter, 137 of which do both tool
+  calling and image input; of the frontier tier that does, `gpt-6-astra` is the
+  newest non-Anthropic flagship — $10/$50 per million, 1.05M context. That is
+  roughly 7 cents a scan against Sonnet's 1–2. `openai/gpt-5.5`,
+  `openai/gpt-5.4` and `anthropic/claude-opus-5` are the candidates; the last is
+  there as a control, so the eval can show what the switch cost.
+- **OpenRouter's own metadata confirms Fable 5.1 cannot do forced tool use.**
+  It is the one model in the frontier tier whose `tool_choice` column reads no.
+  That agreement is reassuring but it is still metadata, not a guarantee, for
+  any of the others — the golden set is the proof, and the thing it has to
+  prove is not the verdict but whether the Arabic quotes come back verbatim.

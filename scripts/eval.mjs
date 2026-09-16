@@ -14,7 +14,15 @@ import { readFile, writeFile } from "node:fs/promises";
 const CASES_PATH = new URL("../content/eval-cases.json", import.meta.url);
 const REPORT_PATH = new URL("../EVAL-REPORT.md", import.meta.url);
 const PLACEHOLDER = "REPLACE_WITH_EXACT_SMS_TEXT";
-const DEFAULT_MODELS = ["claude-sonnet-5", "claude-haiku-4-5"];
+// The shortlist --compare runs. Every one of these is in the deployment's
+// ANTHROPIC_MODEL_CANDIDATES, or the Worker ignores the override and quietly
+// runs the configured model against itself four times.
+const DEFAULT_MODELS = [
+  "openai/gpt-6-astra",
+  "openai/gpt-5.5",
+  "openai/gpt-5.4",
+  "anthropic/claude-opus-5",
+];
 const ARABIC = /[؀-ۿ]/;
 
 function parseArgs(argv) {
