@@ -201,3 +201,27 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
 - **The latest receipt on Home does not interpolate a status into a key.** The
   API only ever writes `received`; anything else falls back to it rather than
   printing `status.whatever` onto the screen.
+- **The drill's tile counts the drill.** The reference's subtitle said three
+  messages; this drill asks six. `test/drill-count.test.ts` reads
+  `content/quiz.json` and fails if the copy and the content disagree, because a
+  number about the app stated in the app's own copy is still a number under
+  rule 4.
+- **The radar's trend is padded to the eight weeks its heading names**
+  (`padWeeks` in `worker/routes/radar.ts`). `GROUP BY` dropped quiet weeks, so
+  "Last 8 weeks" sat over two bars of equal height with no axis. A zero week
+  now draws nothing rather than a floor-height stub — a stub reads as a small
+  count — and the first and last week are printed under a baseline.
+- **`whitespace-nowrap` on the scanner's outline pills.** "Scan a screenshot"
+  in Rubik is wider than the pill is tall, so the label wrapped and the pill
+  outgrew its own height. Cairo and Rubik are wider than the Manrope they
+  replaced; any fixed-height pill added from here needs the same guard.
+- **`deploy-check` asks the deployment which commit it is**, by reading
+  `__BUILD_ID__` back out of the live bundle, rather than comparing asset
+  hashes. The SHA is baked into the bundle, so every commit changes the hash —
+  three runs in a row reported BEHIND for commits that touched only markdown.
+  The step now also names any of src, worker, shared, content, public,
+  `vite.config.ts` or `wrangler.jsonc` that changed in the gap.
+- **The font check reads content types, not status codes.** A missing
+  `/fonts/*.woff2` falls through to the SPA catch-all and returns index.html
+  with a 200, which is exactly what the step had been reporting as a pass — for
+  two font files Phase 1 had replaced.
