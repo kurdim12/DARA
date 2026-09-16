@@ -23,6 +23,7 @@ import {
 } from "../shared/types";
 import {
   EngineFailure,
+  EngineModelUnavailable,
   EngineRateLimited,
   EngineTimeout,
   runEngine,
@@ -36,6 +37,8 @@ export interface Env {
   DB: D1Database;
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_MODEL?: string;
+  /** Comma-separated ids the eval may compare against the configured one. */
+  ANTHROPIC_MODEL_CANDIDATES?: string;
   /**
    * A Messages-API gateway to call instead of Anthropic directly. OpenRouter's
    * is https://openrouter.ai/api. Unset means straight to Anthropic.
@@ -50,26 +53,27 @@ const DEFAULT_MODEL = "claude-sonnet-5";
 
 /**
  * The eval compares candidate models against one deployment, so /api/analyze
- * accepts a model override — but only from this list. Anything else is ignored
- * and the configured model is used, so the override can never be turned into a
- * way to spend someone else's credits on an arbitrary model.
+ * accepts a model override — but only the configured model or one of the
+ * candidates named in `ANTHROPIC_MODEL_CANDIDATES`. Anything else is ignored
+ * and the configured model is used, so the override can never become a way to
+ * spend this account's credits on any model in a gateway's catalogue.
  *
- * Gateway ids carry a vendor prefix, and both spellings of the same model are
- * listed rather than pattern-matched: an allowlist that accepts a prefix
- * accepts everything behind it.
+ * The list is config rather than code because which models are worth trying
+ * changes faster than this file does — and because a prefix match would not be
+ * an allowlist: `anthropic/` accepts everything behind it.
  */
-const MODEL_ALLOWLIST = new Set([
-  "claude-sonnet-5",
-  "claude-haiku-4-5",
-  "claude-haiku-4-5-20251001",
-  "claude-opus-5",
-  "anthropic/claude-sonnet-5",
-  "anthropic/claude-haiku-4-5",
-  "anthropic/claude-opus-5",
-]);
+function allowedModels(env: Env): Set<string> {
+  const configured = env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
+  const candidates = (env.ANTHROPIC_MODEL_CANDIDATES ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  return new Set([configured, ...candidates]);
+}
 
-function chosenModel(configured: string, requested: string | undefined): string {
-  return requested && MODEL_ALLOWLIST.has(requested) ? requested : configured;
+function chosenModel(env: Env, requested: string | undefined): string {
+  const configured = env.ANTHROPIC_MODEL ?? DEFAULT_MODEL;
+  return requested && allowedModels(env).has(requested) ? requested : configured;
 }
 
 const app = new Hono<{ Bindings: Env }>();
@@ -213,10 +217,7 @@ app.post("/api/analyze", async (c) => {
     const result = await runEngine({
       apiKey,
       baseURL: c.env.ANTHROPIC_BASE_URL,
-      model: chosenModel(
-        c.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
-        c.req.header("X-DARA-Model"),
-      ),
+      model: chosenModel(c.env, c.req.header("X-DARA-Model")),
       thinking: c.env.ENGINE_THINKING,
       text,
       lang,
@@ -305,6 +306,10 @@ app.post("/api/analyze", async (c) => {
     response.stats = result.stats;
     return c.json(response);
   } catch (error) {
+    if (error instanceof EngineModelUnavailable) {
+      console.error((error as Error).message);
+      return c.json({ error: "model_unavailable" }, 502);
+    }
     if (error instanceof EngineTimeout) return c.json({ error: "timeout" }, 504);
     if (error instanceof EngineRateLimited) return c.json({ error: "rate_limited" }, 429);
     if (error instanceof EngineFailure) {

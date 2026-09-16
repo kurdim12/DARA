@@ -33,8 +33,19 @@
     }
   ],
 
+  // ANTHROPIC_BASE_URL points the engine at a gateway that speaks the Messages
+  // API. OpenRouter's is https://openrouter.ai/api — with it set, model ids
+  // take a vendor prefix and ANTHROPIC_API_KEY holds the OpenRouter key.
+  // Unset, the engine calls api.anthropic.com directly.
+  //
+  // ANTHROPIC_MODEL_CANDIDATES is the only other list /api/analyze will accept
+  // in the X-DARA-Model header, so `npm run eval -- --compare` can put several
+  // models through the golden set against one deployment and the numbers can
+  // choose. Nothing outside it can be requested.
   "vars": {
-    "ANTHROPIC_MODEL": "claude-sonnet-5",
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+    "ANTHROPIC_MODEL": "anthropic/claude-sonnet-5",
+    "ANTHROPIC_MODEL_CANDIDATES": "anthropic/claude-sonnet-5,anthropic/claude-opus-5",
     "ENGINE_THINKING": "disabled",
     "APP_ENV": "production"
   },

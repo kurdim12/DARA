@@ -267,3 +267,35 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   a false claim. DEMO-RUNBOOK.md names the four places the app does admit what
   it does not know, and tells the presenter not to describe a screen that is
   not there.
+
+- **The engine goes through OpenRouter, and the UI stops naming a vendor.**
+  OpenRouter exposes `POST /api/v1/messages` in the Anthropic Messages API
+  format, so the switch is `ANTHROPIC_BASE_URL` plus a prefixed model id — the
+  forced tool call, the image block and the whole post-validation chain are
+  untouched. "مدعوم بتقنية Claude" was true only while the engine called
+  Claude; it now reads "تحليل بالذكاء الاصطناعي عبر خادم درع", which stays true
+  whichever model wins, and `honesty-check.mjs` fails the build if any
+  dictionary names a vendor the configured model does not belong to.
+- **Claude Fable 5.1 — the top model on the board — cannot run this engine.**
+  It rejects forced tool use with a 400, and every scan forces
+  `tool_choice: {type:"tool", name:"report_verdict"}`. `scripts/candidates.mjs`
+  generalises the trap: it filters OpenRouter's public catalogue to models that
+  do both tools and images, and flags any that advertise `tools` without
+  `tool_choice`.
+- **A rejected model is its own error now** (`model_unavailable`, 502). A wrong
+  or unentitled model id used to arrive as `server_error` on every case, which
+  is indistinguishable from the model being down. The user-facing message is
+  unchanged — a person does not need to know the id is wrong — but the eval
+  report and the Worker log now say which it was. A model id is config, not a
+  credential, so naming it costs nothing.
+- **The eval's model override is an allowlist read from config**
+  (`ANTHROPIC_MODEL_CANDIDATES`), not a hardcoded set and not a prefix match. A
+  prefix match would not be an allowlist: `anthropic/` accepts everything
+  behind it, and the override would become a way to spend this account's
+  credits on any model in the catalogue.
+- **`bareModel()` strips the vendor prefix before the per-model profile runs.**
+  Every profile test is a prefix match on `claude-…`, so `anthropic/claude-…`
+  would have silently matched nothing — sending Haiku's `temperature` to
+  Sonnet, or omitting `thinking: disabled` where it belongs. A non-Claude model
+  now gets neither field: both are Anthropic's, and through a gateway they
+  reach a model that 400s on them or ignores them.

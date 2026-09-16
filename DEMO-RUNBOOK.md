@@ -160,8 +160,8 @@ Four places where the app says what it does not know. That is the argument.
 ## If the venue network is bad
 
 Nothing to do. A staged message you warmed up falls back to its saved verdict
-and shows **نتيجة محفوظة** next to *مدعوم بتقنية Claude*. Read the label out
-rather than hiding it.
+and shows **نتيجة محفوظة** next to *تحليل بالذكاء الاصطناعي عبر خادم درع*. Read
+the label out rather than hiding it.
 
 A message you did **not** warm up has no fallback and will show an error. Do
 not improvise a fourth message on stage.
@@ -196,10 +196,17 @@ not improvise a fourth message on stage.
 - It is **HTTPS**, and it asks for no account, no name and no phone number. It
   is not "fully encrypted" and it does not "store nothing". The text of a
   message is stored only if you choose to attach it to a report.
-- **مدعوم بتقنية Claude** is true: the verdict is a real Claude call, made on
-  the DARA' server, and the footer states how long it took. A result labelled
-  **نتيجة محفوظة** is a real earlier Claude verdict replayed from the device.
-  Say so when it appears.
+- **تحليل بالذكاء الاصطناعي عبر خادم درع** is what the footer says, and it is
+  the whole claim: a real AI model produced this verdict, the call was made
+  from DARA's server rather than the phone, and the seconds next to it are the
+  real round trip. **The app does not name the model, and neither should you.**
+  It runs through OpenRouter and the model is a config line that may change
+  between rehearsal and the room; naming a vendor on stage is a claim you would
+  then have to keep true. If a judge asks which model: say it is a frontier
+  model reached through a gateway, that the choice is made by the golden set in
+  `content/eval-cases.json` rather than by taste, and offer to show them the
+  eval report. A result labelled **نتيجة محفوظة** is a real earlier verdict
+  replayed from the device. Say so when it appears.
 - The fifteen campaigns and the 55 official bodies are real and sourced, and
   **this team has not re-checked those sources** — both lists came across from
   the earlier build already marked verified. If a judge asks who checked them,

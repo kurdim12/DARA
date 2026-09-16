@@ -1,0 +1,40 @@
+# Which models on OpenRouter could actually run this engine?
+#
+# "Best model" is a leaderboard question; this app asks a narrower one. Every
+# scan forces a named tool call and a screenshot scan sends an image, so a
+# model that cannot do both is out regardless of its benchmarks. The catalogue
+# is public, so this needs no key and costs nothing.
+#
+# It narrows the field. It does not pick the winner — only the golden set can,
+# because what decides this demo is whether the model quotes Arabic back
+# verbatim so the red underlines land on the right words.
+name: candidates
+
+on:
+  workflow_dispatch:
+    inputs:
+      vendor:
+        description: Comma-separated vendors to keep (blank = all)
+        default: ""
+      max_in:
+        description: Highest $ per million input tokens to consider (blank = any)
+        default: ""
+
+jobs:
+  list:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Models that can run this engine
+        env:
+          VENDOR: ${{ inputs.vendor }}
+          MAX_IN: ${{ inputs.max_in }}
+        run: |
+          ARGS=""
+          [ -n "$VENDOR" ] && ARGS="$ARGS --vendor $VENDOR"
+          [ -n "$MAX_IN" ] && ARGS="$ARGS --max-in $MAX_IN"
+          node scripts/candidates.mjs $ARGS | tee "$GITHUB_STEP_SUMMARY"

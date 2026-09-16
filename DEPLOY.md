@@ -52,11 +52,37 @@ with a 500 because the `reports` table does not exist.
 
 ## A4. Add the API key
 
+The engine reaches the model through **OpenRouter**, which speaks the Anthropic
+Messages API at `https://openrouter.ai/api` — so the key below is an
+**OpenRouter** key (`sk-or-...`), not an Anthropic one, and `ANTHROPIC_BASE_URL`
+in `wrangler.jsonc` is what points at it. Clear that var and the same variable
+takes an Anthropic key instead; nothing else changes.
+
 **Workers & Pages → dara → Settings → Variables and Secrets → Add →
 type `Secret` → name `ANTHROPIC_API_KEY` → paste the key → Save.**
 
 A secret only reaches a Worker on its next deploy. Push anything, or hit
 **Retry build** on the last build, so the deploy re-runs.
+
+Then open `/api/health` on a phone. `key_present` must be `true` and `api_host`
+must be the gateway you meant — a key that is present but pointed at the wrong
+host fails exactly like a missing one, and that is the only way to tell them
+apart from outside.
+
+## A5. Choose the model
+
+`ANTHROPIC_MODEL` in `wrangler.jsonc` takes a gateway id such as
+`anthropic/claude-sonnet-5` or `google/gemini-3.x`. Two hard requirements: the
+model must support a **forced tool call** and **image input**, or it cannot
+serve this app — every scan forces a named tool call, and a screenshot scan
+sends an image. Run the **candidates** workflow (Actions → candidates → Run) to
+list the models in OpenRouter's public catalogue that do both.
+
+That narrows the field; it does not pick the winner. Put two or three ids in
+`ANTHROPIC_MODEL_CANDIDATES`, deploy, and run the eval with `--compare`. What
+decides it is not a benchmark but whether the model quotes the Arabic back
+verbatim — a paraphrased quote fails post-validation, the red underlines
+disappear, and the demo loses the one moment it is built around.
 
 ## A5. Check it took
 

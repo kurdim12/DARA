@@ -282,9 +282,60 @@ for (const { file, path, value, gated } of strings) {
   }
 }
 
+/**
+ * A vendor named in the UI must be the vendor the engine actually calls.
+ *
+ * "مدعوم بتقنية Claude" was true for as long as the engine called Claude, and
+ * the moment the configured model changed it became a claim about a company
+ * whose model never sees the message. That is the same class of untruth as
+ * "your report was forwarded to the Cybercrime Unit" — it is just flattering
+ * rather than alarming, which is exactly why nobody would have caught it.
+ *
+ * So the dictionaries are read against wrangler.jsonc: name a vendor the
+ * configured model does not belong to and the build stops.
+ */
+const VENDORS = {
+  Claude: /(^|\/)claude-/i,
+  Anthropic: /(^|\/)claude-|^anthropic\//i,
+  OpenAI: /^openai\/|(^|\/)gpt-/i,
+  "GPT-": /^openai\/|(^|\/)gpt-/i,
+  Gemini: /^google\/|(^|\/)gemini-/i,
+  Google: /^google\/|(^|\/)gemini-/i,
+  Llama: /^meta-llama\/|(^|\/)llama-/i,
+  Mistral: /^mistralai\/|(^|\/)mistral-/i,
+  DeepSeek: /^deepseek\/|(^|\/)deepseek-/i,
+  Qwen: /^qwen\/|(^|\/)qwen/i,
+  Grok: /^x-ai\/|(^|\/)grok-/i,
+};
+
+async function checkVendorClaims() {
+  const wrangler = await readFile(new URL("wrangler.jsonc", ROOT), "utf8");
+  const configured = /"ANTHROPIC_MODEL":\s*"([^"]*)"/.exec(wrangler)?.[1] ?? "";
+  if (!configured) {
+    report("wrangler.jsonc", "no ANTHROPIC_MODEL to check the UI's vendor claims against", "");
+    return;
+  }
+  for (const lang of ["ar", "en"]) {
+    const dict = JSON.parse(await readFile(new URL(`src/i18n/${lang}.json`, ROOT), "utf8"));
+    for (const [key, value] of Object.entries(dict)) {
+      for (const [vendor, owns] of Object.entries(VENDORS)) {
+        if (!value.includes(vendor)) continue;
+        if (owns.test(configured)) continue;
+        report(
+          `src/i18n/${lang}.json ${key}`,
+          `names ${vendor}, but the engine is configured to run ${configured}`,
+          value.slice(0, 90),
+        );
+      }
+    }
+  }
+}
+
+await checkVendorClaims();
+
 if (hits === 0) {
   console.log(
-    `No authority, encryption or retention claims in the UI copy, and nothing in ${strings.length} renderable content strings across ${CONTENT_FILES.length} content files states a law, a penalty or a number without a verified flag.`,
+    `No authority, encryption or retention claims in the UI copy, no vendor named that the configured model does not belong to, and nothing in ${strings.length} renderable content strings across ${CONTENT_FILES.length} content files states a law, a penalty or a number without a verified flag.`,
   );
   process.exit(0);
 }

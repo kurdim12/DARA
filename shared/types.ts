@@ -202,7 +202,14 @@ export interface AnalyzeResponse {
 }
 
 export interface ApiError {
-  error: "timeout" | "too_long" | "rate_limited" | "bad_request" | "server_error";
+  error:
+    | "timeout"
+    | "too_long"
+    | "rate_limited"
+    | "bad_request"
+    | "server_error"
+    /** The configured model is wrong, unavailable, or refuses this request shape. */
+    | "model_unavailable";
   message?: string;
 }
 

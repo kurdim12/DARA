@@ -15,6 +15,15 @@ const BASE_MAX_TOKENS = 2000;
 export class EngineTimeout extends Error {}
 export class EngineRateLimited extends Error {}
 export class EngineFailure extends Error {}
+/**
+ * The key works but the configured model does not: wrong id, no access to it
+ * on this account, or the gateway does not carry it. Separated from a generic
+ * failure because it is a configuration mistake with a one-line fix, and
+ * because `server_error` on every case is indistinguishable from the model
+ * being down — which is exactly the wrong thing to be guessing at on a
+ * deadline. Says nothing secret: a model id is config, not a credential.
+ */
+export class EngineModelUnavailable extends Error {}
 
 /**
  * A gateway such as OpenRouter names the same model `anthropic/claude-opus-5`.
@@ -161,6 +170,12 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
     if (controller.signal.aborted) throw new EngineTimeout("engine timed out");
     if (error instanceof Anthropic.APIError && error.status === 429) {
       throw new EngineRateLimited("upstream rate limit");
+    }
+    if (error instanceof Anthropic.APIError && (error.status === 404 || error.status === 400)) {
+      // A gateway answers an unknown or unentitled model with 404, and a model
+      // that rejects part of this request shape — forced tool use, an image —
+      // with 400. Both mean: this model cannot serve this app.
+      throw new EngineModelUnavailable(`model ${args.model} was rejected (status ${error.status})`);
     }
     // Deliberately not logging the error body: it can echo the pasted message.
     const status =

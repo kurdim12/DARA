@@ -25,9 +25,13 @@ checklist of at most 6 lines saying what to test. Stop at each gate and wait for
   from the same origin. No CORS, one login, one deploy.
 - Frontend: React + Vite + TypeScript + Tailwind. Installable PWA with an offline app shell.
 - Storage: D1 (binding `DB`).
-- AI: Anthropic Messages API, called only from the Worker. Model comes from the
-  `ANTHROPIC_MODEL` var: default `claude-sonnet-5`, candidate `claude-haiku-4-5-20251001`
-  if latency requires it (the eval decides).
+- AI: the Messages API, called only from the Worker, through OpenRouter
+  (`ANTHROPIC_BASE_URL`) so one key reaches many vendors. `ANTHROPIC_MODEL`
+  chooses; `ANTHROPIC_MODEL_CANDIDATES` lists what the eval may compare against
+  it, and nothing outside that list can be requested. The eval decides, on
+  verdict accuracy, on how many Arabic quotes survive post-validation, and on
+  latency. A model must support a forced tool call and image input or it cannot
+  serve this app at all — `npm run candidates` lists the ones that can.
 - Scaffold from create-cloudflare's current React template. Before writing any
   Wrangler config, check current Cloudflare docs for Workers static assets, SPA
   routing, making `/api/*` reach the Worker, D1 migrations, and rate limiting.
@@ -53,8 +57,12 @@ checklist of at most 6 lines saying what to test. Stop at each gate and wait for
    flips `verified` to true, after checking an official source.
 4. Never invent phone numbers, URLs, statistics, or legal text. That applies to UI
    copy and to the engine's output.
-5. "مدعوم بتقنية Claude" is allowed because the engine really calls Claude. When a
-   cached fallback result is shown, the UI tags it "نتيجة محفوظة".
+5. The UI names no AI vendor. It says the verdict is AI analysis on DARA's own
+   server and how long it took, which stays true whichever model the eval
+   picks. `scripts/honesty-check.mjs` reads the dictionaries against
+   `ANTHROPIC_MODEL` and fails the build if a vendor is named that the
+   configured model does not belong to. When a cached fallback result is shown,
+   the UI tags it "نتيجة محفوظة".
 
 ## Hard rules: security
 - `ANTHROPIC_API_KEY` exists only as a Worker secret, set by Abdelrahman in the
