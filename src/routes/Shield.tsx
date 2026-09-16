@@ -54,6 +54,14 @@ const TONE: Record<Contact["tone"], IconTone> = {
   danger: "red",
 };
 
+/**
+ * The extortion shield. Triage first: somebody who opens this screen already
+ * knows what happened to them, and the fastest thing the app can do is take
+ * them to it in one tap rather than make them pick, then confirm.
+ *
+ * Quick exit sits at the top of every view here, not only on the steps. It
+ * replaces the page rather than pushing, so Back cannot return to it.
+ */
 export function Shield({
   navigate,
   quickExit,
@@ -62,17 +70,11 @@ export function Shield({
   quickExit: () => void;
 }) {
   const { t, lang } = useI18n();
-  const [chosen, setChosen] = useState<Situation | null>(null);
   const [open, setOpen] = useState<Situation | null>(null);
 
   if (open) {
     return (
-      <Steps
-        situation={open}
-        onBack={() => setOpen(null)}
-        onExit={quickExit}
-        navigate={navigate}
-      />
+      <Steps situation={open} onBack={() => setOpen(null)} onExit={quickExit} navigate={navigate} />
     );
   }
 
@@ -84,9 +86,27 @@ export function Shield({
   return (
     <>
       <Page>
-        <Header title={t("shield.title")} />
+        <Header title={t("sh.title")} trailing={<QuickExit onExit={quickExit} />} />
+        <p className="t-sub -mt-1.5">{t("sh.sub")}</p>
 
-        <div className="rounded-scanner bg-red px-4 py-4 text-white-brush">
+        {/* Triage. One tap from "this happened to me" to what to do about it. */}
+        <div className="mt-4 space-y-2">
+          {situations(lang).map((situation) => (
+            <IconRow
+              key={situation.id}
+              as="card"
+              Icon={SITUATION_ICON[situation.id] ?? AlertCircle}
+              title={situation.title}
+              sub={situation.summary}
+              onClick={() => setOpen(situation)}
+              trailing={<RowChevron />}
+            />
+          ))}
+        </div>
+
+        <AnonNote />
+
+        <div className="mt-6 rounded-scanner bg-red px-4 py-4 text-white-brush">
           <SectionLabel className="flex items-center gap-2 text-white-brush">
             <span aria-hidden="true" className="pulse-dot size-2 rounded-full bg-white" />
             {t("shield.danger_title")}
@@ -111,7 +131,7 @@ export function Shield({
           </div>
         </div>
 
-        <h2 className="t-h3 mt-7">{t("shield.helplines")}</h2>
+        <h2 className="t-h3 mt-6">{t("shield.helplines")}</h2>
         <ListCard className="mt-2.5">
           {lines.map((line) => (
             <IconRow
@@ -138,54 +158,35 @@ export function Shield({
             />
           ))}
         </ListCard>
+        <p className="t-sub mt-2.5 text-[12px]">{t("sh.numbers_pending")}</p>
 
-        <div className="mt-6 flex items-center gap-3">
-          <span aria-hidden="true" className="h-px flex-1 bg-line" />
-          <span className="t-sub">{t("shield.or_guidance")}</span>
-          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+        <div className="mt-6">
+          <PrimaryButton onClick={() => navigate("report")}>{t("sh.report_cta")}</PrimaryButton>
         </div>
-
-        <div className="mt-7">
-          <h2 className="t-h3">{t("shield.what_happened")}</h2>
-          <p className="t-sub mt-1.5">{t("shield.what_sub")}</p>
-        </div>
-        <div className="mt-2.5 space-y-2">
-          {situations(lang).map((situation) => (
-            <IconRow
-              key={situation.id}
-              as="card"
-              Icon={SITUATION_ICON[situation.id] ?? AlertCircle}
-              title={situation.title}
-              sub={situation.summary}
-              selected={chosen?.id === situation.id}
-              onClick={() => setChosen(situation)}
-              trailing={<RowChevron />}
-            />
-          ))}
-        </div>
-
-        <div className="mt-5">
-          <PrimaryButton disabled={!chosen} onClick={() => setOpen(chosen)}>
-            {t("shield.get_help")}
-          </PrimaryButton>
-        </div>
-
-        <AnonNote />
 
         {law && (
           <Card className="mt-6 flex items-start gap-3">
-            <FileText
-              size={20}
-              strokeWidth={1.75}
-              className="mt-0.5 shrink-0 text-ink"
-              aria-hidden="true"
-            />
+            <FileText size={20} strokeWidth={1.75} className="mt-0.5 shrink-0 text-ink-2" aria-hidden="true" />
             <p className="t-sub flex-1">{law}</p>
           </Card>
         )}
       </Page>
       <BottomNav active="shield" navigate={navigate} />
     </>
+  );
+}
+
+/** Leaves without a trace in this tab's history. Present on every shield view. */
+function QuickExit({ onExit }: { onExit: () => void }) {
+  const { t } = useI18n();
+  return (
+    <button
+      type="button"
+      onClick={onExit}
+      className="flex h-[34px] shrink-0 items-center rounded-full bg-ink px-3.5 text-[13px] font-bold text-white-brush"
+    >
+      {t("sh.exit")}
+    </button>
   );
 }
 
@@ -203,9 +204,6 @@ function AnonNote() {
 /**
  * The guided steps for one situation. Reviewed, fixed text — deliberately not
  * AI, because the person reading it is in no position to judge generated text.
- *
- * Quick exit stays where it has always been, top right: it replaces the page
- * rather than pushing, so Back cannot return here.
  */
 function Steps({
   situation,
@@ -223,30 +221,19 @@ function Steps({
   return (
     <>
       <Page>
-        <Header
-          title={situation.title}
-          onBack={onBack}
-          trailing={
-            <button
-              type="button"
-              onClick={onExit}
-              className="flex h-[34px] shrink-0 items-center rounded-full bg-ink px-3.5 text-[13px] font-bold text-white-brush"
-            >
-              {t("shield.exit")}
-            </button>
-          }
-        />
+        <Header title={situation.title} onBack={onBack} trailing={<QuickExit onExit={onExit} />} />
 
         <p className="t-body text-ink-2">{situation.intro}</p>
 
-        <div className="mt-6">
+        <p className="t-eyebrow mt-6">{t("rec.steps_title")}</p>
+        <div className="mt-3">
           <Stepper steps={situation.steps.map((step) => ({ body: step }))} />
         </div>
 
         <AnonNote />
 
-        <div className="mt-5">
-          <PrimaryButton onClick={() => navigate("report")}>{t("report.title")}</PrimaryButton>
+        <div className="mt-5 space-y-2.5">
+          <PrimaryButton onClick={() => navigate("report")}>{t("sh.report_cta")}</PrimaryButton>
         </div>
       </Page>
       <BottomNav active="shield" navigate={navigate} />
