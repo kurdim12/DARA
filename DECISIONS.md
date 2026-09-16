@@ -251,3 +251,19 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   so `docs/screens/merge-3/result-*.png` come from an intercepted
   `/api/analyze`. They are layout evidence and nothing else; see the README in
   that folder.
+- **Home's fourth quick tool is Recover, not "Learn".** The brief lists
+  Directory, Check before you pay, Two-minute drill and Learn. In this app
+  Learn *is* the two-minute drill — one screen, already the third tile — so a
+  fourth tile pointing at it would be a second door to the same place. Recover
+  took the slot; without it, Recover appears only under Help. Shield is still
+  reachable from Help and from any result that routes there.
+- **"Check before you pay" and "Official institutions" share a screen but not a
+  job.** Both open Protect; the first lands with the cursor in the lookup (a
+  one-shot intent through `App`, consumed on arrival), the second on the list.
+  That is the brief's four tools without four destinations that do not exist.
+- **The transparency page is still not built, and the runbook says so.** Its
+  ported copy states accuracy figures for the reference build's on-device
+  classifier, which this app does not run, so rendering it as written would be
+  a false claim. DEMO-RUNBOOK.md names the four places the app does admit what
+  it does not know, and tells the presenter not to describe a screen that is
+  not there.
