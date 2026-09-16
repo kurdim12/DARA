@@ -153,7 +153,9 @@
   }
 
   .t-meta {
-    font-size: 12px;
+    /* 13px floor: dates and source attributions are the smallest text most
+       people will try to read on Home, and 12px was under it. */
+    font-size: 13px;
     font-weight: 600;
     line-height: 1.35;
   }

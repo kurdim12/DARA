@@ -1,24 +1,20 @@
-import { useState } from "react";
-import { BookOpen, ChevronRight, ClipboardPaste, ShieldCheck, Wallet, Wrench } from "lucide-react";
-import { MAX_INPUT_CHARS, type AnalysisType, type AnalyzeImage } from "../../shared/types";
+import { useState, type Dispatch, type SetStateAction } from "react";
+import { BookOpen, ChevronRight, ShieldCheck, Wallet, Wrench } from "lucide-react";
+import type { AnalysisType, AnalyzeImage } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { DemoTray } from "../components/DemoTray";
 import { Logo } from "../components/Logo";
-import { ScannerCard } from "../components/ScannerCard";
-import { TypeChips } from "../components/TypeChips";
+import { ScanInputCard } from "../components/ScanInputCard";
 import {
   BleedPage,
   Gutter,
-  Card,
   ListCard,
   Pills,
-  PrimaryButton,
   Tag,
   Tile,
 } from "../components/Shell";
 import { useI18n, type TextKey } from "../i18n";
 import { campaignDate, campaigns } from "../lib/campaigns";
-import { readClipboardText } from "../lib/clipboard";
 import { listCases } from "../lib/storage";
 import type { Route } from "../lib/router";
 
@@ -41,54 +37,43 @@ const TOOLS = [
   { action: "recover", title: "tool.recover", sub: "tool.recover_sub", Icon: Wrench },
 ] satisfies { action: Route | "lookup"; title: TextKey; sub: TextKey; Icon: typeof Wrench }[];
 
-/** Shorter than this and there is nothing in the clipboard worth checking. */
-const MIN_CLIP = 8;
+/** Half-typed input. Owned by App so the فحص tab can inherit it. */
+export interface Draft {
+  text: string;
+  type: AnalysisType;
+  image: AnalyzeImage | null;
+}
 
 export function Home({
   navigate,
   onLookup,
+  draft,
+  onDraft,
   onStaged,
   onSubmit,
 }: {
   navigate: (route: Route) => void;
   /** Opens the directory screen with the lookup focused. */
   onLookup: () => void;
+  draft: Draft;
+  onDraft: Dispatch<SetStateAction<Draft>>;
   onStaged: (text: string) => void;
   /** Carries what was pasted or picked into Scan and runs it there. */
   onSubmit: (text: string, type: AnalysisType, image: AnalyzeImage | null) => void;
 }) {
   const { t, lang } = useI18n();
-  const [text, setText] = useState("");
-  const [type, setType] = useState<AnalysisType>("message");
-  const [image, setImage] = useState<AnalyzeImage | null>(null);
+  const { text, type, image } = draft;
+  // Functional, not `{ ...draft, … }`: the card sets text and type in the same
+  // tick when a paste is auto-detected, and two spreads of the same captured
+  // draft meant the second silently threw away the first — the field stayed
+  // empty while the chip moved.
+  const setText = (next: string) => onDraft((d) => ({ ...d, text: next }));
+  const setType = (next: AnalysisType) => onDraft((d) => ({ ...d, type: next }));
+  const setImage = (next: AnalyzeImage | null) => onDraft((d) => ({ ...d, image: next }));
   const [errorKey, setErrorKey] = useState<TextKey | null>(null);
-  const [clipNote, setClipNote] = useState<TextKey | null>(null);
-  const [clipBusy, setClipBusy] = useState(false);
   const [trayOpen, setTrayOpen] = useState(false);
   const strip = campaigns(lang).slice(0, 3);
   const latest = listCases()[0];
-  const ready = text.trim().length > 0 || image !== null;
-
-  /**
-   * One press: read the clipboard, then check what was in it. The clipboard is
-   * never touched on load, which is what the line under the button says.
-   */
-  async function readClipboard() {
-    setClipNote(null);
-    setClipBusy(true);
-    try {
-      const clip = await readClipboardText();
-      if (!clip || clip.trim().length < MIN_CLIP) {
-        setClipNote("ft.clip.empty");
-        return;
-      }
-      onSubmit(clip.trim().slice(0, MAX_INPUT_CHARS), type, null);
-    } catch {
-      setClipNote("ft.clip.failed");
-    } finally {
-      setClipBusy(false);
-    }
-  }
 
   return (
     <>
@@ -98,9 +83,12 @@ export function Home({
             verdict, a flagged span and the shield — nowhere else. */}
         <div
           style={{
-            paddingTop: "max(54px, env(safe-area-inset-top))",
+            // Standard header padding. The old 54px reserve pushed the title
+            // and the input card down far enough that the campaigns strip
+            // started below the second screen.
+            paddingTop: "max(16px, env(safe-area-inset-top))",
             paddingInline: 20,
-            paddingBottom: 20,
+            paddingBottom: 16,
           }}
         >
           <div className="flex items-start justify-between gap-3">
@@ -108,33 +96,23 @@ export function Home({
             <Pills />
           </div>
 
-          <h1 className="t-hero mt-6">{t("home.h1")}</h1>
-          <p className="t-body mt-2 max-w-[310px] text-ink-2">{t("home.sub")}</p>
+          <h1 className="t-hero mt-5">{t("home.h1")}</h1>
+          <p className="t-body mt-2 max-w-[330px] text-ink-2">{t("home.sub")}</p>
         </div>
 
         <Gutter>
-          <ScannerCard
-            variant="home"
+          <ScanInputCard
             text={text}
             onText={setText}
-            placeholder={t("home.placeholder")}
-            label={t("home.analyze")}
+            type={type}
+            onType={setType}
             image={image}
             onImage={(next) => {
               setImage(next);
               if (next) setErrorKey(null);
             }}
             onError={setErrorKey}
-            showPaste={false}
-            chips={<TypeChips value={type} onChange={setType} />}
-            submit={
-              <PrimaryButton
-                disabled={!ready}
-                onClick={() => onSubmit(text.trim(), type, image)}
-              >
-                {t("home.analyze")}
-              </PrimaryButton>
-            }
+            onSubmit={() => onSubmit(text.trim(), type, image)}
           />
 
           {errorKey && (
@@ -142,27 +120,6 @@ export function Home({
               {t(errorKey)}
             </p>
           )}
-
-          <Card className="mt-4">
-            <p className="t-row">{t("ft.clip.title")}</p>
-            <p className="mt-1 text-[12px] font-normal leading-snug text-ink-2">
-              {t("ft.clip.line")}
-            </p>
-            <button
-              type="button"
-              onClick={() => void readClipboard()}
-              disabled={clipBusy}
-              className="press mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-btn border border-line bg-paper text-[14px] font-bold text-ink disabled:text-ink-2"
-            >
-              <ClipboardPaste size={16} strokeWidth={1.75} aria-hidden="true" />
-              {t(clipBusy ? "detect.loading" : "ft.clip.cta")}
-            </button>
-            {clipNote && (
-              <p role="status" className="mt-2 text-[12px] font-normal leading-snug text-ink-2">
-                {t(clipNote)}
-              </p>
-            )}
-          </Card>
 
           <h2 className="t-h3 mt-9">{t("ft.home.tools")}</h2>
           <div className="mt-3 grid grid-cols-2 gap-2.5">

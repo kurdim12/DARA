@@ -406,3 +406,31 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   test pins the order, pins that the raised tab is the exact middle of an
   odd-length row, and pins that BottomNav and DEMO-RUNBOOK.md describe the same
   bar — the runbook was still on the old order and the test caught it.
+
+## One input card on Home and فحص
+
+- **`ScanInputCard` replaces `ScannerCard` and Home's clipboard card.** Home had
+  two clipboard paths — a "paste" link inside the box and a card below it that
+  read and submitted in one press — so the only way to see what was about to be
+  sent was to watch it go. Now paste fills the field and «افحص الآن» is the only
+  scan trigger on the page. `ScannerCard` was deleted rather than left behind,
+  because a second input component is how the two screens drift apart.
+- **Chips wrap instead of scrolling, at a 12px row gap.** The fifth chip used to
+  sit half past the right edge of a 390px screen with nothing to say it was
+  there. The gap is 12px, not 8px, because `.tap` expands a 34px chip's hit area
+  to 44px — 5px past each edge — and on an 8px gap the second row's expansion
+  painted over the first row's and stole the tap. Measured with
+  `elementFromPoint`, not with a bounding box, which cannot see a pseudo-element.
+- **Detection runs on any change to the field, not only on the «لصق» button,**
+  because most people paste with the keyboard or a long-press, not our button.
+  It yields permanently once someone taps a chip themselves: «رابط» and «موقع»
+  are a real judgement call and an app that keeps undoing that judgement is
+  worse than one that never guessed.
+- **`--ink-2` was NOT darkened — it already passes.** 6.87:1 on paper and 7.26:1
+  on card in light, 8.35:1 and 7.81:1 in dark, against a 4.5:1 bar. Darkening it
+  would have flattened the ink/ink-2 hierarchy for no accessibility gain. What
+  was actually under the bar was size, not colour: nav labels at 11px,
+  `SectionLabel` and `.t-meta` at 12px. Those are now 13px.
+- **«افحص الآن» lights up on any content, so short input had to start
+  explaining itself.** Scan's 8-character floor previously made the button
+  silently do nothing; `scan.too_short` says what to do instead.

@@ -18,8 +18,7 @@ import type {
 } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { HighlightedMessage } from "../components/HighlightedMessage";
-import { ScannerCard } from "../components/ScannerCard";
-import { TypeChips, TYPE_META } from "../components/TypeChips";
+import { ScanInputCard } from "../components/ScanInputCard";
 import { JordanLayerRows } from "../components/JordanLayer";
 import {
   Bleed,
@@ -94,7 +93,12 @@ export function Scan({
   async function run(value: string, forced?: AnalysisType, picture?: AnalyzeImage | null) {
     const trimmed = value.trim();
     const shot = picture === undefined ? image : picture;
-    if (!shot && trimmed.length < MIN_INPUT) return;
+    if (!shot && trimmed.length < MIN_INPUT) {
+      // The button lights up on any content, so this path is reachable now.
+      // Silently returning would read as a dead button.
+      setErrorKey("scan.too_short");
+      return;
+    }
     setErrorKey(null);
     setStage({ name: "loading" });
     try {
@@ -129,31 +133,30 @@ export function Scan({
   }
 
   const busy = stage.name === "loading";
-  const ready = image !== null || text.trim().length >= MIN_INPUT;
 
   return (
     <>
       <Page>
         <Header title={t("scan.title")} />
 
-        <TypeChips value={type} onChange={setType} />
-
-        <div className="mt-3">
-          <ScannerCard
-            variant="scan"
-            text={text}
-            onText={setText}
-            disabled={busy}
-            placeholder={t(TYPE_META[type].placeholder)}
-            label={t(TYPE_META[type].label)}
-            image={image}
-            onImage={(next) => {
-              setImage(next);
-              if (next) setErrorKey(null);
-            }}
-            onError={setErrorKey}
-          />
-        </div>
+        {/* The same component Home uses. The chips, the label, the consent
+            line and the one button all live inside it, so the two screens
+            cannot drift into two different ideas of how you check something. */}
+        <ScanInputCard
+          text={text}
+          onText={setText}
+          type={type}
+          onType={setType}
+          busy={busy}
+          image={image}
+          onImage={(next) => {
+            setImage(next);
+            if (next) setErrorKey(null);
+          }}
+          onError={setErrorKey}
+          onSubmit={() => void run(text)}
+          submitLabel={busy ? t("scan.analyzing") : t("home.analyze")}
+        />
 
         {errorKey && (
           <p
@@ -163,12 +166,6 @@ export function Scan({
             {t(errorKey)}
           </p>
         )}
-
-        <div className="mt-3">
-          <PrimaryButton disabled={!ready} loading={busy} onClick={() => void run(text)}>
-            {busy ? t("scan.analyzing") : t("home.analyze")}
-          </PrimaryButton>
-        </div>
 
         <Card className="mt-7">
           <SectionLabel>{t("scan.what")}</SectionLabel>

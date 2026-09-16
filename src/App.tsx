@@ -2,8 +2,8 @@ import { useCallback, useState } from "react";
 import type { AnalysisType, AnalyzeImage, Category } from "../shared/types";
 import { LangProvider } from "./i18n";
 import { ThemeProvider } from "./lib/theme";
-import { useRouter } from "./lib/router";
-import { Home } from "./routes/Home";
+import { useRouter, type Route } from "./lib/router";
+import { Home, type Draft } from "./routes/Home";
 import { Scan, type Seed } from "./routes/Scan";
 import { Threats } from "./routes/Threats";
 import { Report } from "./routes/Report";
@@ -34,6 +34,28 @@ function Screens() {
   const [prefill, setPrefill] = useState<{ category: Category; messageText: string } | null>(null);
   /** Set by "Check before you pay", which is the lookup rather than the list. */
   const [focusLookup, setFocusLookup] = useState(false);
+  /**
+   * What is half-typed into Home's input card. It lives here rather than in
+   * Home so that tapping the raised فحص button carries it across instead of
+   * throwing it away — the two screens share one input, so they share its
+   * contents too.
+   */
+  const [draft, setDraft] = useState<Draft>({ text: "", type: "message", image: null });
+
+  /**
+   * Home's navigate. Leaving Home for فحص with something in the field seeds
+   * فحص with it, unrun: carried over for review, never scanned behind the
+   * person's back.
+   */
+  const navigateFromHome = useCallback(
+    (next: Route) => {
+      if (next === "scan" && (draft.text.trim().length > 0 || draft.image)) {
+        setSeed({ text: draft.text, run: false, type: draft.type, image: draft.image });
+      }
+      navigate(next);
+    },
+    [draft, navigate],
+  );
 
   const handOff = useCallback(
     (text: string, run: boolean, type?: AnalysisType, image?: AnalyzeImage | null) => {
@@ -98,8 +120,10 @@ function Screens() {
     default:
       return (
         <Home
-          navigate={navigate}
+          navigate={navigateFromHome}
           onLookup={openLookup}
+          draft={draft}
+          onDraft={setDraft}
           onStaged={(text) => handOff(text, false)}
           onSubmit={(text, type, image) => handOff(text, true, type, image)}
         />

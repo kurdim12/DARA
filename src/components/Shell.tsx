@@ -378,6 +378,23 @@ export function ChipRow({ children }: { children: ReactNode }) {
 }
 
 /**
+ * Chips that wrap onto a second line instead of scrolling sideways.
+ *
+ * A scrolling rail hides its own last chip: on a 390px screen the fifth type
+ * sat half off the edge with nothing to say it was there, so people chose
+ * from the four they could see. Wrapping costs one row of height and shows
+ * all five. Chips must not shrink here, hence the override — `shrink-0` on
+ * the Chip keeps its label from being squeezed mid-word.
+ */
+export function ChipWrap({ children }: { children: ReactNode }) {
+  // Row gap 12px, not 8px. A chip is 34px tall and `.tap` expands its hit
+  // area to 44px — 5px past each edge — so on an 8px gap the second row's
+  // expansion paints over the first row's and steals the tap. 12 > 10 keeps
+  // every chip's own 44px to itself.
+  return <div className="flex flex-wrap gap-x-2 gap-y-3">{children}</div>;
+}
+
+/**
  * The one red action on a screen, with the arrow that says this goes
  * somewhere.
  * Disabled is a hairline tint with secondary ink on it — visibly not yet,
@@ -481,7 +498,7 @@ export function SectionLabel({
   className?: string;
 }) {
   return (
-    <p className={`text-[12px] font-extrabold uppercase tracking-[0.08em] ${className}`}>
+    <p className={`text-[13px] font-extrabold uppercase tracking-[0.08em] ${className}`}>
       {children}
     </p>
   );

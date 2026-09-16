@@ -93,7 +93,10 @@ export function BottomNav({
                 ) : (
                   <Icon size={22} strokeWidth={1.75} aria-hidden="true" />
                 )}
-                <span className={`text-[11px] leading-none ${on ? "font-bold" : "font-medium"}`}>
+                {/* 13px floor: 11px was below the size a label has to be to
+                    be read at arm's length, and these five are the only
+                    labels some people will read on the whole screen. */}
+                <span className={`text-[13px] leading-none ${on ? "font-bold" : "font-medium"}`}>
                   {t(label)}
                 </span>
               </button>

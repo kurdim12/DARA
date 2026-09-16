@@ -1,7 +1,7 @@
 import { Briefcase, Globe, Link2, MessageSquare, Phone } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { ANALYSIS_TYPES, type AnalysisType } from "../../shared/types";
-import { Chip, ChipRow } from "./Shell";
+import { Chip, ChipRow, ChipWrap } from "./Shell";
 import { useI18n, type TextKey } from "../i18n";
 
 /** What each kind of thing is called, what it asks for, and its icon. */
@@ -16,17 +16,26 @@ export const TYPE_META: Record<
   website: { label: "type.website", placeholder: "scan.ph_website", Icon: Globe },
 };
 
-/** The five chips. Home carries them inside the scanner card, Scan above it. */
+/**
+ * The five chips, above the field inside ScanInputCard on both screens.
+ *
+ * They wrap rather than scroll: on a 390px screen the fifth chip used to sit
+ * half past the edge with nothing to say it was there. `wrap={false}` keeps
+ * the old scrolling rail for anywhere that still wants it.
+ */
 export function TypeChips({
   value,
   onChange,
+  wrap = true,
 }: {
   value: AnalysisType;
   onChange: (type: AnalysisType) => void;
+  wrap?: boolean;
 }) {
   const { t } = useI18n();
+  const Row = wrap ? ChipWrap : ChipRow;
   return (
-    <ChipRow>
+    <Row>
       {ANALYSIS_TYPES.map((option) => (
         <Chip
           key={option}
@@ -36,6 +45,6 @@ export function TypeChips({
           onClick={() => onChange(option)}
         />
       ))}
-    </ChipRow>
+    </Row>
   );
 }
