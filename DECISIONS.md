@@ -434,3 +434,21 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
 - **«افحص الآن» lights up on any content, so short input had to start
   explaining itself.** Scan's 8-character floor previously made the button
   silently do nothing; `scan.too_short` says what to do instead.
+
+## OCR as a separate step
+
+- **`worker/ocr/`, not `src/ocr/` as the brief said.** `src/` is the browser
+  bundle and `OPENROUTER_API_KEY` is a Worker secret. An OCR module there would
+  either ship dead code to the browser or ship the key with it.
+- **Gemma primary, Haiku fallback — decided by the table, not by assumption.**
+  Ten Arabic screenshots, both providers: Gemma 97.7% characters correct at
+  $0.00005/image, Haiku 94.9% at $0.00100. Twenty times cheaper and more
+  accurate. Haiku is the faster of the two (2.1s vs 3.8s mean), which is the
+  right property for the thing that rescues a slow primary.
+- **The engine stopped receiving the image, and that broke its wall.** The wall
+  read `args.image ? 25s : 10s`; with OCR reading the picture that test was
+  false for every screenshot, so every screenshot silently got the text wall.
+  8 of 20 runs timed out. It now keys off `fromScreenshot`, at 15s.
+- **The transcription renders once, editable in place.** Showing the OCR card
+  above the highlighted message printed the same paragraph twice — caught by
+  looking at the screen, not by a test.
