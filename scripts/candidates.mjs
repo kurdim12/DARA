@@ -23,11 +23,15 @@
 const CATALOGUE = "https://openrouter.ai/api/v1/models";
 
 function parseArgs(argv) {
-  const args = { vendor: null, maxIn: null, json: false };
+  const args = { vendor: null, maxIn: null, json: false, top: false, limit: 40 };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--vendor") args.vendor = argv[++i].split(",").map((v) => v.trim());
     else if (argv[i] === "--max-in") args.maxIn = Number(argv[++i]);
     else if (argv[i] === "--json") args.json = true;
+    // Price is a crude stand-in for capability, but it is the only ordering
+    // the catalogue offers, and the frontier tier is what "best model" means.
+    else if (argv[i] === "--top") args.top = true;
+    else if (argv[i] === "--limit") args.limit = Number(argv[++i]);
   }
   return args;
 }
@@ -38,7 +42,7 @@ function perMillion(value) {
   return Number.isFinite(n) ? n * 1_000_000 : null;
 }
 
-export function candidates(models, { vendor = null, maxIn = null } = {}) {
+export function candidates(models, { vendor = null, maxIn = null, top = false } = {}) {
   return models
     .filter((m) => {
       const params = m.supported_parameters ?? [];
@@ -58,7 +62,11 @@ export function candidates(models, { vendor = null, maxIn = null } = {}) {
       out: perMillion(m.pricing?.completion),
       forcesTools: (m.supported_parameters ?? []).includes("tool_choice"),
     }))
-    .sort((a, b) => (a.in ?? Infinity) - (b.in ?? Infinity));
+    .sort((a, b) =>
+      top
+        ? (b.in ?? -Infinity) - (a.in ?? -Infinity)
+        : (a.in ?? Infinity) - (b.in ?? Infinity),
+    );
 }
 
 function table(rows) {
@@ -79,7 +87,7 @@ async function main() {
     process.exit(1);
   }
   const { data } = await res.json();
-  const rows = candidates(data, { vendor: args.vendor, maxIn: args.maxIn });
+  const rows = candidates(data, { vendor: args.vendor, maxIn: args.maxIn, top: args.top });
 
   if (args.json) {
     console.log(JSON.stringify(rows, null, 2));
@@ -88,7 +96,12 @@ async function main() {
 
   console.log(`${data.length} models in the catalogue.`);
   console.log(`${rows.length} of them support both tool calling and image input.\n`);
-  console.log(table(rows.slice(0, 40)));
+  console.log(
+    args.top
+      ? `Most expensive first — the frontier tier, which is what "best" usually means.\n`
+      : `Cheapest first. Pass --top for the frontier tier.\n`,
+  );
+  console.log(table(rows.slice(0, args.limit)));
   const noForce = rows.filter((r) => !r.forcesTools);
   if (noForce.length > 0) {
     console.log(
