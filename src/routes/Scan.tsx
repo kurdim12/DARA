@@ -212,7 +212,11 @@ function Result({
   const { t, lang } = useI18n();
   // Seeded from the transcription, and reset whenever a new one arrives.
   const [draft, setDraft] = useState(input);
-  useEffect(() => setDraft(input), [input]);
+  const [editing, setEditing] = useState(false);
+  useEffect(() => {
+    setDraft(input);
+    setEditing(false);
+  }, [input]);
   const level = levelFor(result);
   const fill = LEVEL_FILL[level];
   const facts: { key: TextKey; value: string }[] = [];
@@ -267,21 +271,40 @@ function Result({
           </div>
         </Bleed>
 
-        {/* 1b. For a screenshot: what the OCR step actually read, above the
-               verdict's own evidence and editable. A transcription can be
-               wrong, and a verdict built on a misread line should be
-               correctable by the person holding the phone rather than
-               defended. Re-checking runs the ordinary text pipeline. */}
-        {result.input_kind === "image" && (
-          <Card className="mt-6">
-            <p className="t-eyebrow">{t("ocr.title")}</p>
+        {/* 2. The message, with every flag underlined where it sits. The one
+               thing on this screen a jury follows with their eyes.
+
+               For a screenshot this IS the transcription — the engine judged
+               this exact text, so every quote it returned exists inside it,
+               which is why the underlines land. Showing it once and letting
+               it be edited in place beats printing the same paragraph twice. */}
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <p className="t-eyebrow">
+            {result.input_kind === "image" ? t("ocr.title") : t("res.message")}
+          </p>
+          {result.input_kind === "image" && (
+            <button
+              type="button"
+              onClick={() => {
+                setDraft(input);
+                setEditing((was) => !was);
+              }}
+              className="tap text-[13px] font-bold text-ink-2 underline underline-offset-2"
+            >
+              {t(editing ? "ocr.cancel" : "ocr.correct")}
+            </button>
+          )}
+        </div>
+
+        {editing && result.input_kind === "image" ? (
+          <div className="mt-2.5">
             <textarea
               dir="auto"
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
-              rows={4}
+              rows={5}
               aria-label={t("ocr.title")}
-              className="mt-2.5 w-full resize-none rounded-btn border border-line bg-paper p-3.5 text-[15px] leading-relaxed text-ink outline-none"
+              className="w-full resize-none rounded-btn border border-line bg-card p-3.5 text-[15px] leading-relaxed text-ink outline-none"
             />
             <p className="t-sub mt-2">{t("ocr.note")}</p>
             <button
@@ -293,21 +316,12 @@ function Result({
               <RefreshCw size={16} strokeWidth={1.75} aria-hidden="true" />
               {t("ocr.rescan")}
             </button>
-          </Card>
+          </div>
+        ) : (
+          <div className="mt-2.5">
+            <HighlightedMessage text={input} flags={result.red_flags} />
+          </div>
         )}
-
-        {/* 2. The message, with every flag underlined where it sits. The one
-               thing on this screen a jury follows with their eyes.
-
-               For a screenshot this is the transcription, which is exactly why
-               the flags land: the engine judged this text, so every quote it
-               returned exists inside it. */}
-        <p className="t-eyebrow mt-6">
-          {result.input_kind === "image" ? t("res.from_image") : t("res.message")}
-        </p>
-        <div className="mt-2.5">
-          <HighlightedMessage text={input} flags={result.red_flags} />
-        </div>
 
         {result.red_flags.length > 0 && (
           <>

@@ -73,10 +73,20 @@ describe("the screenshot pipeline", () => {
 describe("the result screen", () => {
   const scan = read("src/routes/Scan.tsx");
 
-  it("shows the transcription, editable, for a screenshot", () => {
+  it("shows the transcription once, editable in place", () => {
     expect(scan).toContain('t("ocr.title")');
     expect(scan).toMatch(/onChange=\{\(e\) => setDraft\(e\.target\.value\)\}/);
     expect(scan).toContain('t("ocr.rescan")');
+    expect(scan).toContain('t(editing ? "ocr.cancel" : "ocr.correct")');
+    // One block, two modes. Printing the transcription and then the
+    // highlighted copy of the same paragraph is the same text twice.
+    expect(scan.match(/<HighlightedMessage/g), "the message renders once").toHaveLength(1);
+  });
+
+  it("leaves editing when a new result arrives", () => {
+    // Otherwise the next scan opens straight into a textarea over text
+    // nobody asked to correct.
+    expect(scan).toMatch(/setDraft\(input\);\s*\n\s*setEditing\(false\);/);
   });
 
   it("re-checks corrected text without paying for OCR twice", () => {

@@ -339,6 +339,8 @@
   "nav.reports": "بلاغاتي",
   "nav.scan": "فحص",
   "nav.shield": "الدرع",
+  "ocr.cancel": "إلغاء",
+  "ocr.correct": "صحّح النص",
   "ocr.edited": "نص معدَّل",
   "ocr.note": "صحّح النص إن كان فيه خطأ، ثم أعد الفحص.",
   "ocr.rescan": "أعد الفحص",

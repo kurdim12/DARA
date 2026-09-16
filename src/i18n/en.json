@@ -339,6 +339,8 @@
   "nav.reports": "Reports",
   "nav.scan": "Scan",
   "nav.shield": "Shield",
+  "ocr.cancel": "Cancel",
+  "ocr.correct": "Correct the text",
   "ocr.edited": "Edited text",
   "ocr.note": "Correct the text if it is wrong, then check it again.",
   "ocr.rescan": "Check again",
