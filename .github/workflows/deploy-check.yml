@@ -20,6 +20,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # The verdict resolves the SHA baked into the LIVE bundle against
+          # this repo's history. checkout's default depth-1 clone has no
+          # object for any earlier commit, so every candidate failed
+          # `git cat-file -e` and the verdict was a permanent UNKNOWN.
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -127,6 +133,7 @@ jobs:
           for c in $(grep -oE '\b[0-9a-f]{7}\b' /tmp/live.js | sort -u); do
             git cat-file -e "$c^{commit}" 2>/dev/null || continue
             echo "candidate: $c $(git log -1 --format='%s' "$c" | cut -c1-60)"
+            CANDIDATES="${CANDIDATES:+$CANDIDATES }$c"
             if git merge-base --is-ancestor "$c" HEAD 2>/dev/null; then LIVE_SHA=$c; fi
           done
           HEAD_SHA=$(git rev-parse --short=7 HEAD)
@@ -145,7 +152,10 @@ jobs:
           if ! grep -q '"counts"' /tmp/threats.txt 2>/dev/null; then
             echo "STALE: the live build predates the rebuild — /api/threats does not exist on it"
           elif [ -z "$LIVE_SHA" ]; then
-            echo "UNKNOWN: no build id in the live bundle — check by hand"
+            echo "UNKNOWN: no commit id in the live bundle resolved against this repo."
+            echo "  candidates seen: ${CANDIDATES:-none}"
+            echo "  none / all unresolvable usually means a shallow clone;"
+            echo "  resolvable but not an ancestor means the deploy came from another branch."
           elif [ "$LIVE_SHA" = "$HEAD_SHA" ]; then
             echo "CURRENT: the live site is serving this exact commit"
           elif [ -z "$(git diff --name-only "$LIVE_SHA..$HEAD_SHA" -- src worker shared content public index.html vite.config.ts wrangler.jsonc 2>/dev/null)" ]; then
