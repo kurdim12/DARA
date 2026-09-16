@@ -193,7 +193,7 @@ export function Shield({
 function AnonNote() {
   const { t } = useI18n();
   return (
-    <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[12.5px] font-semibold leading-snug text-green-ink">
+    <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-[12.5px] font-semibold leading-snug text-green">
       <EyeOff size={14} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
       {t("shield.anon_note")}
     </p>

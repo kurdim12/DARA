@@ -174,20 +174,24 @@ function specimenKeys(content) {
   return Array.isArray(declared) ? new Set(declared) : new Set();
 }
 
-function walkContent(node, path, out, specimens = new Set()) {
+function walkContent(node, path, out, specimens = new Set(), signed = false) {
   if (Array.isArray(node)) {
-    node.forEach((item, index) => walkContent(item, `${path}[${index}]`, out, specimens));
+    node.forEach((item, index) => walkContent(item, `${path}[${index}]`, out, specimens, signed));
     return;
   }
   if (node === null || typeof node !== "object") return;
 
   if (node.verified === false) return; // gated: never renders in production
+  // A record's `verified: true` is a person's signature on that record,
+  // including its nested parts — a bilingual {en, ar} pair under a signed
+  // campaign is the same signed fact, not an unsigned one.
+  const here = signed || node.verified === true;
   if (path === "" ) {
     for (const [key, value] of Object.entries(node)) {
       // `_meta` is notes to ourselves; `rewrite_required` is a record of the
       // v1 strings we threw out, quoted so nobody reinstates them.
       if (key === "_meta" || key === "rewrite_required") continue;
-      walkContent(value, key, out, specimens);
+      walkContent(value, key, out, specimens, here);
     }
     return;
   }
@@ -218,9 +222,9 @@ function walkContent(node, path, out, specimens = new Set()) {
     }
     if (specimens.has(key)) continue;
     if (typeof value === "string") {
-      out.push({ path: `${path}.${key}`, value, gated: "verified" in node });
+      out.push({ path: `${path}.${key}`, value, gated: here || "verified" in node });
     } else {
-      walkContent(value, `${path}.${key}`, out, specimens);
+      walkContent(value, `${path}.${key}`, out, specimens, here);
     }
   }
 }

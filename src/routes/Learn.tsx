@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, X } from "lucide-react";
+import { ArrowUpRight, Check, X } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import {
   Card,
@@ -57,7 +57,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
     return (
       <>
         <Page>
-          <Header title={t("tool.learn")} />
+          <Header title={t("ft.tr.title")} />
           <div className="reveal mt-10 text-center">
             <p className="t-sub">{t("learn.your_score")}</p>
             <p className="tnum mt-2 text-[28px] font-extrabold leading-none">
@@ -66,6 +66,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
               </bdi>
             </p>
           </div>
+          <p className="t-sub mx-auto mt-3 max-w-[300px] text-center">{t("ft.tr.score_line")}</p>
           <div className="mt-8 space-y-2.5">
             <PrimaryButton onClick={() => navigate("scan")}>{t("learn.try_scanner")}</PrimaryButton>
             <OutlineButton onClick={restart}>{t("learn.restart")}</OutlineButton>
@@ -81,7 +82,7 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
   return (
     <>
       <Page>
-        <Header title={t("tool.learn")} />
+        <Header title={t("ft.tr.title")} />
         <p className="t-sub -mt-1.5">{t("tool.learn_sub")}</p>
 
         {/* Six dots. Where you are, and how much is left, without a number. */}
@@ -105,7 +106,14 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
         {/* A quiz message is quoted text, never a link — the same rule the
             verdict screen follows for the message being analysed. */}
         <Card className="mt-3">
-          <Tag>{t("type.message")}</Tag>
+          <div className="flex flex-wrap items-center gap-2">
+            <Tag>{t("type.message")}</Tag>
+            {question.entity && (
+              <span dir="auto" className="t-meta text-ink-2">
+                {question.entity}
+              </span>
+            )}
+          </div>
           <p
             dir="auto"
             className="mt-2.5 whitespace-pre-wrap break-words rounded-btn bg-paper p-3.5 text-[15px] font-medium leading-relaxed"
@@ -131,10 +139,12 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
           />
         </div>
 
+        <p className="t-sub mt-4 text-center text-[12px]">{t("ft.tr.local")}</p>
+
         {given && (
           <div className="reveal mt-5">
             <p
-              className={`t-row flex items-center gap-2 ${right ? "text-green-ink" : "text-red-ink"}`}
+              className={`t-row flex items-center gap-2 ${right ? "text-green" : "text-red-ink"}`}
             >
               {right ? (
                 <Check size={18} strokeWidth={1.75} aria-hidden="true" />
@@ -145,9 +155,42 @@ export function Learn({ navigate }: { navigate: (route: Route) => void }) {
             </p>
             <Card className="mt-2.5">
               <p className="t-row">{t("learn.tell")}</p>
-              <p dir="auto" className="t-body mt-1.5">
-                {question.tell}
-              </p>
+              {question.signals.length > 0 ? (
+                <ul className="mt-2 space-y-2">
+                  {question.signals.map((signal, index) => (
+                    <li key={index} className="flex items-start gap-2.5">
+                      <span
+                        aria-hidden="true"
+                        className="mt-1.5 size-1.5 shrink-0 rounded-full bg-red"
+                      />
+                      <span dir="auto" className="t-body flex-1 text-[14px]">
+                        {signal}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p dir="auto" className="t-body mt-1.5">
+                  {question.tell}
+                </p>
+              )}
+              {question.sourceName && (
+                <p dir="auto" className="t-meta mt-2.5 border-t border-line pt-2 text-ink-2">
+                  {question.sourceUrl ? (
+                    <a
+                      href={question.sourceUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="inline-flex items-center gap-1 underline underline-offset-2"
+                    >
+                      {question.sourceName}
+                      <ArrowUpRight size={12} strokeWidth={1.75} aria-hidden="true" className="shrink-0" />
+                    </a>
+                  ) : (
+                    question.sourceName
+                  )}
+                </p>
+              )}
             </Card>
             <div className="mt-5">
               <PrimaryButton onClick={next}>

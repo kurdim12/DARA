@@ -100,20 +100,48 @@ export interface Question {
   message: string;
   answer: "scam" | "legitimate";
   tell: string;
+  /** Present on the three drawn from documented campaigns. */
+  signals: string[];
+  entity?: string;
+  sourceName?: string;
+  sourceUrl?: string;
+  /** True when the message is a reconstruction of the campaign, not a capture. */
+  reconstructed: boolean;
 }
 
+interface RawQuestion {
+  id: string;
+  message: Bilingual;
+  answer: "scam" | "legitimate";
+  tell: Bilingual;
+  signals?: { en: string[]; ar: string[] };
+  entity?: Bilingual;
+  source_name?: Bilingual;
+  source_url?: string;
+  reconstructed?: boolean;
+  verified?: boolean;
+}
+
+/**
+ * The drill's six. Three are real messages tied to a documented campaign, and
+ * carry the source that reported it; three are legitimate messages, which is
+ * what stops the drill teaching people to answer "scam" to everything.
+ *
+ * A question marked `verified: false` does not render, the same rule the rest
+ * of the app follows.
+ */
 export function questions(lang: Lang): Question[] {
-  return (
-    quizFile.questions as {
-      id: string;
-      message: Bilingual;
-      answer: "scam" | "legitimate";
-      tell: Bilingual;
-    }[]
-  ).map((q) => ({
-    id: q.id,
-    message: pick(q.message, lang),
-    answer: q.answer,
-    tell: pick(q.tell, lang),
-  }));
+  return (quizFile.questions as RawQuestion[])
+    .filter((q) => q.verified !== false)
+    .map((q) => ({
+      id: q.id,
+      message: pick(q.message, lang),
+      answer: q.answer,
+      tell: pick(q.tell, lang),
+      signals: q.signals ? (lang === "ar" ? q.signals.ar : q.signals.en) : [],
+      entity: q.entity ? pick(q.entity, lang) : undefined,
+      sourceName: q.source_name ? pick(q.source_name, lang) : undefined,
+      sourceUrl: q.source_url,
+      reconstructed: Boolean(q.reconstructed),
+    }));
 }

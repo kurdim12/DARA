@@ -1,25 +1,126 @@
 {
   "_meta": {
-    "purpose": "Six questions on the Learn screen. Each shows a realistic message and asks whether it is a scam.",
+    "purpose": "Six messages for the two-minute drill: three real scams, each tied to a documented campaign with a named source, and three legitimate messages as controls.",
     "rule": "The messages come from the same families as content/eval-cases.json. No statistics, no real phone numbers, no real institution asked to play the villain beyond the impersonation the scam itself performs.",
-    "balance": "Three scams and three legitimate messages, on purpose. A quiz that is mostly scams teaches people to answer scam.",
+    "balance": "Half are legitimate on purpose. A drill that is all scams teaches people to answer scam, which is the opposite of what this app is for.",
     "specimens": [
-      "message"
+      "message",
+      "signals",
+      "tell"
     ],
-    "specimens_note": "The `message` field of each question is a quoted specimen — an invented example of what a message of this family looks like. It is not the app speaking, so the numbers inside it (a verification code, an order number) are deliberately fake and are exempt from the sourcing rule. Every other string in this file is the app's own words and is not exempt."
+    "specimens_note": "message is a scam as it was received, or a legitimate message quoted for contrast; signals and tell are the phrases lifted out of it. All are quoted evidence, not DARA' speaking.",
+    "origin": "The three scam messages came from the reference build's drill (zaidabualshaar/dara-app, gh-pages 8ebde8a), extracted rather than retyped. They replaced three invented specimens that did the same job without a source. The legitimate controls are this repo's own."
   },
   "questions": [
     {
-      "id": "q_fine",
+      "id": "tr_jordan_post",
       "answer": "scam",
       "message": {
-        "en": "Greater Amman Municipality: you have an unpaid traffic fine. Pay within 24 hours to avoid the amount doubling: amanat-pay-now.com/fine",
-        "ar": "أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة. ادفع خلال 24 ساعة لتجنب مضاعفة المبلغ: amanat-pay-now.com/fine"
+        "en": "البريد الأردني: تنبيه نهائي! شحنتك (ID: JO8829) عالقة بسبب عنوان خاطئ. إذا لم يتم تحديث العنوان خلال 12 ساعة، سيتم إرجاع الطرد إلى بلد المنشأ وسيتحمل المرسل إليه رسوم التخزين الإضافية. لن نتمكن من إعادة الإرسال بمجرد البدء في إجراءات الإرجاع. تحديث الآن: https://jordan.tcrz.top/jo",
+        "ar": "البريد الأردني: تنبيه نهائي! شحنتك (ID: JO8829) عالقة بسبب عنوان خاطئ. إذا لم يتم تحديث العنوان خلال 12 ساعة، سيتم إرجاع الطرد إلى بلد المنشأ وسيتحمل المرسل إليه رسوم التخزين الإضافية. لن نتمكن من إعادة الإرسال بمجرد البدء في إجراءات الإرجاع. تحديث الآن: https://jordan.tcrz.top/jo"
       },
       "tell": {
-        "en": "Official bodies do not collect fines through a link in a message, and the link is not on a government domain.",
-        "ar": "الجهات الرسمية لا تحصّل المخالفات عبر رابط في رسالة، والرابط ليس على نطاق حكومي."
-      }
+        "en": "A 12-hour deadline and a threat to send the parcel back: manufactured urgency. The link jordan.tcrz.top does not belong to Jordan Post, whose official domain is jordanpost.com.jo. Extra storage fees for a parcel you never ordered. It arrived from a personal email address, not an official channel.",
+        "ar": "مهلة 12 ساعة وتهديد بإرجاع الطرد: استعجال مفتعل حتى ما تفكر. الرابط jordan.tcrz.top ما بيتبع البريد الأردني، نطاقه الرسمي jordanpost.com.jo. رسوم تخزين إضافية على شحنة ما طلبتها أصلاً. وصلت من عنوان بريد شخصي، مش من قناة رسمية."
+      },
+      "signals": {
+        "en": [
+          "A 12-hour deadline and a threat to send the parcel back: manufactured urgency.",
+          "The link jordan.tcrz.top does not belong to Jordan Post, whose official domain is jordanpost.com.jo.",
+          "Extra storage fees for a parcel you never ordered.",
+          "It arrived from a personal email address, not an official channel."
+        ],
+        "ar": [
+          "مهلة 12 ساعة وتهديد بإرجاع الطرد: استعجال مفتعل حتى ما تفكر.",
+          "الرابط jordan.tcrz.top ما بيتبع البريد الأردني، نطاقه الرسمي jordanpost.com.jo.",
+          "رسوم تخزين إضافية على شحنة ما طلبتها أصلاً.",
+          "وصلت من عنوان بريد شخصي، مش من قناة رسمية."
+        ]
+      },
+      "entity": {
+        "en": "Jordan Post",
+        "ar": "البريد الأردني"
+      },
+      "source_name": {
+        "en": "Message documented by the team (screenshot, 27 Apr 2026)",
+        "ar": "رسالة موثقة لدى الفريق (لقطة شاشة، 27 نيسان 2026)"
+      },
+      "source_url": null,
+      "campaign_id": "jordan_post_imessage_2026_04",
+      "reconstructed": false,
+      "verified": true
+    },
+    {
+      "id": "tr_gam_fine",
+      "answer": "scam",
+      "message": {
+        "en": "نود إعلامكم بوجود مخالفة مواقف غير مسددة على مركبتكم. يرجى المبادرة بالسداد استناداً لأحكام قانون السير الأردني رقم 49 لسنة 2008 وتعديلاته. إن عدم التسديد خلال المهلة القانونية يوجب مضاعفة قيمة الغرامة وتحويل الملف إلى محكمة أمانة عمان والحجز الإداري على المركبة ومنع تجديد رخصتها وفق قانون جباية الأموال العامة",
+        "ar": "نود إعلامكم بوجود مخالفة مواقف غير مسددة على مركبتكم. يرجى المبادرة بالسداد استناداً لأحكام قانون السير الأردني رقم 49 لسنة 2008 وتعديلاته. إن عدم التسديد خلال المهلة القانونية يوجب مضاعفة قيمة الغرامة وتحويل الملف إلى محكمة أمانة عمان والحجز الإداري على المركبة ومنع تجديد رخصتها وفق قانون جباية الأموال العامة"
+      },
+      "tell": {
+        "en": "Citing a law number so the message is believed quickly. Threatening a doubled fine and a licence-renewal block: time pressure. The domain in the message is not the municipality's official amman.jo.",
+        "ar": "الاستشهاد برقم قانون حتى تصدّق الرسالة بسرعة. تهديد بمضاعفة الغرامة وبمنع تجديد رخصة المركبة: ضغط بالوقت. النطاق بالرسالة مش نطاق الأمانة الرسمي amman.jo."
+      },
+      "signals": {
+        "en": [
+          "Citing a law number so the message is believed quickly.",
+          "Threatening a doubled fine and a licence-renewal block: time pressure.",
+          "The domain in the message is not the municipality's official amman.jo."
+        ],
+        "ar": [
+          "الاستشهاد برقم قانون حتى تصدّق الرسالة بسرعة.",
+          "تهديد بمضاعفة الغرامة وبمنع تجديد رخصة المركبة: ضغط بالوقت.",
+          "النطاق بالرسالة مش نطاق الأمانة الرسمي amman.jo."
+        ]
+      },
+      "entity": {
+        "en": "Greater Amman Municipality",
+        "ar": "أمانة عمّان الكبرى"
+      },
+      "source_name": {
+        "en": "Akhbarna, reporting the Greater Amman Municipality warning (27 Aug 2026)",
+        "ar": "أخبارنا نقلاً عن تحذير أمانة عمّان الكبرى (27 آب 2026)"
+      },
+      "source_url": "https://akhbarna.net/article/363479",
+      "campaign_id": "gam_fake_fines_2026_08",
+      "reconstructed": false,
+      "verified": true
+    },
+    {
+      "id": "tr_wallet_otp",
+      "answer": "scam",
+      "message": {
+        "en": "معك خدمة عملاء المحفظة الإلكترونية. في تحديث إلزامي لبياناتك، ورح يوصلك رمز تحقق على رقمك هلأ. احكيلي الرمز حتى نكمّل التحديث وما يتوقف حسابك.",
+        "ar": "معك خدمة عملاء المحفظة الإلكترونية. في تحديث إلزامي لبياناتك، ورح يوصلك رمز تحقق على رقمك هلأ. احكيلي الرمز حتى نكمّل التحديث وما يتوقف حسابك."
+      },
+      "tell": {
+        "en": "Asking for the verification code: no real institution asks for it, by call or by message. A “mandatory data update” is the recurring pretext in this campaign. Threatening to suspend the account unless you answer at once.",
+        "ar": "طلب رمز التحقق: ولا جهة رسمية بتطلبه، لا بمكالمة ولا برسالة. «تحديث إلزامي للبيانات» ذريعة متكررة بهاي الحملة. تهديد بإيقاف الحساب إذا ما تجاوبت فوراً."
+      },
+      "signals": {
+        "en": [
+          "Asking for the verification code: no real institution asks for it, by call or by message.",
+          "A “mandatory data update” is the recurring pretext in this campaign.",
+          "Threatening to suspend the account unless you answer at once."
+        ],
+        "ar": [
+          "طلب رمز التحقق: ولا جهة رسمية بتطلبه، لا بمكالمة ولا برسالة.",
+          "«تحديث إلزامي للبيانات» ذريعة متكررة بهاي الحملة.",
+          "تهديد بإيقاف الحساب إذا ما تجاوبت فوراً."
+        ]
+      },
+      "entity": {
+        "en": "E-wallet companies",
+        "ar": "شركات المحافظ الإلكترونية"
+      },
+      "source_name": {
+        "en": "The Jordan Times, quoting the Cybercrime Unit (23 Sep 2024)",
+        "ar": "جوردان تايمز نقلاً عن وحدة مكافحة الجرائم الإلكترونية (23 أيلول 2024)"
+      },
+      "source_url": "https://jordantimes.com/news/local/six-suspects-arrested-279-e-wallet-fraud-incidents-says-ccu",
+      "campaign_id": "wallet_otp_cell_2024_09",
+      "reconstructed": true,
+      "verified": true
     },
     {
       "id": "q_otp_real",
@@ -34,18 +135,6 @@
       }
     },
     {
-      "id": "q_otp_call",
-      "answer": "scam",
-      "message": {
-        "en": "This is the bank's fraud department. We stopped a suspicious transfer. A code is arriving on your phone now — read it to me so we can block it.",
-        "ar": "معك قسم الاحتيال في البنك. أوقفنا تحويلًا مشبوهًا. رح يوصلك رمز على هاتفك الآن، اقرأه لي حتى نوقفه."
-      },
-      "tell": {
-        "en": "The code is the key to your account, not proof of who you are. Whoever asks for it is logging in while you read it out.",
-        "ar": "الرمز مفتاح حسابك، لا إثبات لهويتك. من يطلبه يدخل بينما أنت تقرأه له."
-      }
-    },
-    {
       "id": "q_delivery",
       "answer": "legitimate",
       "message": {
@@ -55,18 +144,6 @@
       "tell": {
         "en": "It tells you something and asks for nothing — no link, no fee, no urgency.",
         "ar": "تخبرك بشيء ولا تطلب شيئًا — بلا رابط ولا رسوم ولا استعجال."
-      }
-    },
-    {
-      "id": "q_job",
-      "answer": "scam",
-      "message": {
-        "en": "Hiring now! Work from home, good monthly salary, no experience needed. Send a small registration fee to start immediately.",
-        "ar": "نستقطب الآن! عمل من المنزل، راتب شهري جيد، لا خبرة مطلوبة. أرسل رسوم تسجيل بسيطة للبدء فورًا."
-      },
-      "tell": {
-        "en": "Work pays you. Anyone asking for a fee before you have worked is not an employer.",
-        "ar": "العمل يدفع لك. من يطلب رسومًا قبل أن تعمل ليس صاحب عمل."
       }
     },
     {
