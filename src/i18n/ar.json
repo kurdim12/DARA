@@ -657,5 +657,7 @@
   "ui2.sheet.close": "إغلاق",
   "ui2.sheet.more": "ما معنى هذا؟",
   "ui2.steps.all_done": "تمت كل الخطوات",
-  "ui2.steps.of": "الخطوة {n} من {total}"
+  "ui2.steps.of": "الخطوة {n} من {total}",
+  "report.community_sub": "بلاغات عامة على المنصة. لا شيء ترسله عبر هذا التطبيق ينضم إلى هذه القائمة.",
+  "report.seeded": "مثال أضافه الفريق"
 }

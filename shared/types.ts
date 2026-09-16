@@ -258,6 +258,8 @@ export interface CommunityReport {
   case_number: string;
   threat_type: ThreatType;
   description: string;
+  /** True for the rows the team seeded. The feed marks them as examples. */
+  is_seed: boolean;
 }
 
 export interface ReportResponse {

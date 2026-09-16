@@ -472,17 +472,20 @@ app.get("/api/reset", (c) => {
 app.get("/api/reports/community", async (c) => {
   try {
     const rows = await c.env.DB.prepare(
-      `SELECT id, threat_type, description
+      `SELECT id, threat_type, description, is_seed
          FROM reports
         WHERE is_public = 1 AND is_test = 0 AND description IS NOT NULL
         ORDER BY id DESC
         LIMIT 4`,
-    ).all<{ id: number; threat_type: string | null; description: string }>();
+    ).all<{ id: number; threat_type: string | null; description: string; is_seed: number }>();
 
     const reports: CommunityReport[] = (rows.results ?? []).map((row) => ({
       case_number: caseNumberFor(row.id),
       threat_type: (row.threat_type ?? "other") as CommunityReport["threat_type"],
       description: row.description,
+      // The screen marks these as examples rather than leaving a presenter to
+      // remember to say it.
+      is_seed: row.is_seed === 1,
     }));
     return c.json({ reports });
   } catch (error) {

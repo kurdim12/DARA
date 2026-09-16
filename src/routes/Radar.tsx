@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BottomNav } from "../components/BottomNav";
 import { CampaignCard } from "../components/CampaignCard";
+import { RadarNumbers } from "../components/RadarNumbers";
 import { ThreatRow } from "../components/ThreatRow";
 import { Card, Chip, ChipRow, Header, ListCard, Page } from "../components/Shell";
+import { AppError, fetchRadar, type RadarData } from "../lib/api";
 import { useI18n, type TextKey } from "../i18n";
 import { CAMPAIGN_FILTERS, campaigns, inFilter, type CampaignFilter } from "../lib/campaigns";
 import { allThreats, reportCounts } from "../lib/threats";
 import type { Route } from "../lib/router";
 
-type Segment = "campaigns" | "patterns";
+type Segment = "radar" | "campaigns" | "patterns";
 
 const SEGMENTS: { id: Segment; label: TextKey }[] = [
+  { id: "radar", label: "radar.seg_radar" },
   { id: "campaigns", label: "camp.tab_campaigns" },
   { id: "patterns", label: "camp.tab_patterns" },
 ];
@@ -40,9 +43,12 @@ export function Radar({
   onCheckSample: (text: string) => void;
 }) {
   const { t, lang } = useI18n();
-  const [segment, setSegment] = useState<Segment>("campaigns");
+  const [segment, setSegment] = useState<Segment>("radar");
   const [filter, setFilter] = useState<CampaignFilter>("all");
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const [numbers, setNumbers] = useState<
+    { state: "loading" } | { state: "ready"; radar: RadarData } | { state: "error"; key: TextKey }
+  >({ state: "loading" });
 
   useEffect(() => {
     let live = true;
@@ -51,6 +57,22 @@ export function Radar({
       live = false;
     };
   }, []);
+
+  const load = useCallback(() => {
+    let live = true;
+    setNumbers({ state: "loading" });
+    fetchRadar()
+      .then((radar) => live && setNumbers({ state: "ready", radar }))
+      .catch((error) =>
+        live &&
+        setNumbers({ state: "error", key: error instanceof AppError ? error.key : "radar.error" }),
+      );
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  useEffect(() => load(), [load]);
 
   const shown = campaigns(lang).filter((entry) => inFilter(entry, filter));
 
@@ -66,7 +88,10 @@ export function Radar({
               type="button"
               aria-pressed={segment === id}
               onClick={() => setSegment(id)}
-              className={`press h-9 flex-1 rounded-full text-[13px] font-bold ${
+              // "Documented campaigns" needs two lines at this width, so the
+              // pills size to their content and stay the same height as each
+              // other rather than one of them growing alone.
+              className={`press flex min-h-9 flex-1 items-center justify-center rounded-full px-2 py-1.5 text-center text-[12.5px] font-bold leading-tight ${
                 segment === id ? "bg-card text-ink" : "text-ink-2"
               }`}
             >
@@ -75,7 +100,31 @@ export function Radar({
           ))}
         </div>
 
-        {segment === "campaigns" ? (
+        {segment === "radar" ? (
+          <>
+            <p className="t-sub mt-3">{t("radar.sub")}</p>
+            {numbers.state === "loading" && (
+              <Card className="mt-3">
+                <p className="t-sub">…</p>
+              </Card>
+            )}
+            {numbers.state === "error" && (
+              <Card className="mt-3">
+                <p role="alert" className="t-body text-red-ink">
+                  {t(numbers.key)}
+                </p>
+                <button
+                  type="button"
+                  onClick={load}
+                  className="tap mt-2 text-[13px] font-bold text-ink"
+                >
+                  {t("radar.retry")}
+                </button>
+              </Card>
+            )}
+            {numbers.state === "ready" && <RadarNumbers radar={numbers.radar} />}
+          </>
+        ) : segment === "campaigns" ? (
           <>
             <p className="t-sub mt-3">{t("camp.sub")}</p>
             <div className="mt-3">

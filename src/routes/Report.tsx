@@ -273,6 +273,7 @@ export function Report({
 
         <div className="mt-7">
           <SectionHeading>{t("report.community")}</SectionHeading>
+          <p className="t-sub mt-1">{t("report.community_sub")}</p>
         </div>
         <CommunityFeed />
       </Page>
@@ -313,9 +314,14 @@ function CommunityFeed() {
     <ListCard className="mt-3">
       {rows.map((row) => (
         <div key={row.case_number} className="px-4 py-3.5">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Tag>{t(`threat.${row.threat_type}` as TextKey)}</Tag>
             <span className="t-meta text-ink-2">{t("report.anonymous_tag")}</span>
+            {row.is_seed && (
+              <span className="t-meta rounded-[6px] border border-line px-1.5 py-0.5 text-ink-2">
+                {t("report.seeded")}
+              </span>
+            )}
           </div>
           <p dir="auto" className="mt-2 line-clamp-2 text-[14px] font-medium leading-snug text-ink-2">
             {row.description}

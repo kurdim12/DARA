@@ -657,5 +657,7 @@
   "ui2.sheet.close": "Close",
   "ui2.sheet.more": "What does this mean?",
   "ui2.steps.all_done": "All steps done",
-  "ui2.steps.of": "Step {n} of {total}"
+  "ui2.steps.of": "Step {n} of {total}",
+  "report.community_sub": "Public reports on the platform. Nothing you send through this app joins this list.",
+  "report.seeded": "Example added by the team"
 }

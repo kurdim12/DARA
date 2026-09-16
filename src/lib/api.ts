@@ -138,3 +138,40 @@ export async function sendReport(payload: ReportRequest): Promise<ReportResponse
   if (!res.ok) throw new AppError("error.generic");
   return (await res.json()) as ReportResponse;
 }
+
+export interface RadarRow {
+  key: string;
+  count: number;
+}
+
+export interface RadarData {
+  generated_at: string;
+  reports_total: number;
+  verified_campaigns: number;
+  this_week: {
+    from: string;
+    to: string;
+    total: number;
+    by_category: RadarRow[];
+    by_entity: RadarRow[];
+  };
+  trend: { week_start: string; count: number }[];
+  top_hosts: RadarRow[];
+  top_numbers: RadarRow[];
+}
+
+/** The radar's numbers. Every one is a count of rows in D1; see worker/routes/radar.ts. */
+export async function fetchRadar(): Promise<RadarData> {
+  let res: Response;
+  try {
+    res = await fetch("/api/radar");
+  } catch {
+    throw new AppError(
+      typeof navigator !== "undefined" && navigator.onLine === false
+        ? "error.offline"
+        : "radar.error",
+    );
+  }
+  if (!res.ok) throw new AppError("radar.error");
+  return (await res.json()) as RadarData;
+}
