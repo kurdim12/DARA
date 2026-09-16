@@ -1,0 +1,66 @@
+{
+  "_meta": {
+    "situation": "link_tapped",
+    "purpose": "The branch the reference build had and this one did not: someone tapped the link and has not entered anything yet. Ordered by urgency, reviewed fixed text — no AI.",
+    "rule": "A step that names an institution's specific procedure or a number ships verified: false and does not render until someone has checked it. Every step below names neither: they are generic and true wherever the link came from.",
+    "origin": "Written for this merge, 16 Sep 2026. It is the only recovery text in this repo that is not ported from one of the two builds — Abdelrahman should read it before the jury does."
+  },
+  "title": { "en": "I tapped the link", "ar": "ضغطتُ على الرابط" },
+  "summary": { "en": "and haven't entered anything yet", "ar": "ولم أُدخل شيئاً بعد" },
+  "steps": [
+    {
+      "id": "enter_nothing",
+      "title": { "en": "Enter nothing, then close the page", "ar": "لا تُدخل شيئاً، ثم أغلق الصفحة" },
+      "body": {
+        "en": "Opening a page is not the same as giving anything away. The moment that matters is the one where you type. Close it without filling in a field, and most of the risk closes with it.",
+        "ar": "فتح الصفحة ليس كإعطاء بياناتك. اللحظة المهمة هي لحظة الكتابة. أغلقها قبل أن تملأ أي حقل، ويُغلَق معها معظم الخطر."
+      },
+      "verified": true
+    },
+    {
+      "id": "install_nothing",
+      "title": { "en": "Install nothing it offered", "ar": "لا تثبّت شيئاً عرضته عليك" },
+      "body": {
+        "en": "If the page asked you to download a file, an update or an app to continue, that request is the attack. Delete anything it managed to download and do not open it.",
+        "ar": "إن طلبت منك الصفحة تنزيل ملف أو تحديث أو تطبيق للمتابعة، فهذا الطلب هو الهجوم نفسه. احذف أي شيء نزل ولا تفتحه."
+      },
+      "verified": true
+    },
+    {
+      "id": "expect_followup",
+      "title": { "en": "Expect a follow-up message", "ar": "توقّع رسالة متابعة" },
+      "body": {
+        "en": "A tap tells the sender the number is live. The next message often sounds more convincing and may name something real about you. Treat it the same way, whatever it knows.",
+        "ar": "الضغطة تُخبر المُرسِل أن الرقم فعّال. الرسالة التالية غالباً أكثر إقناعاً وقد تذكر شيئاً حقيقياً عنك. تعامل معها بالطريقة نفسها مهما بدت مطّلعة."
+      },
+      "verified": true
+    },
+    {
+      "id": "check_signed_in",
+      "title": { "en": "Check where you were already signed in", "ar": "تحقّق من الحسابات التي كنت مسجّلاً بها" },
+      "body": {
+        "en": "If you were signed in to an account in the same browser, open that account from its own app and end any session you do not recognise. Change the password from a device you trust.",
+        "ar": "إن كنت مسجّلاً بحساب في المتصفح نفسه، افتح الحساب من تطبيقه الرسمي وأنهِ أي جلسة لا تعرفها. وغيّر كلمة المرور من جهاز تثق به."
+      },
+      "verified": true
+    },
+    {
+      "id": "keep_evidence",
+      "title": { "en": "Keep the message before you delete it", "ar": "احتفظ بالرسالة قبل حذفها" },
+      "body": {
+        "en": "Screenshot the message and the address it opened. Deleting it is the first instinct and it removes the only record of what happened.",
+        "ar": "صوّر الرسالة والعنوان الذي فتحته. الحذف هو أول ردّ فعل، وهو يمحو السجل الوحيد لما جرى."
+      },
+      "verified": true
+    },
+    {
+      "id": "report_dara",
+      "title": { "en": "File a report in DARA'", "ar": "أبلغ في درع" },
+      "body": {
+        "en": "It takes a minute and stays anonymous — no account, no name. You get a case number to follow it with.",
+        "ar": "تستغرق دقيقة وتبقى مجهولة — بلا حساب وبلا اسم. وتحصل على رقم بلاغ تتابع به."
+      },
+      "verified": true
+    }
+  ]
+}

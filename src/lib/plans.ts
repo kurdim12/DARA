@@ -1,4 +1,5 @@
 import accountHacked from "../../content/recover/account_hacked.json";
+import linkTapped from "../../content/recover/link_tapped.json";
 import dataStolen from "../../content/recover/data_stolen.json";
 import deviceCompromised from "../../content/recover/device_compromised.json";
 import identityTheft from "../../content/recover/identity_theft.json";
@@ -20,8 +21,9 @@ function pick(text: Bilingual, lang: Lang): string {
 
 export type PlanId =
   | "money_lost"
-  | "account_hacked"
   | "data_stolen"
+  | "link_tapped"
+  | "account_hacked"
   | "device_compromised"
   | "identity_theft";
 
@@ -38,11 +40,17 @@ interface RawPlan {
   steps: RawStep[];
 }
 
-/** Order matters: losing money is the one where minutes count. */
+/**
+ * Order matters: losing money is the one where minutes count, and the list
+ * runs from most urgent to least. The sixth entry on the Recover screen is not
+ * a plan at all — being blackmailed opens the shield, which is a different
+ * kind of screen with a quick exit on it.
+ */
 const PLAN_FILES: Record<PlanId, RawPlan> = {
   money_lost: moneyLost as RawPlan,
-  account_hacked: accountHacked as RawPlan,
   data_stolen: dataStolen as RawPlan,
+  link_tapped: linkTapped as RawPlan,
+  account_hacked: accountHacked as RawPlan,
   device_compromised: deviceCompromised as RawPlan,
   identity_theft: identityTheft as RawPlan,
 };

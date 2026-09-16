@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Banknote, Fingerprint, KeyRound, Smartphone, UserX } from "lucide-react";
+import { Banknote, Fingerprint, KeyRound, Link2, ShieldAlert, Smartphone, UserX } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import {
@@ -16,8 +16,9 @@ import type { Route } from "../lib/router";
 
 const ICONS: Record<PlanId, LucideIcon> = {
   money_lost: Banknote,
-  account_hacked: KeyRound,
   data_stolen: Fingerprint,
+  link_tapped: Link2,
+  account_hacked: KeyRound,
   device_compromised: Smartphone,
   identity_theft: UserX,
 };
@@ -55,10 +56,10 @@ export function Recover({ navigate }: { navigate: (route: Route) => void }) {
   return (
     <>
       <Page>
-        <Header title={t("recover.title")} />
-        <h2 className="t-h3">{t("recover.what")}</h2>
+        <Header title={t("rec.title")} />
+        <p className="t-sub -mt-1.5">{t("rec.sub")}</p>
 
-        <div className="mt-2.5 space-y-2">
+        <div className="mt-4 space-y-2">
           {plans(lang).map((plan) => (
             <IconRow
               key={plan.id}
@@ -70,6 +71,18 @@ export function Recover({ navigate }: { navigate: (route: Route) => void }) {
               onClick={() => setOpen(plan)}
             />
           ))}
+
+          {/* The sixth. Being blackmailed is not a recovery plan — it opens the
+              shield, which is the screen with the quick exit on it. */}
+          <IconRow
+            as="card"
+            Icon={ShieldAlert}
+            tone="red"
+            title={t("rec.sit_shield")}
+            sub={t("rec.sit_shield_sub")}
+            trailing={<RowChevron />}
+            onClick={() => navigate("shield")}
+          />
         </div>
       </Page>
       <BottomNav active="recover" navigate={navigate} />
