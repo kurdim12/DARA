@@ -48,6 +48,29 @@ export function contact(id: string, lang: Lang): Contact | null {
   return contacts(lang).find((entry) => entry.id === id) ?? null;
 }
 
+export interface VerifiedLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
+interface RawLink {
+  id: string;
+  label: { en: string; ar: string };
+  url: string;
+  verified: boolean;
+}
+
+/**
+ * An outbound link to an official form, or null while nobody has opened it.
+ * A URL the app sends someone to is the same kind of claim as a phone number.
+ */
+export function officialLink(id: string, lang: Lang): VerifiedLink | null {
+  const entry = ((file as { links?: RawLink[] }).links ?? []).find((item) => item.id === id);
+  if (!entry || !entry.verified) return null;
+  return { id: entry.id, label: pick(entry.label, lang), url: entry.url };
+}
+
 /** The cybercrime-law line, or null while nobody has cited the article. */
 export function legalLine(id: string, lang: Lang): string | null {
   const entry = (file.legal as RawLegal[]).find((item) => item.id === id);

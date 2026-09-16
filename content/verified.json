@@ -8,21 +8,30 @@
     {
       "id": "emergency",
       "tone": "danger",
-      "label": { "en": "Jordan Police", "ar": "الأمن العام" },
+      "label": {
+        "en": "Jordan Police",
+        "ar": "الأمن العام"
+      },
       "number": "911",
       "verified": false
     },
     {
       "id": "family_protection",
       "tone": "primary",
-      "label": { "en": "Family Protection Dept.", "ar": "إدارة حماية الأسرة" },
+      "label": {
+        "en": "Family Protection Dept.",
+        "ar": "إدارة حماية الأسرة"
+      },
       "number": "110",
       "verified": false
     },
     {
       "id": "cybercrime_unit",
       "tone": "warn",
-      "label": { "en": "Cybercrime Unit", "ar": "وحدة الجرائم الإلكترونية" },
+      "label": {
+        "en": "Cybercrime Unit",
+        "ar": "وحدة الجرائم الإلكترونية"
+      },
       "number": "+962 6 465 5660",
       "verified": false
     }
@@ -36,6 +45,18 @@
       },
       "verified": false,
       "note": "A statement about the law. It needs the official text and the article cited before it renders."
+    }
+  ],
+  "links": [
+    {
+      "id": "jocert_form",
+      "label": {
+        "en": "the JoCERT form",
+        "ar": "نموذج JoCERT"
+      },
+      "url": "https://jocert.ncsc.jo/AR/Forms/",
+      "verified": false,
+      "note": "The official reporting form the reference build linked to. A URL the app sends someone to is the same kind of claim as a phone number: it renders only once somebody has opened it and confirmed it is the right form and still live."
     }
   ]
 }
