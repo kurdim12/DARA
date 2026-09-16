@@ -49,15 +49,34 @@ jobs:
           curl -sS --max-time 20 -o /tmp/community.txt -w "http=%{http_code}\n" "$TARGET/api/reports/community" || echo "(unreachable)"
           cat /tmp/community.txt; echo
 
-          # Self-hosted since the facelift. A 404 here would not break the
-          # page — it would quietly swap both typefaces for the system font,
-          # which is the kind of thing you notice on stage and not before.
+          # Self-hosted since the facelift. A missing font would not break the
+          # page — it would quietly swap a typeface for the system font, which
+          # is the kind of thing you notice on stage and not before.
+          #
+          # The status code alone cannot see it: an SPA catch-all answers a
+          # missing /fonts/*.woff2 with index.html and a cheerful 200. The
+          # content-type is what tells the truth, so that is what is asserted.
+          # The list comes from the stylesheet in THIS commit rather than being
+          # typed here, because a font swap otherwise leaves this step checking
+          # files nobody loads any more.
           echo "=== fonts, served from /public/fonts ==="
-          for f in manrope-latin-800-normal ibm-plex-sans-arabic-arabic-500-normal; do
-            code=$(curl -sS --max-time 20 -o /dev/null -w "%{http_code}" "$TARGET/fonts/$f.woff2" || echo "---")
-            type=$(curl -sSI --max-time 20 "$TARGET/fonts/$f.woff2" | grep -i '^content-type:' | tr -d '\r' || true)
-            echo "$f.woff2 http=$code $type"
+          FONT_BAD=0
+          for f in $(grep -o '/fonts/[a-z0-9.-]*\.woff2' src/styles/fonts.css | sort -u); do
+            out=$(curl -sS --max-time 20 -o /dev/null \
+              -w "%{http_code} %{content_type}" "$TARGET$f" || echo "--- none")
+            code=${out%% *}
+            type=${out##* }
+            case "$type" in
+              font/woff2|application/font-woff2|application/octet-stream) mark="ok" ;;
+              *) mark="WRONG TYPE — this font is not being served"; FONT_BAD=1 ;;
+            esac
+            echo "$f http=$code type=$type $mark"
           done
+          if [ "$FONT_BAD" = 1 ]; then
+            echo "FONTS: at least one typeface is missing on the deployment"
+          else
+            echo "FONTS: all $(grep -o '/fonts/[a-z0-9.-]*\.woff2' src/styles/fonts.css | sort -u | wc -l) referenced files are served as fonts"
+          fi
           echo
 
           # The rebuild opens in English and LTR; every earlier build shipped
