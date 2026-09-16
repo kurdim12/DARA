@@ -15,6 +15,13 @@ export interface Contact {
   label: string;
   /** null until someone has checked it against an official source. */
   number: string | null;
+  /**
+   * Some lines are a switchboard plus an extension — 196 then 812594. The
+   * extension is held apart from the number on purpose: you dial the short
+   * code, wait, then dial the extension, so gluing them into one tel: link
+   * would dial 196812594, which is not a number anyone answers.
+   */
+  extensions: string[];
 }
 
 interface RawContact {
@@ -22,6 +29,7 @@ interface RawContact {
   tone: Contact["tone"];
   label: { en: string; ar: string };
   number: string;
+  extensions?: string[];
   verified: boolean;
 }
 
@@ -41,6 +49,7 @@ export function contacts(lang: Lang): Contact[] {
     tone: entry.tone,
     label: pick(entry.label, lang),
     number: entry.verified ? entry.number : null,
+    extensions: entry.verified ? (entry.extensions ?? []) : [],
   }));
 }
 

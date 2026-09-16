@@ -150,7 +150,21 @@ export function Shield({
               Icon={HELP_LINE_ICON[line.id] ?? ShieldIcon}
               tone={TONE[line.tone]}
               title={line.label}
-              sub={line.number ? <bdi className="tnum">{line.number}</bdi> : t("shield.pending_number")}
+              sub={
+                line.number ? (
+                  <span className="tnum">
+                    <bdi>{line.number}</bdi>
+                    {line.extensions.length > 0 && (
+                      <>
+                        {" · "}
+                        <bdi>{t("shield.ext").replace("{e}", line.extensions.join(" / "))}</bdi>
+                      </>
+                    )}
+                  </span>
+                ) : (
+                  t("shield.pending_number")
+                )
+              }
               trailing={
                 line.number ? (
                   <a

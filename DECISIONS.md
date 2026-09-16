@@ -322,3 +322,26 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   instead of an error they can move past. Fast failures are the retryable ones,
   and they are also the common ones. `test/model-chain.test.ts` pins that rule
   along with the walk order and the de-duplication.
+
+- **The three help-line numbers were replaced with Abdelrahman's set, and all
+  three remain `verified: false`.** Rule 3 says only he flips those, after
+  reading an official source, and I am not one. What I could do is check them
+  against what the file held and against published sources: 911 corroborated as
+  the unified emergency number; the cybercrime unit's 196 with extensions
+  812594 / 812232 corroborated, replacing a `+962 6 465 5660` carried from v1
+  that matches no published number; the Family Protection line **not**
+  corroborated, and it replaces a `110` that this file had attributed to the
+  wrong body — 110 is the Jordan River Foundation's families-and-children
+  helpline, a charity line, not the PSD directorate the row names. Each row's
+  `note` records which of those it is.
+- **A switchboard-plus-extension number is stored as two fields.** 196 and
+  812594 glued into one `tel:` link dials 196812594, which nobody answers. The
+  number column dials the short code and the extension is printed beside it —
+  "196 · تحويلة 812594 / 812232". Checked by flipping all three flags locally
+  and reading the rendered `href`s: `tel:196`, not `tel:196812594`. The flags
+  are back to false.
+- **`test/contacts.test.ts` asserts the file is still a staging area.** Every
+  contact must render its name while hiding its number, no unverified row may
+  leak a number or an extension, and no flag may be true. The last one will
+  fail the day Abdelrahman verifies a number — deliberately, so that flip is a
+  conscious commit and not a surprise in a diff.

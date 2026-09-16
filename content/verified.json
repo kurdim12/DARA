@@ -2,38 +2,45 @@
   "_meta": {
     "purpose": "Every phone number and legal line the app could show. Nothing here renders in a production build until someone has checked it against an official source and set verified to true.",
     "rule": "Only Abdelrahman flips a flag, after reading the official source. Until then the Shield screen shows the card, the name and a 'pending verification' line — never an invented number, and never a tel: link.",
-    "origin": "The numbers were carried over from the v1 app and have never been confirmed."
+    "origin": "The numbers came from the v1 app and were never confirmed. On 16 Sep 2026 Abdelrahman supplied a replacement set; two of the three differed from what was here, and one old entry named the wrong organisation. Each row's note says what was corroborated and what was not. All three are still unverified."
   },
   "contacts": [
     {
       "id": "emergency",
       "tone": "danger",
       "label": {
-        "en": "Jordan Police",
-        "ar": "الأمن العام"
+        "en": "Unified Emergency Number",
+        "ar": "الرقم الموحد للطوارئ"
       },
       "number": "911",
-      "verified": false
+      "verified": false,
+      "note": "Abdelrahman's table, 16 Sep. psd.gov.jo describes 911 as Jordan's unified emergency number, which is the one entry of the three I could corroborate. Check it on psd.gov.jo yourself before flipping this: https://www.psd.gov.jo/en-us/content/security-services/911-emergency-number/"
     },
     {
       "id": "family_protection",
       "tone": "primary",
       "label": {
-        "en": "Family Protection Dept.",
-        "ar": "إدارة حماية الأسرة"
+        "en": "Family Protection & Juvenile Dept.",
+        "ar": "إدارة حماية الأسرة والأحداث"
       },
-      "number": "110",
-      "verified": false
+      "number": "06 580 0500",
+      "verified": false,
+      "note": "Abdelrahman's table, 16 Sep. I could NOT corroborate this number from an official source — treat it as the least checked of the three. It replaces 110, which this file had wrong: 110 is the Jordan River Foundation's families-and-children helpline, a charity line, not the PSD directorate this row names. Check against psd.gov.jo or moi.gov.jo's directory."
     },
     {
       "id": "cybercrime_unit",
       "tone": "warn",
       "label": {
         "en": "Cybercrime Unit",
-        "ar": "وحدة الجرائم الإلكترونية"
+        "ar": "وحدة مكافحة الجرائم الإلكترونية"
       },
-      "number": "+962 6 465 5660",
-      "verified": false
+      "number": "196",
+      "verified": false,
+      "extensions": [
+        "812594",
+        "812232"
+      ],
+      "note": "Abdelrahman's table, 16 Sep. Corroborated: published sources give 196 with extensions 812594 and 812232, and a direct line 06 563 3404. It replaces +962 6 465 5660, which this file carried from v1 and which matches none of those. Confirm on the unit's own page at psd.gov.jo before flipping. NOTE the shape: a caller dials 196 and then the extension — if the Shield screen ever renders this as one tel: link it will dial 196812594, which is not a number. That is why this row carries extensions separately."
     }
   ],
   "legal": [
