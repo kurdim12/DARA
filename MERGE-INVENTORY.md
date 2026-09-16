@@ -239,3 +239,55 @@ Two other facts worth knowing before the demo:
   the seed text with Arabic or adding a second column — a schema decision, not
   a copy edit.
 
+
+## 10. Pre-flight for the revised brief (16 Sep, second paste)
+
+The brief changed after Phases 1–3 shipped. This is the delta, not a restart.
+
+**Phase 0 checks**
+
+| # | Check | State |
+| --- | --- | --- |
+| 1 | `GET /api/radar`, `GET /api/threats`, `POST /api/lookup`, `GET /api/report/:id` | All four exist and answer |
+| 2 | `ANTHROPIC_API_KEY` set; one live scan returns a verdict | **FAILS — `key_present: false`.** Nothing else on this page matters until it is set |
+| 3 | CORS allows `zaidabualshaar.github.io` and our own origin | Done |
+| 4 | Reference cloned, extracted, inventory written | Done — sections 1–9 above |
+
+**What the revision changes**
+
+The navigation IA moved. Built: الرئيسية · فحص · الرادار · إبلاغ · حماية.
+Asked for: **الرئيسية · فحص · بلاغاتي · الرادار · تعافي** — the third tab becomes
+"my reports" (report form + device list + settings) and the fifth becomes تعافي
+(Recover + extortion shield + verified numbers). Every screen behind them
+exists; this is rewiring and two new screens, not a rebuild.
+
+**Already satisfied by Phases 1–3** — brand tokens, the three self-hosted
+families, the mark and PWA icons, no blue; Radar's three sub-tabs, stat cards,
+"not a national statistic", 8-week bars, top hosts and numbers with honest empty
+states, "آخر تحديث"; documented campaigns with sources and the Home top-3 strip;
+the entities directory with the lookup on top and the checklist as a second tab;
+one six-question drill; the Result order with the Jordan layer checklist,
+"تعذّر التحقق" rows and extraction cards; shield triage with quick exit; one
+Recover list of six ending in the shield; the always-anonymous report with
+channel, entity, attached text, the authority radio and a receipt; the image
+chip; the clipboard-consent card.
+
+**Not built — what this revision adds**
+
+| Ask | Cost | Ported strings waiting |
+| --- | --- | --- |
+| بلاغاتي tab: my-reports list on device | Small — `storage.ts` already keeps 20 | — |
+| Settings: language, font size, save-scans toggle, privacy line | Medium — font size is new | `ft.set.*` (2) |
+| "كيف يعمل درع" trust page | Medium, and **its ported copy states accuracy figures for a classifier this app does not run** — those rows cannot render as written | `ft.tp.*` (38) |
+| Home "قريباً" locked roadmap row | Small | `ft.soon.*` (14) |
+| Quick tools → QR · تحقق قبل الدفع · تدرّب دقيقتين · الجهات الرسمية | Small — the fourth tile is تعافي today | — |
+| Lookup accepting IBAN and CliQ alias, with the honesty line | Small — `alias` and `number` exist, IBAN does not | `sh2.*` (16) |
+| On-device lite classifier as a labelled preliminary signal | Large — a 346 KB model chunk | `cls.*` (8) |
+| Scan history on device, off by default, last 30 | Medium | `ft.hist.*` (10) |
+| Share target | Small — a manifest entry and three query params | — |
+| QR | Stays hidden per the brief | `ft.qr.*` (12) |
+
+One conflict to flag rather than silently resolve: the brief says the Radar
+lookup "cannot say an account is clean", which the existing `/api/lookup`
+already honours — every failed external check returns `unverified`, never
+`clean`. No change needed there; noting it so the next reader does not re-do it.
