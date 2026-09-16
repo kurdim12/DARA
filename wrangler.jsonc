@@ -35,7 +35,8 @@
 
   // ANTHROPIC_BASE_URL points the engine at a gateway that speaks the Messages
   // API. OpenRouter's is https://openrouter.ai/api — with it set, model ids
-  // take a vendor prefix and ANTHROPIC_API_KEY holds the OpenRouter key.
+  // take a vendor prefix and OPENROUTER_API_KEY holds the OpenRouter key.
+  // Billing is OpenRouter's, not Anthropic's, whichever model is chosen.
   // Unset, the engine calls api.anthropic.com directly.
   //
   // ANTHROPIC_MODEL_CANDIDATES is the only other list /api/analyze will accept

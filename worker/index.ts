@@ -35,6 +35,16 @@ import { caseNumberFor, idFromCaseNumber } from "./lib/reports";
 
 export interface Env {
   DB: D1Database;
+  /**
+   * The gateway key. Named for the gateway it is actually used against, not
+   * for the wire format: this app talks the Messages API, but every call goes
+   * to ANTHROPIC_BASE_URL — OpenRouter — and is billed there. The old name
+   * read as "an Anthropic account is required", which is not true and cost a
+   * real misunderstanding, so it is only kept as a fallback for a deployment
+   * that still carries the old secret.
+   */
+  OPENROUTER_API_KEY?: string;
+  /** @deprecated Set OPENROUTER_API_KEY. Read so an existing deploy keeps working. */
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_MODEL?: string;
   /** Comma-separated ids the eval may compare against the configured one. */
@@ -52,6 +62,10 @@ export interface Env {
 }
 
 const DEFAULT_MODEL = "claude-sonnet-5";
+
+/** The gateway key under either name, new one first. */
+const gatewayKey = (env: Env): string | undefined =>
+  env.OPENROUTER_API_KEY || env.ANTHROPIC_API_KEY;
 
 /**
  * The eval compares candidate models against one deployment, so /api/analyze
@@ -139,7 +153,7 @@ app.get("/api/health", async (c) => {
   return c.json({
     ok: true,
     // Presence only. The key itself is never read into a response or a log.
-    key_present: Boolean(c.env.ANTHROPIC_API_KEY),
+    key_present: Boolean(gatewayKey(c.env)),
     // Which door the key opens. A key that is present but pointed at the wrong
     // gateway fails exactly like a missing one, and this is the only place to
     // see the difference from a phone.
@@ -204,7 +218,7 @@ app.post("/api/analyze", async (c) => {
   }
 
   // Checked after validation so a too-long paste still gets its own message.
-  const apiKey = c.env.ANTHROPIC_API_KEY;
+  const apiKey = gatewayKey(c.env);
   if (!apiKey) {
     return c.json({ error: "server_error", message: "engine not configured" }, 503);
   }

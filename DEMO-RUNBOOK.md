@@ -14,7 +14,7 @@ Open `https://dara.abdalrhmankurdi12.workers.dev/api/health`. It must say
 ends in *تعذّر إكمال الفحص* — the rest of the app works, Scan does not.
 
 Cloudflare dashboard → Workers & Pages → `dara` → Settings → Variables and
-Secrets → add `ANTHROPIC_API_KEY` as a **Secret** → then push anything, or hit
+Secrets → add `OPENROUTER_API_KEY` as a **Secret** → then push anything, or hit
 **Retry build**, because a secret only reaches the Worker on its next deploy.
 Never paste that key into a chat or a file.
 

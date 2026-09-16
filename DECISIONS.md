@@ -379,3 +379,16 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   either; the tab is تعافي. Both now name the tab that exists, and a test walks
   every string that mentions a tab against the five in `BottomNav`, so copy
   cannot point at a tab that is not there again.
+
+## The key is named for the gateway, not the wire format
+
+- **`ANTHROPIC_API_KEY` became `OPENROUTER_API_KEY`.** The old name read as "you
+  need an Anthropic account and Claude credits", and Abdelrahman reasonably
+  concluded he was being asked to pay twice. He is not: `ANTHROPIC_BASE_URL` is
+  OpenRouter, the configured model is `openai/gpt-6-astra`, and every call —
+  including the `anthropic/claude-opus-5` fallback — is billed on one OpenRouter
+  balance. A name that misleads the one person who has to set it is a bug.
+- **The old name is still read, second.** One accessor, `gatewayKey(env)`, is
+  used by both `/api/health` and the scan, so presence and use can never
+  disagree — health green with the scan 503ing is the worst failure this could
+  have on demo day. A deployment carrying the old secret keeps working.

@@ -59,7 +59,9 @@ in `wrangler.jsonc` is what points at it. Clear that var and the same variable
 takes an Anthropic key instead; nothing else changes.
 
 **Workers & Pages → dara → Settings → Variables and Secrets → Add →
-type `Secret` → name `ANTHROPIC_API_KEY` → paste the key → Save.**
+type `Secret` → name `OPENROUTER_API_KEY` → paste your OpenRouter key
+(`sk-or-v1-…`) → Save.** Nothing is billed to Anthropic; every call goes to
+OpenRouter and comes off that balance.
 
 A secret only reaches a Worker on its next deploy. Push anything, or hit
 **Retry build** on the last build, so the deploy re-runs.

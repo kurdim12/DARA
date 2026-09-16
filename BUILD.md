@@ -26,7 +26,7 @@ Read CLAUDE.md first. It has the rules this plan assumes.
 5. Run `wrangler login` (he approves in the browser) and deploy to workers.dev. The page
    shows the brush mark on paper. `GET /api/health` returns
    `{ ok: true, key_present: <bool>, model: <string> }`. Never echo the key.
-6. Ask him to add `ANTHROPIC_API_KEY` as a secret in the Cloudflare dashboard. Give him the
+6. Ask him to add `OPENROUTER_API_KEY` as a secret in the Cloudflare dashboard. Give him the
    exact click path for the current dashboard. Then confirm `key_present: true`.
 
 ```sql

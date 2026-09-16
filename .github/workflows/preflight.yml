@@ -55,7 +55,7 @@ jobs:
               echo "  live scan FAILED: $(head -c 300 /tmp/body.txt)"; fail=1
             fi
           else
-            echo "  ANTHROPIC_API_KEY is NOT set on the deployment — no scan can be run."; fail=1
+            echo "  OPENROUTER_API_KEY is NOT set on the deployment — no scan can be run."; fail=1
           fi
 
           echo
