@@ -39,7 +39,7 @@ jobs:
               -H 'content-type: application/json' \
               --data-binary "@$payload" || echo "000")
             end=$(date +%s%3N)
-            echo "http=$code  $((end-start))ms"
-            head -c 1200 /tmp/out.json; echo; echo
+            echo "http=$code  wall=$((end-start))ms"
+            python3 scripts/image-report.py /tmp/out.json
             rm -f "$payload"
           done
