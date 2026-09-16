@@ -92,6 +92,10 @@ const NUMBER_LIKE = /(\+\d{3}|\d[\d\s-]{3,})/;
  * why, not a way to turn the check off.
  */
 const APPROVED = {
+  "error.too_long":
+    "The 2,000 is DARA's own input cap — a true statement about itself, not a fact about the world.",
+  "shield.call_now":
+    "Contains 911. The button carrying it renders only when content/verified.json marks the emergency contact verified, and Shield has no other path to it; while that flag is false the screen shows 'Emergency number pending verification' instead. The number in this label is therefore gated by the same flag as the number it dials.",
   "authority.cybercrime_unit":
     "A label in the 'relevant authority (for your reference)' list. Naming a body is not a claim that anything was sent to it, and the confirmation screen says in so many words that nothing was.",
   "report.pilot_note":
@@ -132,6 +136,19 @@ async function scanLines(file) {
       if (approvedKeyOn(line)) continue;
       report(`${file}:${index + 1}`, term, line.trim());
     }
+
+    // The app's own copy carries no `verified` flag to gate a number with, so
+    // a number in a UI string has to be approved by key with a reason. This
+    // is where an invented phone number would otherwise walk in — the exact
+    // thing the jury will check.
+    if (!file.endsWith(".json")) return;
+    const value = line.slice(line.indexOf(":") + 1);
+    if (!NUMBER_LIKE.test(value)) return;
+    // A placeholder like {d} or {0} is filled at render time from data that
+    // is gated where it lives.
+    if (/\{\w*\}/.test(value)) return;
+    if (approvedKeyOn(line)) return;
+    report(`${file}:${index + 1}`, "number in UI copy", line.trim());
   });
 }
 
