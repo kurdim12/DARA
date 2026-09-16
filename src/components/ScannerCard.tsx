@@ -2,6 +2,7 @@ import { useRef, useState, type ReactNode } from "react";
 import { ClipboardPaste, ImageUp, X } from "lucide-react";
 import { ALLOWED_IMAGE_TYPES, MAX_INPUT_CHARS, type AnalyzeImage } from "../../shared/types";
 import { AppError } from "../lib/api";
+import { readClipboardText } from "../lib/clipboard";
 import { prepareImage, previewUrl } from "../lib/image";
 import { useI18n, type TextKey } from "../i18n";
 
@@ -47,10 +48,12 @@ export function ScannerCard({
 
   async function paste() {
     try {
-      const clip = await navigator.clipboard.readText();
+      const clip = await readClipboardText();
       if (clip) onText(clip.slice(0, MAX_INPUT_CHARS));
+      else onError("ft.clip.empty");
     } catch {
-      // Clipboard access is refused on some browsers. Typing still works.
+      // Refused, or never answered. Say so; typing still works.
+      onError("ft.clip.failed");
     }
   }
 
@@ -157,6 +160,13 @@ export function ScannerCard({
           </button>
         </div>
       ) : null}
+
+      {/* The reference build states this above its own paste card. It belongs
+          next to the button it describes, and it is literally true: paste()
+          runs on a press and nowhere else. */}
+      <p className="mt-2.5 text-[12px] font-normal leading-snug text-ink-2">
+        {t("ft.clip.line")}
+      </p>
 
       {screenshot}
     </div>

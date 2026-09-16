@@ -1,5 +1,6 @@
 import file from "../../content/campaigns.json";
 import type { Lang } from "../../shared/types";
+import { dateLocale } from "./locale";
 
 /**
  * Documented campaigns: a scam someone reported, with a date and a named
@@ -107,7 +108,7 @@ export function inFilter(campaign: Campaign, filter: CampaignFilter): boolean {
 export function campaignDate(iso: string, lang: Lang): string {
   const parsed = new Date(iso);
   if (Number.isNaN(parsed.getTime())) return iso;
-  return parsed.toLocaleDateString(lang === "ar" ? "ar-JO" : "en-GB", {
+  return parsed.toLocaleDateString(dateLocale(lang), {
     year: "numeric",
     month: "short",
     day: "numeric",

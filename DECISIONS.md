@@ -173,3 +173,31 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
 - **In Arabic the brush mark stands alone.** The mark already reads درع; setting the same word in type beside it says it twice. Arabic gets the tile and the tagline, no Latin wordmark.
 - **The Radar tab lands on Known Threats until Phase 2.** Every tab reaches a real screen and nothing renders "coming soon" — which is also what the inventory found was already true of this repo and should stay true through the merge.
 - **A screen names itself and the nav decides which tab lights.** Threats, Protect and Learn were each claiming `active="home"`, so the Radar tab never lit on its own screen. `BELONGS_TO` in BottomNav now maps the non-tab screens onto their tab.
+
+- **Home's merge keeps one door per job, not two.** The reference build's
+  clipboard-consent card and its image chip both duplicated controls this card
+  already shows: "Paste from clipboard" and "Scan a screenshot" sit under the
+  box in both variants. A sixth chip also pushed the type row off a 390px
+  screen. So the card keeps the two buttons, and what the reference had that
+  this build did not — the sentence "the clipboard is read only when you press
+  the button" — moved next to the button it describes. Pasting fills the box
+  instead of analyzing straight away, which is the safer demo anyway: the
+  person sees what was read before anything is sent.
+- **The clipboard read has a 3-second deadline** (`src/lib/clipboard.ts`). With
+  the permission withheld, Chromium's `readText()` never settles — it neither
+  resolves nor rejects — so the old silent `catch` produced a dead button.
+  Both callers now race it and say "the clipboard could not be read" instead.
+- **Home's Arabic labels were rewritten into فصحى.** The clipboard strings and
+  the drill subtitle arrived in the reference's colloquial Jordanian
+  ("عندك رسالة بالحافظة؟", "بتعرف تميّزها؟") on a screen that is otherwise
+  simple MSA. The merge brief allows fixing labels that mix registers on one
+  screen; the rest of the ported colloquial copy is listed below and left for a
+  decision, not rewritten today.
+- **Dates render in Latin digits in Arabic too** (`src/lib/locale.ts`).
+  `toLocaleDateString("ar-JO")` formats in Arabic-Indic digits, so Radar and the
+  campaign strip were showing ٢٧ آب ٢٠٢٦ against CLAUDE.md's "Latin digits
+  everywhere". The locale now carries `-u-nu-latn`; `test/digits.test.ts` fails
+  without it.
+- **The latest receipt on Home does not interpolate a status into a key.** The
+  API only ever writes `received`; anything else falls back to it rather than
+  printing `status.whatever` onto the screen.

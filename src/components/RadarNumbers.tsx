@@ -1,6 +1,7 @@
 import { Card } from "./Shell";
 import { useI18n, type TextKey } from "../i18n";
 import type { RadarData, RadarRow } from "../lib/api";
+import { dateLocale } from "../lib/locale";
 
 /**
  * What DARA' itself has been told, this week and in total.
@@ -17,7 +18,7 @@ export function RadarNumbers({ radar }: { radar: RadarData }) {
 
   const day = (iso: string) =>
     iso
-      ? new Date(iso).toLocaleDateString(lang === "ar" ? "ar-JO" : "en-GB", {
+      ? new Date(iso).toLocaleDateString(dateLocale(lang), {
           month: "short",
           day: "numeric",
         })
@@ -87,7 +88,7 @@ export function RadarNumbers({ radar }: { radar: RadarData }) {
         <bdi>
           {t("radar.generated").replace(
             "{d}",
-            new Date(radar.generated_at).toLocaleString(lang === "ar" ? "ar-JO" : "en-GB", {
+            new Date(radar.generated_at).toLocaleString(dateLocale(lang), {
               dateStyle: "medium",
               timeStyle: "short",
             }),
