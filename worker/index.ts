@@ -36,6 +36,11 @@ export interface Env {
   DB: D1Database;
   ANTHROPIC_API_KEY?: string;
   ANTHROPIC_MODEL?: string;
+  /**
+   * A Messages-API gateway to call instead of Anthropic directly. OpenRouter's
+   * is https://openrouter.ai/api. Unset means straight to Anthropic.
+   */
+  ANTHROPIC_BASE_URL?: string;
   ENGINE_THINKING?: string;
   APP_ENV?: string;
   ANALYZE_LIMITER?: RateLimitBinding;
@@ -44,14 +49,23 @@ export interface Env {
 const DEFAULT_MODEL = "claude-sonnet-5";
 
 /**
- * The eval compares the two candidate models against one deployment, so
- * /api/analyze accepts a model override — but only one of these two. Any other
- * value is ignored and the configured model is used.
+ * The eval compares candidate models against one deployment, so /api/analyze
+ * accepts a model override — but only from this list. Anything else is ignored
+ * and the configured model is used, so the override can never be turned into a
+ * way to spend someone else's credits on an arbitrary model.
+ *
+ * Gateway ids carry a vendor prefix, and both spellings of the same model are
+ * listed rather than pattern-matched: an allowlist that accepts a prefix
+ * accepts everything behind it.
  */
 const MODEL_ALLOWLIST = new Set([
   "claude-sonnet-5",
   "claude-haiku-4-5",
   "claude-haiku-4-5-20251001",
+  "claude-opus-5",
+  "anthropic/claude-sonnet-5",
+  "anthropic/claude-haiku-4-5",
+  "anthropic/claude-opus-5",
 ]);
 
 function chosenModel(configured: string, requested: string | undefined): string {
@@ -120,6 +134,10 @@ app.get("/api/health", async (c) => {
     ok: true,
     // Presence only. The key itself is never read into a response or a log.
     key_present: Boolean(c.env.ANTHROPIC_API_KEY),
+    // Which door the key opens. A key that is present but pointed at the wrong
+    // gateway fails exactly like a missing one, and this is the only place to
+    // see the difference from a phone.
+    api_host: c.env.ANTHROPIC_BASE_URL ? new URL(c.env.ANTHROPIC_BASE_URL).host : "api.anthropic.com",
     db_ready,
     model: c.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
   });
@@ -194,6 +212,7 @@ app.post("/api/analyze", async (c) => {
   try {
     const result = await runEngine({
       apiKey,
+      baseURL: c.env.ANTHROPIC_BASE_URL,
       model: chosenModel(
         c.env.ANTHROPIC_MODEL ?? DEFAULT_MODEL,
         c.req.header("X-DARA-Model"),

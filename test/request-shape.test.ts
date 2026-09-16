@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildRequestBody } from "../worker/engine/analyze";
+import { buildRequestBody, bareModel } from "../worker/engine/analyze";
 
 /** Message content is a block array now, so pull the instructions out of it. */
 function instructions(body: ReturnType<typeof buildRequestBody>): string {
@@ -168,5 +168,39 @@ describe("the analysis type hint", () => {
     );
     expect(text).toContain("CHANNEL: sms");
     expect(text).toContain("TYPE: message");
+  });
+});
+
+describe("gateway model ids", () => {
+  it("strips a vendor prefix before profiling the model", () => {
+    expect(bareModel("anthropic/claude-opus-5")).toBe("claude-opus-5");
+    expect(bareModel("claude-opus-5")).toBe("claude-opus-5");
+    expect(bareModel("google/gemini-3.8-flash")).toBe("gemini-3.8-flash");
+  });
+
+  it("sends a prefixed Claude the same body as an unprefixed one", () => {
+    const direct = buildRequestBody({ ...base, model: "claude-sonnet-5" });
+    const viaGateway = buildRequestBody({ ...base, model: "anthropic/claude-sonnet-5" });
+    expect(viaGateway.thinking).toEqual(direct.thinking);
+    expect(viaGateway.temperature).toBe(direct.temperature);
+    expect(viaGateway.tool_choice).toEqual(direct.tool_choice);
+  });
+
+  it("still gives a prefixed Haiku its temperature and no thinking", () => {
+    const body = buildRequestBody({ ...base, model: "anthropic/claude-haiku-4-5" });
+    expect(body.temperature).toBe(0);
+    expect(body.thinking).toBeUndefined();
+  });
+
+  it("sends neither thinking nor temperature to a non-Claude model", () => {
+    // Both fields are Anthropic's. Through a gateway they reach a model that
+    // either 400s on them or ignores them, and the 400 arrives at demo time.
+    for (const model of ["google/gemini-3.8-flash", "openai/gpt-6-astra", "x-ai/grok-5"]) {
+      const body = buildRequestBody({ ...base, model });
+      expect(body.thinking, model).toBeUndefined();
+      expect(body.temperature, model).toBeUndefined();
+      // The forced tool call is the whole contract and must survive.
+      expect(body.tool_choice, model).toEqual({ type: "tool", name: "report_verdict" });
+    }
   });
 });

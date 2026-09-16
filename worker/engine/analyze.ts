@@ -17,6 +17,17 @@ export class EngineRateLimited extends Error {}
 export class EngineFailure extends Error {}
 
 /**
+ * A gateway such as OpenRouter names the same model `anthropic/claude-opus-5`.
+ * Everything below reasons about the model itself, so the vendor prefix comes
+ * off first — otherwise every profile test silently stops matching and the
+ * wrong request shape goes out.
+ */
+export function bareModel(model: string): string {
+  const slash = model.indexOf("/");
+  return slash === -1 ? model : model.slice(slash + 1);
+}
+
+/**
  * The request surface differs by model, and getting it wrong is a 400:
  *
  * - Sonnet 5 (and the Opus 4.7+ family) reject non-default `temperature`, and
@@ -24,21 +35,35 @@ export class EngineFailure extends Error {}
  *   token budget and the seconds this demo does not have, so it is turned off
  *   explicitly.
  * - Haiku 4.5 still accepts `temperature`, and does not think unless asked.
+ * - Anything that is not a Claude model gets neither field. `thinking` and the
+ *   temperature rules are Anthropic's; sending them through a gateway to a
+ *   Gemini or a GPT is a 400 or a silently ignored key, and neither is a thing
+ *   to discover on stage.
  */
 function modelProfile(model: string): {
+  isClaude: boolean;
   acceptsTemperature: boolean;
   acceptsThinkingDisabled: boolean;
 } {
-  const legacySampling = /^claude-(haiku-4-5|sonnet-4-5|haiku-3|sonnet-3)/.test(model);
+  const bare = bareModel(model);
+  const isClaude = bare.startsWith("claude-");
+  const legacySampling = /^claude-(haiku-4-5|sonnet-4-5|haiku-3|sonnet-3)/.test(bare);
   return {
-    acceptsTemperature: legacySampling,
-    acceptsThinkingDisabled: !legacySampling,
+    isClaude,
+    acceptsTemperature: isClaude && legacySampling,
+    acceptsThinkingDisabled: isClaude && !legacySampling,
   };
 }
 
 export interface AnalyzeArgs {
   apiKey: string;
   model: string;
+  /**
+   * Where to send the request. Unset means Anthropic directly. A gateway that
+   * speaks the Messages API — OpenRouter's is at https://openrouter.ai/api —
+   * goes here, and nothing else about the call changes.
+   */
+  baseURL?: string;
   /** "disabled" (default) or "adaptive". Set with the ENGINE_THINKING var. */
   thinking?: string;
   text: string;
@@ -116,6 +141,7 @@ export interface AnalyzeResult extends PostValidated {
 export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
   const client = new Anthropic({
     apiKey: args.apiKey,
+    ...(args.baseURL ? { baseURL: args.baseURL } : {}),
     // One shot inside the 10s wall: a retry would spend the whole budget.
     maxRetries: 0,
   });
