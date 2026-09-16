@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { BookOpen, ChevronRight, ShieldCheck, User, Wrench } from "lucide-react";
 import type { AnalysisType, AnalyzeImage } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { DemoTray } from "../components/DemoTray";
 import { Logo } from "../components/Logo";
 import { ScannerCard } from "../components/ScannerCard";
-import { ThreatRow } from "../components/ThreatRow";
 import { TypeChips } from "../components/TypeChips";
 import {
   BleedPage,
@@ -13,10 +12,11 @@ import {
   ListCard,
   Pills,
   PrimaryButton,
+  Tag,
   Tile,
 } from "../components/Shell";
 import { useI18n, type TextKey } from "../i18n";
-import { allThreats, reportCounts } from "../lib/threats";
+import { campaignDate, campaigns } from "../lib/campaigns";
 import type { Route } from "../lib/router";
 
 const TOOLS = [
@@ -36,23 +36,13 @@ export function Home({
   /** Carries what was pasted or picked into Scan and runs it there. */
   onSubmit: (text: string, type: AnalysisType, image: AnalyzeImage | null) => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [text, setText] = useState("");
   const [type, setType] = useState<AnalysisType>("message");
   const [image, setImage] = useState<AnalyzeImage | null>(null);
   const [errorKey, setErrorKey] = useState<TextKey | null>(null);
   const [trayOpen, setTrayOpen] = useState(false);
-  const [counts, setCounts] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    let live = true;
-    void reportCounts().then((next) => live && setCounts(next));
-    return () => {
-      live = false;
-    };
-  }, []);
-
-  const threats = allThreats().slice(0, 3);
+  const strip = campaigns(lang).slice(0, 3);
   const ready = text.trim().length > 0 || image !== null;
 
   return (
@@ -120,17 +110,38 @@ export function Home({
             ))}
           </div>
 
-          <h2 className="t-h3 mt-9">{t("home.threats")}</h2>
+          {/* The three newest documented campaigns, each with the date and
+              the source that reported it. The patterns list is one tap away
+              inside Radar — a pattern and an incident are different claims and
+              Home should not blur them. */}
+          <h2 className="t-h3 mt-9">{t("camp.title")}</h2>
+          <p className="t-sub mt-1">{t("camp.sub")}</p>
           <ListCard className="mt-3">
-            {threats.map((threat) => (
-              <ThreatRow key={threat.id} threat={threat} count={counts[threat.category] ?? 0} />
+            {strip.map((campaign) => (
+              <article key={campaign.id} className="px-4 py-3.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <Tag tone="danger">{t(`channel.${campaign.channel}` as TextKey)}</Tag>
+                  <span className="t-meta text-ink-2">
+                    <bdi>{campaignDate(campaign.date, lang)}</bdi>
+                  </span>
+                </div>
+                <h3 dir="auto" className="t-row mt-2">{campaign.title}</h3>
+                {campaign.summary && (
+                  <p dir="auto" className="t-sub mt-1 line-clamp-2">
+                    {campaign.summary}
+                  </p>
+                )}
+                <p dir="auto" className="t-meta mt-1.5 truncate text-ink-2">
+                  {campaign.sourceName}
+                </p>
+              </article>
             ))}
             <button
               type="button"
-              onClick={() => navigate("threats")}
+              onClick={() => navigate("radar")}
               className="flex min-h-12 w-full items-center justify-center gap-1 text-[15px] font-bold text-ink"
             >
-              {t("home.threats_all")}
+              {t("radar.title")}
               <ChevronRight size={16} strokeWidth={1.75} className="rtl:rotate-180" aria-hidden="true" />
             </button>
           </ListCard>
