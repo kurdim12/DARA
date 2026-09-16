@@ -39,6 +39,8 @@ export interface Env {
   ANTHROPIC_MODEL?: string;
   /** Comma-separated ids the eval may compare against the configured one. */
   ANTHROPIC_MODEL_CANDIDATES?: string;
+  /** Comma-separated ids tried in order when the configured model fails fast. */
+  ANTHROPIC_MODEL_FALLBACKS?: string;
   /**
    * A Messages-API gateway to call instead of Anthropic directly. OpenRouter's
    * is https://openrouter.ai/api. Unset means straight to Anthropic.
@@ -218,6 +220,10 @@ app.post("/api/analyze", async (c) => {
       apiKey,
       baseURL: c.env.ANTHROPIC_BASE_URL,
       model: chosenModel(c.env, c.req.header("X-DARA-Model")),
+      fallbacks: (c.env.ANTHROPIC_MODEL_FALLBACKS ?? "")
+        .split(",")
+        .map((entry) => entry.trim())
+        .filter(Boolean),
       thinking: c.env.ENGINE_THINKING,
       text,
       lang,

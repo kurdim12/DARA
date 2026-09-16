@@ -311,3 +311,14 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   That agreement is reassuring but it is still metadata, not a guarantee, for
   any of the others — the golden set is the proof, and the thing it has to
   prove is not the verdict but whether the Arabic quotes come back verbatim.
+- **"Works always" is a chain, not a model.** Three layers now: OpenRouter
+  retries a different provider for the same model without being asked; the
+  engine walks `ANTHROPIC_MODEL_FALLBACKS` when a model is rate-limited, gone,
+  or refuses the request shape; and the staged demo messages fall back to a
+  cached verdict on the device. The chain deliberately spans two vendors, so
+  one vendor having a bad morning is not the demo's problem.
+- **A timeout never falls back.** The wall is ten seconds and a timeout has
+  already spent it; a second attempt would leave a presenter watching a spinner
+  instead of an error they can move past. Fast failures are the retryable ones,
+  and they are also the common ones. `test/model-chain.test.ts` pins that rule
+  along with the walk order and the de-duplication.

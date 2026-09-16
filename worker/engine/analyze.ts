@@ -84,6 +84,8 @@ export interface AnalyzeArgs {
   image?: AnalyzeImage;
   /** Deterministic link facts computed before the call, passed as context. */
   linkFacts?: string;
+  /** Tried in order when the primary fails fast. Never tried after a timeout. */
+  fallbacks?: string[];
 }
 
 /**
@@ -147,7 +149,7 @@ export interface AnalyzeResult extends PostValidated {
   latency_ms: number;
 }
 
-export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
+async function runOne(args: AnalyzeArgs, budgetMs: number): Promise<AnalyzeResult> {
   const client = new Anthropic({
     apiKey: args.apiKey,
     ...(args.baseURL ? { baseURL: args.baseURL } : {}),
@@ -156,10 +158,7 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
   });
 
   const controller = new AbortController();
-  const timer = setTimeout(
-    () => controller.abort(),
-    args.image ? ENGINE_IMAGE_TIMEOUT_MS : ENGINE_TIMEOUT_MS,
-  );
+  const timer = setTimeout(() => controller.abort(), budgetMs);
   const startedAt = Date.now();
 
   let message: Anthropic.Message;
@@ -203,4 +202,55 @@ export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
     hasImage: Boolean(args.image),
   });
   return { ...validated, model: args.model, latency_ms };
+}
+
+/**
+ * "Works always" is not a model, it is a chain.
+ *
+ * Two layers sit under this one already: OpenRouter retries a different
+ * provider when one provider for the same model is down or rate-limited, and
+ * it does that without being asked. This layer handles the case that survives
+ * — the whole model gone, rate-limited at the account, or rejecting this
+ * request shape — by moving to the next model in `ANTHROPIC_MODEL_FALLBACKS`.
+ *
+ * What it will NOT do is retry a timeout. The wall is ten seconds and a
+ * timeout has already spent most of it; a second attempt would blow the budget
+ * and leave a presenter staring at a spinner. Fast failures are the ones worth
+ * retrying, and they are also the common ones.
+ *
+ * The result reports the model that actually answered, so a fallback is
+ * visible in the eval rather than silent.
+ */
+export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
+  const wall = args.image ? ENGINE_IMAGE_TIMEOUT_MS : ENGINE_TIMEOUT_MS;
+  const chain = [args.model, ...(args.fallbacks ?? [])].filter(
+    (model, index, all) => model && all.indexOf(model) === index,
+  );
+  const startedAt = Date.now();
+  let lastError: unknown;
+
+  for (let index = 0; index < chain.length; index++) {
+    const remaining = wall - (Date.now() - startedAt);
+    // Under two seconds there is no point starting another model: it cannot
+    // finish, and the failure it produces would be a timeout we caused.
+    if (index > 0 && remaining < 2000) break;
+    try {
+      return await runOne({ ...args, model: chain[index] }, remaining);
+    } catch (error) {
+      lastError = error;
+      // A timeout means the budget is gone, not that this model is wrong.
+      if (error instanceof EngineTimeout) throw error;
+      // Post-validation rejected the output, or the model returned no tool
+      // call. That is this model failing the contract — worth the next one.
+      const retryable =
+        error instanceof EngineRateLimited ||
+        error instanceof EngineModelUnavailable ||
+        error instanceof EngineFailure;
+      if (!retryable || index === chain.length - 1) throw error;
+      console.error(
+        `model ${chain[index]} failed (${(error as Error).message}); falling back to ${chain[index + 1]}`,
+      );
+    }
+  }
+  throw lastError ?? new EngineFailure("no model was reachable");
 }
