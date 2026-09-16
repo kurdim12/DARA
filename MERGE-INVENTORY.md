@@ -231,3 +231,11 @@ Two other facts worth knowing before the demo:
   reference build wrote `never_en` for six bodies and `never_ar` for all of
   them, so English mode shows the Arabic line rather than nothing. Translating
   the other 49 is content work, which this phase was told not to do.
+- **The four seeded community reports are in English only.** They live in
+  `migrations/0002_report_fields.sql` as literal rows, and the Report tab reads
+  them straight out of D1, so in Arabic they appear in English under an Arabic
+  heading. They are labelled as team-added examples, which is honest, but a
+  jury reading the Arabic build sees English. Fixing it means either replacing
+  the seed text with Arabic or adding a second column — a schema decision, not
+  a copy edit.
+
