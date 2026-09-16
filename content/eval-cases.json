@@ -16,7 +16,11 @@
       "synthetic": "written for v2 from v1 scenarios or as a legitimate control",
       "real": "real message from an official source"
     },
-    "fake_domains": "All domains in scam cases are illustrative. The app must never render them as links."
+    "fake_domains": "All domains in scam cases are illustrative. The app must never render them as links.",
+    "specimens": [
+      "text"
+    ],
+    "specimens_note": "Every case's text is an invented scam specimen the engine is scored against. It is never rendered as app copy."
   },
   "cases": [
     {

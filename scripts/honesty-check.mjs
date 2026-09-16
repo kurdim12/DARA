@@ -25,24 +25,44 @@ const FILES = [
   "worker/engine/prompt.ts",
 ];
 
-/** Claims about who receives a report, and about encryption or retention. */
+/**
+ * Claims that are wrong no matter who signed them off: DARA' saying a report
+ * was sent, received or notified, or saying anything about encryption or
+ * retention that is not literally true. Absolute, in every file.
+ */
 const CLAIM_TERMS = [
-  "السلطات",
-  "الجهات المختصة",
-  "الجهة المختصة",
-  "الجرائم الإلكترونية",
   "تم إرسال",
   "تم إبلاغ",
   "تم إخطار",
   "مشفر",
   "مشفرة",
-  "authorities",
   "encrypted",
-  "Cybercrime",
-  "cyber crime",
   "no data",
   "لا نحفظ",
   "لا نخزن",
+];
+
+/**
+ * The NAME of an official body. Naming one is not a claim that anything was
+ * sent to it — "the Jordan Times, quoting the Cybercrime Unit" attributes a
+ * warning, and the entities directory is a list of who a scam impersonates.
+ *
+ * So these are answerable by a `verified: true` record, which is a person's
+ * signature on a sourced fact. They are NOT answerable anywhere else: the
+ * i18n files carry no verified flags, so in the app's own voice a body's name
+ * still stops the build unless it is in APPROVED below with a written reason.
+ *
+ * The sending verbs above stay absolute either way, so a verified record that
+ * said "تم إبلاغ وحدة الجرائم الإلكترونية" would still fail.
+ */
+const ENTITY_NAME_TERMS = [
+  "السلطات",
+  "الجهات المختصة",
+  "الجهة المختصة",
+  "الجرائم الإلكترونية",
+  "authorities",
+  "Cybercrime",
+  "cyber crime",
 ];
 
 /**
@@ -106,7 +126,7 @@ function report(where, why, line) {
 async function scanLines(file) {
   const text = await readFile(new URL(file, ROOT), "utf8");
   text.split("\n").forEach((line, index) => {
-    for (const term of CLAIM_TERMS) {
+    for (const term of [...CLAIM_TERMS, ...ENTITY_NAME_TERMS]) {
       if (!line.toLowerCase().includes(term.toLowerCase())) continue;
       if (insideIdentifier(line, term)) continue;
       if (approvedKeyOn(line)) continue;
@@ -166,7 +186,16 @@ function walkContent(node, path, out, specimens = new Set()) {
       key === "titles" ||
       key === "balance" ||
       key === "state" ||
-      key === "specimens_note"
+      key === "specimens_note" ||
+      // Structural, not prose: an id, a date, a URL and a domain carry digits
+      // without stating anything. The claim, if there is one, is in the text.
+      key === "id" ||
+      key === "date" ||
+      key === "domain" ||
+      key === "official_domain" ||
+      key === "source_url" ||
+      key === "source_url_2" ||
+      key === "tld"
     ) {
       continue;
     }
@@ -183,25 +212,25 @@ for (const file of FILES) await scanLines(file);
 for (const file of await tsxFiles("src/routes/")) await scanLines(file);
 for (const file of await tsxFiles("src/components/")) await scanLines(file);
 
-const CONTENT_FILES = [
-  "content/v1-content.json",
-  "content/protect.json",
-  "content/quiz.json",
-  "content/recover/money_lost.json",
-  "content/recover/account_hacked.json",
-  "content/recover/data_stolen.json",
-  "content/recover/device_compromised.json",
-  "content/recover/identity_theft.json",
-  "content/threats.json",
-  "content/community-seed.json",
-  "content/verified.json",
-  "content/shield/private_photos.json",
-  "content/shield/money_demands.json",
-  "content/shield/account_hacked.json",
-  "content/shield/afraid_safety.json",
-  "content/shield/data_stolen.json",
-];
+/**
+ * Every JSON file under content/, found by walking rather than by list.
+ *
+ * This used to be a hardcoded array, and a hardcoded array is how a content
+ * file gets added without the gate ever reading it — which is the exact blind
+ * spot the Phase 0 audit caught the first time. A new file is now inside the
+ * gate the moment it exists.
+ */
+async function contentFiles(dir = "content/") {
+  const entries = await readdir(new URL(dir, ROOT), { withFileTypes: true });
+  const out = [];
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    if (entry.isDirectory()) out.push(...(await contentFiles(`${dir}${entry.name}/`)));
+    else if (entry.name.endsWith(".json")) out.push(`${dir}${entry.name}`);
+  }
+  return out;
+}
 
+const CONTENT_FILES = await contentFiles();
 const strings = [];
 for (const file of CONTENT_FILES) {
   const content = JSON.parse(await readFile(new URL(file, ROOT), "utf8"));
@@ -210,12 +239,21 @@ for (const file of CONTENT_FILES) {
   for (const entry of found) strings.push({ ...entry, file });
 }
 
-for (const { file, path, value } of strings) {
+for (const { file, path, value, gated } of strings) {
   for (const term of CLAIM_TERMS) {
     if (value.toLowerCase().includes(term.toLowerCase())) {
       report(`${file} ${path}`, term, value.slice(0, 90));
     }
   }
+  if (!gated) {
+    for (const term of ENTITY_NAME_TERMS) {
+      if (value.toLowerCase().includes(term.toLowerCase())) {
+        report(`${file} ${path}`, term, value.slice(0, 90));
+      }
+    }
+  }
+  if (gated) continue; // a person has signed this record off; see above
+
   const sourced = SOURCED_TERMS.find((term) => value.includes(term));
   if (sourced) {
     report(`${file} ${path}`, `${sourced} — renders with no verified flag`, value.slice(0, 90));

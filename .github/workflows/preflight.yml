@@ -1,0 +1,79 @@
+# Phase 0 of the merge brief, asked from a machine that can reach the Worker.
+#
+# Four questions: does every endpoint the reference build calls answer, is the
+# key actually set, does one real scan come back with a verdict, and is CORS an
+# allowlist rather than a wildcard.
+name: preflight
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The deployed URL to check
+        default: https://dara.abdalrhmankurdi12.workers.dev
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      TARGET: ${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}
+      REF_ORIGIN: https://zaidabualshaar.github.io
+    steps:
+      - name: Endpoints, key, live scan and CORS
+        run: |
+          fail=0
+          note() { echo "$1"; }
+
+          code() { curl -sS --max-time 30 -o /tmp/body.txt -w "%{http_code}" "$@" || echo "000"; }
+
+          echo "=== endpoints the reference build calls ==="
+          h=$(code "$TARGET/api/health");              echo "GET  /api/health   $h"; health=$(cat /tmp/body.txt)
+          t=$(code "$TARGET/api/threats");             echo "GET  /api/threats  $t"
+          r=$(code "$TARGET/api/radar");               echo "GET  /api/radar    $r"; radar=$(cat /tmp/body.txt)
+          l=$(code -X POST "$TARGET/api/lookup" -H 'content-type: application/json' -d '{"q":"amman.jo"}')
+          echo "POST /api/lookup   $l"; lookup=$(cat /tmp/body.txt)
+          c=$(code "$TARGET/api/report/DR-2026-00002"); echo "GET  /api/report/:id $c"
+          for pair in "health:$h" "threats:$t" "radar:$r" "lookup:$l" "report:$c"; do
+            [ "${pair#*:}" = "200" ] || { note "MISSING or erroring: ${pair%%:*} -> ${pair#*:}"; fail=1; }
+          done
+          echo "  radar:  $(echo "$radar" | head -c 200)"
+          echo "  lookup: $(echo "$lookup" | head -c 200)"
+
+          echo
+          echo "=== the key, and one real scan ==="
+          echo "  health: $health"
+          key=$(echo "$health" | grep -o '"key_present":[a-z]*' | cut -d: -f2)
+          if [ "$key" = "true" ]; then
+            a=$(code -X POST "$TARGET/api/analyze" -H 'content-type: application/json' \
+                 -d '{"text":"أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة. ادفع خلال 24 ساعة: http://amanat-pay-now.com/fine","lang":"ar","type":"message"}')
+            echo "POST /api/analyze  $a"
+            verdict=$(grep -o '"verdict":"[a-z_]*"' /tmp/body.txt | head -1)
+            model=$(grep -o '"model":"[^"]*"' /tmp/body.txt | head -1)
+            if [ "$a" = "200" ] && [ -n "$verdict" ]; then
+              echo "  live scan: $verdict $model"
+            else
+              echo "  live scan FAILED: $(head -c 300 /tmp/body.txt)"; fail=1
+            fi
+          else
+            echo "  ANTHROPIC_API_KEY is NOT set on the deployment — no scan can be run."; fail=1
+          fi
+
+          echo
+          echo "=== CORS ==="
+          allow() { curl -sSI --max-time 20 "$@" | tr -d '\r' | grep -i '^access-control-allow-origin:' || true; }
+          ref=$(allow -H "Origin: $REF_ORIGIN" "$TARGET/api/threats")
+          pre=$(curl -sSI --max-time 20 -X OPTIONS -H "Origin: $REF_ORIGIN" \
+                  -H 'Access-Control-Request-Method: POST' \
+                  -H 'Access-Control-Request-Headers: content-type' \
+                  "$TARGET/api/lookup" | tr -d '\r' | grep -iE '^(HTTP|access-control-)' || true)
+          other=$(allow -H "Origin: https://example.com" "$TARGET/api/threats")
+          echo "  GET with the reference origin: ${ref:-（none）}"
+          echo "  OPTIONS preflight:"; echo "$pre" | sed 's/^/    /'
+          echo "  GET with a random origin:      ${other:-（none, which is correct）}"
+          echo "$ref" | grep -qi "$REF_ORIGIN" || { note "CORS does not allow the reference origin"; fail=1; }
+          [ -z "$other" ] || { note "CORS echoed an origin that is not on the allowlist"; fail=1; }
+
+          echo
+          echo "=== PREFLIGHT ==="
+          if [ "$fail" = "0" ]; then echo "READY: every endpoint answers, the key is set, a live scan returned a verdict, CORS is an allowlist"
+          else echo "NOT READY: see the lines above"; exit 1; fi

@@ -1,0 +1,19 @@
+{
+  "_meta": {
+    "purpose": "The two lookup facts that need an outside source before they can be stated: which network a Jordanian mobile prefix belongs to, and how much abuse a domain extension carries.",
+    "rule": "Both lists ship verified: false, so the Jordan layer omits those rows and the screen says nothing rather than guessing. The endpoint is already wired to them: flipping a flag to true is all it takes to turn the row on.",
+    "owner": "Abdelrahman. The prefix map needs the TRC's published allocation; the extension list needs a named abuse report to cite."
+  },
+  "operator_prefixes": {
+    "verified": false,
+    "source_needed": "Telecommunications Regulatory Commission published mobile number allocation",
+    "map": { "77": "orange", "78": "umniah", "79": "zain" }
+  },
+  "tld_risk": {
+    "verified": false,
+    "source_needed": "A named, dated abuse report — e.g. Spamhaus or Interisle — that ranks these extensions",
+    "high": ["top", "xyz", "click", "link", "buzz", "rest", "cfd", "sbs"],
+    "medium": ["online", "site", "shop", "store", "live", "icu", "cyou"],
+    "low": ["jo", "com", "net", "org", "gov", "edu"]
+  }
+}

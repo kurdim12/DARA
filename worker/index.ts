@@ -1,4 +1,6 @@
 import { Hono } from "hono";
+import { radar } from "./routes/radar";
+import { lookup } from "./routes/lookup";
 import {
   ALLOWED_IMAGE_TYPES,
   ANALYSIS_TYPES,
@@ -66,6 +68,40 @@ const app = new Hono<{ Bindings: Env }>();
 app.use("/api/*", async (c, next) => {
   await next();
   c.header("Cache-Control", "no-store");
+});
+
+/**
+ * The API answers two origins: itself, and the GitHub Pages build of the
+ * reference app, which calls this Worker for every verdict it shows.
+ *
+ * An allowlist, not a wildcard, and no credentials: there is no cookie or
+ * token to leak, and the rate limit still applies per IP whoever asks. An
+ * origin that is not on the list gets the answer with no CORS header, which
+ * is the same as being refused by a browser.
+ */
+const ALLOWED_ORIGINS = new Set(["https://zaidabualshaar.github.io"]);
+
+app.use("/api/*", async (c, next) => {
+  const origin = c.req.header("Origin");
+  const allowed =
+    origin && (ALLOWED_ORIGINS.has(origin) || origin === new URL(c.req.url).origin);
+
+  if (allowed && c.req.method === "OPTIONS") {
+    return c.body(null, 204, {
+      "Access-Control-Allow-Origin": origin,
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+      "Access-Control-Allow-Headers": "content-type",
+      "Access-Control-Max-Age": "86400",
+      Vary: "Origin",
+    });
+  }
+
+  await next();
+
+  if (allowed) {
+    c.header("Access-Control-Allow-Origin", origin);
+    c.header("Vary", "Origin");
+  }
 });
 
 app.get("/api/health", async (c) => {
@@ -478,6 +514,37 @@ app.get("/api/threats", async (c) => {
 
 // The bare path too: "/api/*" does not match "/api", which would otherwise
 // fall through to the asset server and answer with the app's index.html.
+/**
+ * The Jordan radar. Counts of rows in D1 and nothing else — see routes/radar.ts
+ * for why every list can legitimately come back empty.
+ */
+app.get("/api/radar", async (c) => {
+  try {
+    return c.json(await radar(c.env.DB));
+  } catch {
+    return c.json({ error: "server_error" }, 500);
+  }
+});
+
+/** Check one domain, number or alias against what DARA' can actually confirm. */
+app.post("/api/lookup", async (c) => {
+  let payload: { q?: unknown };
+  try {
+    payload = (await c.req.json()) as { q?: unknown };
+  } catch {
+    return c.json({ error: "bad_request" }, 400);
+  }
+
+  const q = typeof payload.q === "string" ? payload.q.trim() : "";
+  if (!q) return c.json({ error: "bad_request" }, 400);
+
+  try {
+    return c.json(await lookup(c.env.DB, q));
+  } catch {
+    return c.json({ error: "server_error" }, 500);
+  }
+});
+
 app.all("/api", (c) => c.json({ error: "not_found" }, 404));
 app.all("/api/*", (c) => c.json({ error: "not_found" }, 404));
 
