@@ -1,6 +1,7 @@
 import { Card } from "./Shell";
 import { useI18n, type TextKey } from "../i18n";
 import type { RadarData, RadarRow } from "../lib/api";
+import type { Lang } from "../../shared/types";
 import { dateLocale } from "../lib/locale";
 
 /**
@@ -65,7 +66,7 @@ export function RadarNumbers({ radar }: { radar: RadarData }) {
       )}
 
       <Block title={t("radar.trend")}>
-        <Trend rows={radar.trend} emptyLabel={t("radar.empty_trend")} />
+        <Trend rows={radar.trend} emptyLabel={t("radar.empty_trend")} lang={lang} />
       </Block>
 
       <h3 className="t-h3 mt-6">{t("radar.top")}</h3>
@@ -155,29 +156,56 @@ function Rows({
   );
 }
 
+function weekLabel(iso: string, lang: Lang): string {
+  const parsed = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(parsed.getTime())) return iso;
+  return parsed.toLocaleDateString(dateLocale(lang), {
+    month: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 function Trend({
   rows,
   emptyLabel,
+  lang,
 }: {
   rows: { week_start: string; count: number }[];
   emptyLabel: string;
+  lang: Lang;
 }) {
   const most = Math.max(...rows.map((row) => row.count), 0);
   if (rows.length === 0 || most === 0) return <p className="t-sub">{emptyLabel}</p>;
+  const first = rows[0];
+  const last = rows[rows.length - 1];
   return (
-    <ul className="flex h-16 items-end gap-1.5">
-      {rows.map((row) => (
-        <li
-          key={row.week_start}
-          className="flex h-full flex-1 items-end"
-          aria-label={`${row.week_start}: ${row.count}`}
-        >
-          <span
-            className="block w-full rounded-t-[3px] bg-ink"
-            style={{ height: `${Math.max(6, Math.round((row.count / most) * 100))}%` }}
-          />
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className="flex h-16 items-end gap-1.5">
+        {rows.map((row) => (
+          <li
+            key={row.week_start}
+            className="flex h-full flex-1 items-end"
+            aria-label={`${row.week_start}: ${row.count}`}
+          >
+            {/* A week with nothing in it gets no bar, only the rule below it.
+                A floor height here would draw a quiet week as a small one. */}
+            <span
+              className="block w-full rounded-t-[3px] bg-ink"
+              style={{
+                height: row.count === 0 ? 0 : `${Math.max(8, Math.round((row.count / most) * 100))}%`,
+              }}
+            />
+          </li>
+        ))}
+      </ul>
+      {/* The bars are only readable against the span they cover. */}
+      <div className="mt-1.5 border-t border-line pt-1.5">
+        <p className="t-meta flex items-center justify-between text-ink-2">
+          <bdi>{weekLabel(first.week_start, lang)}</bdi>
+          <bdi>{weekLabel(last.week_start, lang)}</bdi>
+        </p>
+      </div>
+    </>
   );
 }

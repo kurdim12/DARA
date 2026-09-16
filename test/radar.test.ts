@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hostsIn, numbersIn, tally } from "../worker/routes/radar";
+import { hostsIn, numbersIn, tally, padWeeks } from "../worker/routes/radar";
 import { normaliseDomain, operatorOf } from "../worker/routes/lookup";
 
 describe("hostsIn", () => {
@@ -75,5 +75,44 @@ describe("operatorOf", () => {
 
   it("calls a non-Jordanian number foreign", () => {
     expect(operatorOf("447700900123")).toBe("foreign");
+  });
+});
+
+describe("padWeeks", () => {
+  const NOW = new Date("2026-09-16T12:00:00Z"); // a Wednesday
+
+  it("returns eight weeks, oldest first, ending with this one", () => {
+    const out = padWeeks([], NOW);
+    expect(out).toHaveLength(8);
+    expect(out[7].week_start).toBe("2026-09-14"); // the Monday of NOW's week
+    expect(out[0].week_start).toBe("2026-07-27");
+    expect(out.map((w) => w.count)).toEqual([0, 0, 0, 0, 0, 0, 0, 0]);
+  });
+
+  it("keeps the counts it was given and zeroes the rest", () => {
+    const out = padWeeks(
+      [
+        { week_start: "2026-09-07", count: 4 },
+        { week_start: "2026-09-14", count: 4 },
+      ],
+      NOW,
+    );
+    expect(out.map((w) => w.count)).toEqual([0, 0, 0, 0, 0, 0, 4, 4]);
+  });
+
+  it("drops a week older than the window rather than distorting it", () => {
+    const out = padWeeks([{ week_start: "2026-01-05", count: 99 }], NOW);
+    expect(out).toHaveLength(8);
+    expect(out.every((w) => w.count === 0)).toBe(true);
+  });
+
+  it("is stable when NOW is itself a Monday", () => {
+    const out = padWeeks([{ week_start: "2026-09-14", count: 2 }], new Date("2026-09-14T00:00:00Z"));
+    expect(out[7]).toEqual({ week_start: "2026-09-14", count: 2 });
+  });
+
+  it("is stable when NOW is a Sunday, which belongs to the week that started Monday", () => {
+    const out = padWeeks([{ week_start: "2026-09-14", count: 2 }], new Date("2026-09-20T23:59:00Z"));
+    expect(out[7]).toEqual({ week_start: "2026-09-14", count: 2 });
   });
 });

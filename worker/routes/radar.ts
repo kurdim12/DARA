@@ -36,6 +36,42 @@ function verifiedCampaignCount(): number {
   return list.filter((entry) => entry.verified === true).length;
 }
 
+/** How many weeks the trend covers. The label on the screen says the same number. */
+export const TREND_WEEKS = 8;
+
+/** The Monday of the week a date falls in, in UTC. */
+function mondayOf(date: Date): string {
+  const d = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Every one of the last `weeks` weeks, oldest first, with a zero where nothing
+ * was reported.
+ *
+ * SQL GROUP BY only returns weeks that have rows, so a quiet fortnight came
+ * back as two bars under a heading that says eight weeks. Padding here means
+ * the chart shows the span the label promises, and a quiet week reads as quiet
+ * instead of vanishing.
+ */
+export function padWeeks(
+  rows: { week_start: string; count: number }[],
+  now: Date,
+  weeks = TREND_WEEKS,
+): { week_start: string; count: number }[] {
+  const counts = new Map(rows.map((row) => [row.week_start, row.count]));
+  const thisMonday = new Date(`${mondayOf(now)}T00:00:00Z`);
+  const out: { week_start: string; count: number }[] = [];
+  for (let back = weeks - 1; back >= 0; back -= 1) {
+    const day = new Date(thisMonday);
+    day.setUTCDate(day.getUTCDate() - back * 7);
+    const key = day.toISOString().slice(0, 10);
+    out.push({ week_start: key, count: counts.get(key) ?? 0 });
+  }
+  return out;
+}
+
 /** Monday of the week a timestamp falls in, in SQLite. */
 const WEEK_START = "date(created_at, '-' || ((strftime('%w', created_at) + 6) % 7) || ' days')";
 
@@ -137,7 +173,7 @@ export async function radar(db: D1Database): Promise<RadarResponse> {
       by_category: byCategory.results ?? [],
       by_entity: byEntity.results ?? [],
     },
-    trend: trend.results ?? [],
+    trend: padWeeks(trend.results ?? [], new Date()),
     top_hosts: tally(reported.flatMap(hostsIn)),
     top_numbers: tally(reported.flatMap(numbersIn)),
   };
