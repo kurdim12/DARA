@@ -38,7 +38,7 @@ export interface PostValidated {
   };
 }
 
-const EVIDENCE_TYPES = new Set([
+export const EVIDENCE_TYPES = new Set([
   "sender",
   "domain",
   "amount",

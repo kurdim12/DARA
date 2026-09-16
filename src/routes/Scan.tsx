@@ -1,5 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Briefcase, Check, Globe, Link2, MessageSquare, Phone, ShieldAlert } from "lucide-react";
+import {
+  AlertTriangle,
+  Briefcase,
+  Check,
+  Globe,
+  Link2,
+  MessageSquare,
+  Phone,
+  ShieldAlert,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
   AnalysisType,
@@ -191,7 +200,7 @@ function Result({
   onAgain: () => void;
   onReport: (prefill: { category: Category; messageText: string }) => void;
 }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const level = levelFor(result);
   const fill = LEVEL_FILL[level];
   const facts: { key: TextKey; value: string }[] = [];
@@ -214,27 +223,40 @@ function Result({
       <Page>
         <Header title={t("res.title")} />
 
-        {/* The verdict leads with the word — scam, suspicious, no signs found —
-            and the finer level sits under it. The red flags are underlined
-            inside the message the person actually received, which is the one
-            thing on this screen a jury follows with their eyes. */}
+        {/* The verdict leads with the word — احتيال, مشبوه, تبدو سليمة — and the
+            finer level sits under it. The mark is behind the word at 8%: the
+            brand signing the judgement, quiet enough that nothing has to be
+            read through it. */}
         <Bleed>
-          <div className={`reveal relative px-5 py-7 ${fill.bg} ${fill.text}`}>
+          <div className={`reveal relative overflow-hidden px-5 py-7 ${fill.bg} ${fill.text}`}>
+            <img
+              src="/brand/dara-mark-white.png"
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute -bottom-6 -end-4 w-[150px] select-none opacity-[0.08]"
+            />
             {result.cached && (
               <span className="absolute end-4 top-4 rounded-full bg-white/25 px-2.5 py-1 text-[12px] font-bold">
                 {t("res.saved")}
               </span>
             )}
-            <p className="t-verdict">{t(VERDICT_WORD[level])}</p>
-            <p className="t-meta mt-1.5 opacity-80">
-              {t("res.risk_level")}: {t(LEVEL_LABEL[level])}
-            </p>
-            <p dir="auto" className="mt-3 text-[15px] font-medium leading-[1.45]">
-              {result.headline}
-            </p>
+            <div className="relative">
+              <p className="t-verdict">{t(VERDICT_WORD[level])}</p>
+              {/* Full contrast, not 80%: over --red that line measures 3.94:1
+                  at 12px, over --amber 3.93 and over --green 4.35. Size and
+                  weight already carry the hierarchy under a 34px verdict. */}
+              <p className="t-meta mt-1.5">
+                {t("res.risk_level")}: {t(LEVEL_LABEL[level])}
+              </p>
+              <p dir="auto" className="mt-3 text-[15px] font-medium leading-[1.45]">
+                {result.headline}
+              </p>
+            </div>
           </div>
         </Bleed>
 
+        {/* 2. The message, with every flag underlined where it sits. The one
+               thing on this screen a jury follows with their eyes. */}
         <p className="t-eyebrow mt-6">
           {result.input_kind === "image" ? t("res.from_image") : t("res.message")}
         </p>
@@ -261,6 +283,8 @@ function Result({
           </>
         )}
 
+        {/* 3. The Jordan layer: facts, each one confirmed, flagged, or openly
+               not checked. */}
         {result.jordan_layer && (
           <>
             <p className="t-eyebrow mt-7">{t("jl.title")}</p>
@@ -271,6 +295,92 @@ function Result({
               <div className="mt-2.5">
                 <JordanLayerRows layer={result.jordan_layer.layer} />
               </div>
+            </Card>
+          </>
+        )}
+
+        {/* 4. What the server pulled apart, one card per kind of thing. */}
+        {result.url_analysis && (
+          <>
+            <p className="t-eyebrow mt-7">{t("verdict.link")}</p>
+            <Card className="mt-2.5">
+              {/* Text, never an anchor. Tapping it is the exact thing this
+                  screen exists to stop. */}
+              <bdi
+                dir="ltr"
+                className="block break-all text-[13px] font-semibold leading-relaxed text-ink"
+              >
+                {result.url_analysis.url}
+              </bdi>
+              <p className="t-sub mt-1 text-[12px]">
+                <bdi dir="ltr">{result.url_analysis.hostname}</bdi>
+              </p>
+              {result.url_analysis.signals.length > 0 && (
+                <ul className="mt-3 space-y-2 border-t border-line pt-3">
+                  {result.url_analysis.signals.map((signal) => (
+                    <li key={signal} className="flex items-start gap-2.5">
+                      <AlertTriangle
+                        size={16}
+                        strokeWidth={1.75}
+                        aria-hidden="true"
+                        className="mt-0.5 shrink-0 text-red-ink"
+                      />
+                      <span dir="auto" className="t-body flex-1 text-[14px]">
+                        {t(`url.${signal}` as TextKey)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </>
+        )}
+
+        {result.known_threat_match && (
+          <>
+            <p className="t-eyebrow mt-7">{t("verdict.pattern")}</p>
+            <Card className="mt-2.5">
+              <p dir="auto" className="t-row">
+                {lang === "ar"
+                  ? result.known_threat_match.title_ar
+                  : result.known_threat_match.title_en}
+              </p>
+              {result.known_threat_match.matched_signals.length > 0 && (
+                <ul className="mt-2.5 flex flex-wrap gap-1.5">
+                  {result.known_threat_match.matched_signals.map((signal) => (
+                    <li
+                      key={signal}
+                      className="rounded-full bg-paper px-2.5 py-1 text-[12px] font-semibold text-ink-2"
+                    >
+                      <bdi>{signal}</bdi>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {result.known_threat_match.source_name && (
+                <p className="t-sub mt-2.5 border-t border-line pt-2 text-[12px]">
+                  <bdi>{result.known_threat_match.source_name}</bdi>
+                </p>
+              )}
+            </Card>
+          </>
+        )}
+
+        {result.evidence_items && result.evidence_items.length > 0 && (
+          <>
+            <p className="t-eyebrow mt-7">{t("verdict.seen_in_image")}</p>
+            <Card className="mt-2.5">
+              <dl className="divide-y divide-line">
+                {result.evidence_items.map((item, index) => (
+                  <div key={index} className="py-2.5 first:pt-0 last:pb-0">
+                    <dt className="t-meta text-ink-2">{t(`evidence.${item.type}` as TextKey)}</dt>
+                    <dd dir="auto" className="t-body mt-0.5 text-[14px]">
+                      <bdi className="font-semibold">{item.value}</bdi>
+                      {item.why && <span className="text-ink-2"> — {item.why}</span>}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
             </Card>
           </>
         )}
@@ -293,6 +403,7 @@ function Result({
           </>
         )}
 
+        {/* 5. What to do, then the three things you can do about it. */}
         {result.actions.length > 0 && (
           <>
             <p className="t-eyebrow mt-7">{t("res.what_now")}</p>
@@ -309,28 +420,50 @@ function Result({
           </>
         )}
 
-        {result.route_to_shield && (
-          <button
-            type="button"
-            onClick={() => navigate("shield")}
-            className="press mt-7 flex w-full items-center gap-3 rounded-row border border-line bg-card px-4 py-3 text-start"
-          >
-            <ShieldAlert size={20} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-red-ink" />
-            <span className="min-w-0 flex-1">
-              <span className="t-row block">{t("res.shield_tile")}</span>
-              <span className="t-sub mt-0.5 block">{t("res.shield_tile_sub")}</span>
-            </span>
-          </button>
-        )}
-
+        {/* Both actions are always here; which one is the red one follows the
+            verdict. A "looks safe" result asking you to report it in red says
+            danger where the screen has just said there is none. */}
         <div className="mt-8 space-y-2.5">
-          <PrimaryButton onClick={() => onReport({ category: result.category, messageText: input })}>
-            {t("res.report_cta")}
-          </PrimaryButton>
-          <OutlineButton onClick={onAgain}>{t("res.again")}</OutlineButton>
+          {result.report_recommended ? (
+            <>
+              <PrimaryButton onClick={() => onReport({ category: result.category, messageText: input })}>
+                {t("res.report_cta")}
+              </PrimaryButton>
+              <OutlineButton onClick={onAgain}>{t("res.again")}</OutlineButton>
+            </>
+          ) : (
+            <>
+              <PrimaryButton onClick={onAgain}>{t("res.again")}</PrimaryButton>
+              <OutlineButton
+                onClick={() => onReport({ category: result.category, messageText: input })}
+              >
+                {t("res.report_cta")}
+              </OutlineButton>
+            </>
+          )}
+          {result.route_to_shield && (
+            <button
+              type="button"
+              onClick={() => navigate("shield")}
+              className="press flex h-12 w-full items-center justify-center gap-2 rounded-btn border border-red text-[15px] font-bold text-red-ink"
+            >
+              <ShieldAlert size={18} strokeWidth={1.75} aria-hidden="true" />
+              {t("res.shield_tile_sub")}
+            </button>
+          )}
         </div>
 
-        <p className="t-meta mt-5 text-center text-ink-2">{t("verdict.powered")}</p>
+        <p className="t-meta mt-5 text-center text-ink-2">
+          {t("verdict.powered")}
+          {result.latency_ms > 0 && (
+            <>
+              {" · "}
+              <bdi className="tnum">
+                {t("res.footer").replace("{s}", (result.latency_ms / 1000).toFixed(1))}
+              </bdi>
+            </>
+          )}
+        </p>
       </Page>
       <BottomNav active="scan" navigate={navigate} />
     </>

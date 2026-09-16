@@ -32,6 +32,8 @@ function Screens() {
   const clearSeed = useCallback(() => setSeed(null), []);
   /** What a verdict knew about the threat, so Report opens with it filled in. */
   const [prefill, setPrefill] = useState<{ category: Category; messageText: string } | null>(null);
+  /** Set by "Check before you pay", which is the lookup rather than the list. */
+  const [focusLookup, setFocusLookup] = useState(false);
 
   const handOff = useCallback(
     (text: string, run: boolean, type?: AnalysisType, image?: AnalyzeImage | null) => {
@@ -40,6 +42,11 @@ function Screens() {
     },
     [navigate],
   );
+
+  const openLookup = useCallback(() => {
+    setFocusLookup(true);
+    navigate("protect");
+  }, [navigate]);
 
   const openReport = useCallback(
     (next: { category: Category; messageText: string }) => {
@@ -74,6 +81,8 @@ function Screens() {
         <Protect
           navigate={navigate}
           onCheck={(text, type) => handOff(text, true, type)}
+          focusLookup={focusLookup}
+          onLookupFocused={() => setFocusLookup(false)}
         />
       );
     case "learn":
@@ -90,6 +99,7 @@ function Screens() {
       return (
         <Home
           navigate={navigate}
+          onLookup={openLookup}
           onStaged={(text) => handOff(text, false)}
           onSubmit={(text, type, image) => handOff(text, true, type, image)}
         />

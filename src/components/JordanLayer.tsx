@@ -144,7 +144,12 @@ export function JordanLayerRows({ layer }: { layer: Layer }) {
         {rows.map((row) => (
           <li key={row.id} className="flex items-start gap-2.5">
             <Mark tone={row.tone} />
-            <span dir="auto" className="t-body flex-1 text-[14px]">
+            {/* A row we could not check is greyed, so the eye reads the
+                checked facts first and still counts the gaps. */}
+            <span
+              dir="auto"
+              className={`t-body flex-1 text-[14px] ${row.tone === "unknown" ? "text-ink-2" : ""}`}
+            >
               {fill(row.text, row.values)}
             </span>
           </li>

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { BookOpen, ChevronRight, ShieldAlert, ShieldCheck, Wrench } from "lucide-react";
-import type { AnalysisType, AnalyzeImage } from "../../shared/types";
+import { BookOpen, ChevronRight, ClipboardPaste, ShieldCheck, Wallet, Wrench } from "lucide-react";
+import { MAX_INPUT_CHARS, type AnalysisType, type AnalyzeImage } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { DemoTray } from "../components/DemoTray";
 import { Logo } from "../components/Logo";
@@ -9,6 +9,7 @@ import { TypeChips } from "../components/TypeChips";
 import {
   BleedPage,
   Gutter,
+  Card,
   ListCard,
   Pills,
   PrimaryButton,
@@ -17,6 +18,7 @@ import {
 } from "../components/Shell";
 import { useI18n, type TextKey } from "../i18n";
 import { campaignDate, campaigns } from "../lib/campaigns";
+import { readClipboardText } from "../lib/clipboard";
 import { listCases } from "../lib/storage";
 import type { Route } from "../lib/router";
 
@@ -27,19 +29,30 @@ import type { Route } from "../lib/router";
  */
 const STATUS_KEYS: Record<string, TextKey> = { received: "status.received" };
 
+/**
+ * Four tools. "Check before you pay" is the lookup rather than the directory
+ * list, so it opens the same screen with the cursor in the search field — a
+ * different job, not a second door to the same one.
+ */
 const TOOLS = [
-  { route: "protect", title: "ft.home.tool_dir", sub: "ft.home.tool_dir_sub", Icon: ShieldCheck },
-  { route: "learn", title: "ft.home.tool_train", sub: "ft.home.tool_train_sub", Icon: BookOpen },
-  { route: "recover", title: "tool.recover", sub: "tool.recover_sub", Icon: Wrench },
-  { route: "shield", title: "tool.shield", sub: "tool.shield_sub", Icon: ShieldAlert },
-] satisfies { route: Route; title: TextKey; sub: TextKey; Icon: typeof Wrench }[];
+  { action: "protect", title: "ft.home.tool_dir", sub: "ft.home.tool_dir_sub", Icon: ShieldCheck },
+  { action: "lookup", title: "ft.home.tool_pay", sub: "ft.home.tool_pay_sub", Icon: Wallet },
+  { action: "learn", title: "ft.home.tool_train", sub: "ft.home.tool_train_sub", Icon: BookOpen },
+  { action: "recover", title: "tool.recover", sub: "tool.recover_sub", Icon: Wrench },
+] satisfies { action: Route | "lookup"; title: TextKey; sub: TextKey; Icon: typeof Wrench }[];
+
+/** Shorter than this and there is nothing in the clipboard worth checking. */
+const MIN_CLIP = 8;
 
 export function Home({
   navigate,
+  onLookup,
   onStaged,
   onSubmit,
 }: {
   navigate: (route: Route) => void;
+  /** Opens the directory screen with the lookup focused. */
+  onLookup: () => void;
   onStaged: (text: string) => void;
   /** Carries what was pasted or picked into Scan and runs it there. */
   onSubmit: (text: string, type: AnalysisType, image: AnalyzeImage | null) => void;
@@ -49,10 +62,33 @@ export function Home({
   const [type, setType] = useState<AnalysisType>("message");
   const [image, setImage] = useState<AnalyzeImage | null>(null);
   const [errorKey, setErrorKey] = useState<TextKey | null>(null);
+  const [clipNote, setClipNote] = useState<TextKey | null>(null);
+  const [clipBusy, setClipBusy] = useState(false);
   const [trayOpen, setTrayOpen] = useState(false);
   const strip = campaigns(lang).slice(0, 3);
   const latest = listCases()[0];
   const ready = text.trim().length > 0 || image !== null;
+
+  /**
+   * One press: read the clipboard, then check what was in it. The clipboard is
+   * never touched on load, which is what the line under the button says.
+   */
+  async function readClipboard() {
+    setClipNote(null);
+    setClipBusy(true);
+    try {
+      const clip = await readClipboardText();
+      if (!clip || clip.trim().length < MIN_CLIP) {
+        setClipNote("ft.clip.empty");
+        return;
+      }
+      onSubmit(clip.trim().slice(0, MAX_INPUT_CHARS), type, null);
+    } catch {
+      setClipNote("ft.clip.failed");
+    } finally {
+      setClipBusy(false);
+    }
+  }
 
   return (
     <>
@@ -89,6 +125,7 @@ export function Home({
               if (next) setErrorKey(null);
             }}
             onError={setErrorKey}
+            showPaste={false}
             chips={<TypeChips value={type} onChange={setType} />}
             submit={
               <PrimaryButton
@@ -106,15 +143,36 @@ export function Home({
             </p>
           )}
 
+          <Card className="mt-4">
+            <p className="t-row">{t("ft.clip.title")}</p>
+            <p className="mt-1 text-[12px] font-normal leading-snug text-ink-2">
+              {t("ft.clip.line")}
+            </p>
+            <button
+              type="button"
+              onClick={() => void readClipboard()}
+              disabled={clipBusy}
+              className="press mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-btn border border-line bg-paper text-[14px] font-bold text-ink disabled:text-ink-2"
+            >
+              <ClipboardPaste size={16} strokeWidth={1.75} aria-hidden="true" />
+              {t(clipBusy ? "detect.loading" : "ft.clip.cta")}
+            </button>
+            {clipNote && (
+              <p role="status" className="mt-2 text-[12px] font-normal leading-snug text-ink-2">
+                {t(clipNote)}
+              </p>
+            )}
+          </Card>
+
           <h2 className="t-h3 mt-9">{t("ft.home.tools")}</h2>
           <div className="mt-3 grid grid-cols-2 gap-2.5">
-            {TOOLS.map(({ route, title, sub, Icon }) => (
+            {TOOLS.map(({ action, title, sub, Icon }) => (
               <Tile
-                key={route}
+                key={action}
                 Icon={Icon}
                 title={t(title)}
                 sub={t(sub)}
-                onClick={() => navigate(route)}
+                onClick={() => (action === "lookup" ? onLookup() : navigate(action))}
               />
             ))}
           </div>

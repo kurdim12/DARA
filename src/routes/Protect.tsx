@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search } from "lucide-react";
 import type { AnalysisType } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
@@ -43,13 +43,19 @@ const HINT_LABEL: Record<LookupResult["hint"], TextKey> = {
 export function Protect({
   navigate,
   onCheck,
+  focusLookup = false,
+  onLookupFocused,
 }: {
   navigate: (route: Route) => void;
   /** Hands the value to Scan with the right chip already chosen. */
   onCheck: (text: string, type: AnalysisType) => void;
+  /** True when Home's "Check before you pay" opened this screen. */
+  focusLookup?: boolean;
+  onLookupFocused?: () => void;
 }) {
   const { t, lang } = useI18n();
   const [segment, setSegment] = useState<Segment>("directory");
+  const lookupRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
   const [result, setResult] = useState<
@@ -57,6 +63,16 @@ export function Protect({
   >({ state: "idle" });
   // This visit only. Nothing is written to the device and nothing is sent.
   const [ticked, setTicked] = useState<Record<string, boolean>>({});
+
+  // "Check before you pay" is the lookup, not the list, so it opens with the
+  // cursor already there. The intent is consumed once: coming back to this
+  // screen later should land on the directory as normal.
+  useEffect(() => {
+    if (!focusLookup) return;
+    setSegment("directory");
+    lookupRef.current?.focus();
+    onLookupFocused?.();
+  }, [focusLookup, onLookupFocused]);
 
   const items = checklist(lang);
   const done = items.filter((item) => ticked[item.id]).length;
@@ -117,6 +133,7 @@ export function Protect({
                 <div className="mt-2 flex items-center gap-2">
                   <input
                     id="lookup"
+                    ref={lookupRef}
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}

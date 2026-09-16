@@ -26,6 +26,7 @@ export function ScannerCard({
   label,
   chips,
   submit,
+  showPaste = true,
 }: {
   variant: "home" | "scan";
   text: string;
@@ -41,6 +42,12 @@ export function ScannerCard({
   chips?: ReactNode;
   /** Home puts "Analyze now" inside the card too. */
   submit?: ReactNode;
+  /**
+   * Home carries the clipboard on its own consent card, which reads and checks
+   * in one press, so the box there shows only the screenshot control. Two
+   * buttons for one clipboard is the duplication this merge is removing.
+   */
+  showPaste?: boolean;
 }) {
   const { t } = useI18n();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -146,10 +153,12 @@ export function ScannerCard({
 
       {variant === "home" ? (
         <div className="mt-3.5 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[12.5px] font-semibold text-ink-2">
-          <button type="button" onClick={() => void paste()} className="tap flex items-center gap-1.5">
-            <ClipboardPaste size={14} strokeWidth={1.75} aria-hidden="true" />
-            {t("home.paste_clipboard")}
-          </button>
+          {showPaste && (
+            <button type="button" onClick={() => void paste()} className="tap flex items-center gap-1.5">
+              <ClipboardPaste size={14} strokeWidth={1.75} aria-hidden="true" />
+              {t("home.paste_clipboard")}
+            </button>
+          )}
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
@@ -161,12 +170,13 @@ export function ScannerCard({
         </div>
       ) : null}
 
-      {/* The reference build states this above its own paste card. It belongs
-          next to the button it describes, and it is literally true: paste()
-          runs on a press and nowhere else. */}
-      <p className="mt-2.5 text-[12px] font-normal leading-snug text-ink-2">
-        {t("ft.clip.line")}
-      </p>
+      {/* The sentence goes wherever the clipboard button is, and it is
+          literally true: paste() runs on a press and nowhere else. */}
+      {showPaste && (
+        <p className="mt-2.5 text-[12px] font-normal leading-snug text-ink-2">
+          {t("ft.clip.line")}
+        </p>
+      )}
 
       {screenshot}
     </div>
