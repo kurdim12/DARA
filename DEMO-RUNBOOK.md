@@ -1,154 +1,212 @@
 # DEMO-RUNBOOK.md
 
-For Wednesday 16 September 2026, in front of the Crown Prince Award jury.
-Everything here was checked against the built app, not written from memory.
+For the Crown Prince Award jury, Wednesday 16 September 2026.
+Everything below was clicked through on a build of this commit. Where the app
+does not do something, this says so.
 
 ---
 
 ## Before you leave the house
 
-**1. The key.** Open
-`https://dara.abdalrhmankurdi12.workers.dev/api/health`. It must say
-`"key_present": true`. Today it says **false**, and while it does, every check
-returns an error — the rest of the app works, Scan does not. Cloudflare
-dashboard → Workers & Pages → `dara` → Settings → Variables and Secrets → add
-`ANTHROPIC_API_KEY` as a **Secret** → redeploy. Never paste that key into a
-chat or a file.
+**1. The key. Nothing else on this page matters until this is done.**
+Open `https://dara.abdalrhmankurdi12.workers.dev/api/health`. It must say
+`"key_present": true`. **Today it says `false`**, and while it does, every scan
+ends in *تعذّر إكمال الفحص* — the rest of the app works, Scan does not.
 
-**2. Warm the phone.** On good wifi, run all three demo messages once. A staged
-message checked live once leaves its real verdict on that device, so if the
-venue's network is bad the same message still answers — labelled
-**Saved result**, never silently.
+Cloudflare dashboard → Workers & Pages → `dara` → Settings → Variables and
+Secrets → add `ANTHROPIC_API_KEY` as a **Secret** → then push anything, or hit
+**Retry build**, because a secret only reaches the Worker on its next deploy.
+Never paste that key into a chat or a file.
 
-**3. Add it to the home screen.** It opens without a browser bar and shows the
-mark rather than a screenshot of the page.
+**2. Warm the phone.** On good wifi, run the three messages below once each. A
+staged message checked live once leaves its real verdict on that device, so if
+the venue's network is bad the same message still answers — labelled **نتيجة
+محفوظة**, never silently.
+
+**3. Add it to the home screen.** It opens without a browser bar, and the icon
+is the mark rather than a screenshot of the page.
 
 **4. Decide your language.** The app opens in **English**. The staged messages
-are Arabic, so if you are demoing in Arabic, tap **عر** first — the whole app
-flips, including the nav order.
+are Arabic, so if you are presenting in Arabic tap **عر** in the top corner
+first. The whole app flips, including the order of the tab bar.
 
-**5. Know where Scan is.** The bottom bar reads Home · Report · **Scan** ·
-Recover · Shield, and Scan is the raised navy circle in the middle. That circle
-is the one control to reach for if anything goes sideways.
+**5. Know the bar.** Home · Scan · Radar · Report · Help, and **Scan** is the
+raised red circle in the middle. That circle is the one control to reach for if
+anything goes sideways.
 
 ---
 
-## The three messages, in order
+## 1. The first scan — the fake Amman Municipality fine
 
-Long-press the **DARA'** logo on Home for about a second. The staged tray
-opens; tap the message from there — no typing, no autocorrect. The English
-wording below is there if you would rather paste.
-
-**1 — The obvious one. Expect: High risk.**
+Long-press the **mark** on Home for about a second and a half. The rehearsal
+tray opens; tap the message from there, so there is no typing and no
+autocorrect on stage.
 
 > أمانة عمان الكبرى: بذمتك مخالفة مرورية غير مدفوعة بقيمة 45 ديناراً. ادفع خلال 24 ساعة لتجنب مضاعفة الغرامة: http://amanat-amman-pay.com/fine
 
-> Greater Amman Municipality: you have an unpaid traffic fine of 45 JOD. Pay within 24 hours to avoid the amount doubling: http://amanat-amman-pay.com/fine
+*Greater Amman Municipality: you have an unpaid traffic fine of 45 JOD. Pay
+within 24 hours to avoid the amount doubling: http://amanat-amman-pay.com/fine*
 
-Point at the quoted message on the result: the link, the deadline and the
-sender name are underlined in red and numbered to match the reasons beneath.
-**Say that this is a reconstruction of that family, not the real SMS** — the
-real text is still waiting on you (`gam_parking_fine` in the golden set).
+**Say that this is a reconstruction of that family of messages, not a real SMS
+anyone received.** The real text is still waiting on you —
+`gam_parking_fine` in `content/eval-cases.json` is a placeholder.
 
-**2 — The subtle one. Expect: High risk.**
+Expect **احتيال / Scam**, a solid red band.
 
-> معك قسم الاحتيال في البنك. رصدنا حركة مشبوهة على حسابك. رح يوصلك رمز على هاتفك، اقرأه لي حتى نوقف العملية فوراً.
+---
 
-No link at all. The attack is entirely social, and the app still has to name it.
-Tap the **Call** chip first, so the scanner is told what it is looking at.
+## 2. The thing to point at — the Jordan layer
 
-**3 — The control. Expect: Safe.**
+Scroll past the verdict. The screen reads in one order, every time:
 
-> رمز التحقق الخاص بك هو 482913. لا تشارك هذا الرمز مع أي شخص، ولن يطلبه منك موظفو البنك أبداً.
+1. **The message as you received it.** The deadline, the threat and the link
+   are underlined in red where they sit, numbered.
+2. **لماذا** — the same numbers again, one reason each. Follow one with your
+   finger from the underline to its reason. This is the moment.
+3. **الطبقة الأردنية — the Jordan layer.** This is the slide. Read two rows out:
 
-Same subject as message 2, opposite verdict. **Run this one.** It is the answer
-to the question this jury always asks: *does it just say scam to everything?*
+   > الرسالة تدّعي أمانة عمان الكبرى ونطاقها الرسمي ammancity.gov.jo
+
+   > قوائم التهديد: تعذّر التحقق
+
+   The first is a fact checked against this app's directory of official bodies
+   — 55 of them. The second is a check that did not answer, **shown as a row,
+   in grey, rather than left out** — because a missing row would read as a
+   clean bill of health. Then the line under the block:
+
+   > هذه حقائق مُتحقَّق منها لحظياً، وليست حكماً.
+
+4. **الرابط** — the link pulled apart: what it is, which host actually decides
+   where it goes, and why each part is a problem. The link is text. Nothing on
+   this screen is tappable, which is the whole point.
+5. **نمط مشابه رُصد سابقاً** — the documented campaign it resembles, with the
+   name of the source that published the warning underneath.
+6. **ما الذي يحدث هنا؟** — the impersonated body, the threat type, what it asks
+   for, the likely goal, the pressure used.
+
+If a judge asks *how does it know?* — that is rows 3 to 5, and none of them is
+the model. The model reads the message. The layer checks it.
+
+---
+
+## 3. The report, and the sentence to read aloud
+
+From the result, tap **أبلغ عن هذه الرسالة**. The Report tab opens with the
+threat type already chosen.
+
+The report is **always anonymous** — there is no toggle to leave on and no
+contact field, because the app does not ask for one. Pick the channel, leave
+**الجهة المعنية (لمعلوماتك أنت)** where it is, and type two sentences into
+*ماذا حدث؟*. The button stays grey until there are twenty characters.
+
+Submit. The case number comes up large. Then read this out, slowly:
+
+> بلاغك محفوظ في منصة درع (نسخة تجريبية). لم يُرسَل إلى أي جهة. افتح تبويب
+> الحماية لتعرف كيف تصل إلى الجهة المعنية بنفسك.
+
+*Your report is stored on the DARA' platform (pilot). It has not been forwarded
+to any authority. Use the Help tab for how to reach the relevant authority
+yourself.*
+
+That is the answer to the hardest question in the room, and the app says it
+before anyone asks. Do not soften it.
+
+Scroll down the Report tab afterwards: **بلاغات المجتمع** shows four reports,
+each tagged **مثال أضافه الفريق**. Say they are seeded examples. (They are in
+English even in the Arabic build — they are literal rows in a migration.)
+
+---
+
+## 4. Radar
+
+**الرادار** tab. Three numbers across the top, then, immediately under them:
+
+> ثلاثة أرقام منفصلة لا تُجمع: بلاغات وصلت إلى منصة درع، وحملات وثّقها الفريق.
+> ليست إحصاءً وطنياً.
+
+Read that line. It is the difference between a demo and a claim. Every number
+on the screen counts rows in this app's own database — the bar chart covers the
+last eight weeks, with the dates under it, and most of those weeks are empty
+because this is a pilot with a handful of reports in it.
+
+Then the second segment, **الحملات الموثقة**: fifteen real campaigns, each with
+a date and a named source. Open one and point at the source line. That is where
+the Jordan layer's campaign row came from.
+
+---
+
+## 5. Where the trust page would go — and what to show instead
+
+**The transparency page is not built.** The brief calls for it as the closing
+beat; it is not in this build, and you should not describe one. Its copy is
+ported and sitting in the dictionaries, and part of that copy states accuracy
+figures for a classifier this app does not run — which is why it is not on
+screen rather than half-true.
+
+What is on screen, and makes the same point:
+
+- Every help line under **حماية** says **قيد التحقق** and none of them dials.
+  Nobody has checked those numbers against an official source, so the app will
+  not print one. Say this out loud — a jury that has seen apps invent a hotline
+  will notice.
+- The Jordan layer's **تعذّر التحقق** rows, from §2.
+- Radar's *ليست إحصاءً وطنياً*.
+- The report sentence from §3.
+
+Four places where the app says what it does not know. That is the argument.
 
 ---
 
 ## If the venue network is bad
 
 Nothing to do. A staged message you warmed up falls back to its saved verdict
-after 12 seconds and shows **Saved result** next to *Powered by Claude*. Read
-that label out rather than hiding it.
+and shows **نتيجة محفوظة** next to *مدعوم بتقنية Claude*. Read the label out
+rather than hiding it.
 
-A message you did not warm up has no fallback and will show an error. Do not
-improvise a fourth message on stage.
-
----
-
-## The one report to submit live
-
-From the result of message 1, tap **Report this threat** → the Report tab opens.
-Leave **Anonymous Report** on. Pick **Phishing**, leave the authority on
-Cybercrime Unit, and type two sentences into *What happened?* — the button stays
-grey until there are twenty characters.
-
-Submit. The confirmation shows the case number large with a **Copy** button, and
-then the sentence that matters:
-
-> Your report is stored on the DARA' platform (pilot). It has not been forwarded
-> to any authority. Use the Shield tab for how to reach the relevant authority
-> yourself.
-
-Read that sentence out loud. It is the answer to the hardest question in the
-room, and the app says it before anyone asks.
-
-Scroll down on the Report tab afterwards: **Community Reports** shows four
-anonymous reports. Say that they are seeded examples — nothing a visitor submits
-joins that feed.
-
----
-
-## Shield
-
-Shield tab → scroll to **What happened to you?** → **Private photos or videos**
-→ **Get Help Now**. Read step 1 aloud:
-
-> Do not pay anything. Paying does not make it stop, and it tells them you pay.
-
-Two things to point at on the way:
-
-- Every help line says **Number pending verification** and none of them dials.
-  That is deliberate. Nobody has checked those numbers against an official
-  source yet, and the app will not invent one. Say so — it is a strength.
-- **Quick exit** at the top of the steps replaces the page, so Back cannot
-  return to it. Press it once.
+A message you did **not** warm up has no fallback and will show an error. Do
+not improvise a fourth message on stage.
 
 ---
 
 ## If you have another minute
 
-- **Recover** → *I lost money to fraud* — five steps down a numbered spine, the
-  first one red because minutes count: *Stop further payments now*. The last
-  step is the blue button that files the report.
-- **Scan a screenshot**, on Home under the box or as a pill on the Scan screen.
-  Pick a screenshot of a message from the phone's gallery and it is read and
-  checked the same way pasted text is. Have one in the gallery before you go.
-- **Home → Learn** — the six-question quiz. Three of the six are legitimate
-  messages, on purpose.
-- The **moon** button, on any screen. The whole app has a dark theme.
+- **حماية → درع الابتزاز.** Triage first: five situations, no AI anywhere in
+  this flow. **خروج سريع** at the top replaces the page so Back cannot return
+  to it — press it once and show that it works.
+- **حماية → تعافي → حُوِّل مبلغ من حسابي.** Seven steps in order of urgency;
+  the first is *أوقف أي دفعة أخرى الآن*, because minutes count.
+- **الرئيسية → تحقق قبل الدفع.** Opens the directory with the cursor already in
+  the lookup. Type a domain and it says what DARA' can confirm about it — and
+  says plainly when it cannot.
+- **الرئيسية → تدرّب دقيقتين.** Six messages, three of them legitimate on
+  purpose.
+- **افحص لقطة شاشة**, in the box on Home or on the Scan screen. Have a
+  screenshot of a message in the gallery before you go.
+- The **moon** button on any screen. The whole app has a dark theme.
 
 ---
 
 ## The hard rule for the presenter
 
-**Never claim anything the app does not literally do.** Specifically:
+**Never claim anything the app does not literally do.**
 
-- Reports are stored on **DARA'**, a pilot. They are not forwarded to the
-  Cybercrime Unit, the TRA, a bank, or any ministry. The authority list on the
-  Report screen is labelled *for your reference* and that is all it is.
-- It is **HTTPS**, and it asks for no account and no name. It is not "fully
-  encrypted" and it does not "store nothing". If someone turns anonymity off and
-  types a contact, that contact is stored — which is why the toggle exists.
-- **Powered by Claude** is true: the verdict is a real Claude call. A result
-  labelled **Saved result** is a real earlier Claude verdict replayed from the
-  device. Say that when it appears.
-- A report count under a threat card is the real number of reports filed on
-  DARA' for that family. When it says **Known pattern** instead, that means
-  nobody has filed one yet — not that the number is hidden.
-- Anything the app does not show you — an emergency number, the article of the
-  cybercrime law — is withheld on purpose, because nobody has checked it against
-  an official source. If a judge asks, that is the answer, and it is a good one.
+- Reports are stored on **منصة درع**, a pilot. They are not forwarded to the
+  Cybercrime Unit, the TRA, a bank, or any ministry. The authority list is
+  labelled *لمعلوماتك أنت* and that is all it is.
+- It is **HTTPS**, and it asks for no account, no name and no phone number. It
+  is not "fully encrypted" and it does not "store nothing". The text of a
+  message is stored only if you choose to attach it to a report.
+- **مدعوم بتقنية Claude** is true: the verdict is a real Claude call, made on
+  the DARA' server, and the footer states how long it took. A result labelled
+  **نتيجة محفوظة** is a real earlier Claude verdict replayed from the device.
+  Say so when it appears.
+- The fifteen campaigns and the 55 official bodies are real and sourced, and
+  **this team has not re-checked those sources** — both lists came across from
+  the earlier build already marked verified. If a judge asks who checked them,
+  that is the honest answer.
+- Anything the app does not show you — an emergency number, an article of the
+  cybercrime law — is withheld on purpose, because nobody has checked it
+  against an official source. If a judge asks, that is the answer, and it is a
+  good one.
 
 If something fails on stage, say what failed. This jury has seen polished demos.
