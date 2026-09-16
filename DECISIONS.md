@@ -345,3 +345,18 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   leak a number or an extension, and no flag may be true. The last one will
   fail the day Abdelrahman verifies a number — deliberately, so that flip is a
   conscious commit and not a surprise in a diff.
+- **The help-line numbers are not just stale, the published sources disagree.**
+  Family Protection alone has four: 911 (PSD's own service page routes family
+  violence through it and the ammn911 app), 06 580 0500 (Abdelrahman's table),
+  06 581 5826 (secondary directories), and the 110 this file used to carry,
+  which belongs to a charity. Cybercrime has three: 196 with extensions, a
+  direct 06 563 3404, and the v1 number that matches nothing. Picking one would
+  be inventing a fact, so every contact now carries a `candidates` list — each
+  number, how it was described, and where it was seen. A test asserts the
+  number a row ships is one of its own candidates, so nothing can appear from
+  nowhere.
+- **The official pages were added as `links`, because a link cannot go stale the
+  way a cached extension can.** psd.gov.jo is the authority for all three, and
+  checking a link is opening it once. If the numbers stay unresolvable, the
+  honest Shield screen is 911 plus "the directorate's page", not three numbers
+  nobody has confirmed.

@@ -43,3 +43,24 @@ describe("contacts", () => {
     expect(flipped).toEqual([]);
   });
 });
+
+describe("candidates", () => {
+  it("every contact records where its number could have come from", () => {
+    // Abdelrahman said the numbers were out of date and the published sources
+    // turned out to disagree with each other. The file holds all of them so
+    // the disagreement is visible rather than resolved by whoever edited last.
+    for (const row of file.contacts) {
+      const list = (row as { candidates?: unknown[] }).candidates ?? [];
+      expect(list.length, `${row.id} has no candidates recorded`).toBeGreaterThan(0);
+    }
+  });
+
+  it("the number a contact ships is one of its own candidates", () => {
+    for (const row of file.contacts) {
+      const list = ((row as { candidates?: { number: string }[] }).candidates ?? []).map(
+        (c) => c.number,
+      );
+      expect(list, `${row.id} ships a number that is in no source`).toContain(row.number);
+    }
+  });
+});
