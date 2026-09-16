@@ -1,7 +1,7 @@
 import campaignsFile from "../../content/campaigns.json";
 import entitiesFile from "../../content/entities.json";
 import factsFile from "../../content/lookup-facts.json";
-import { registrableName } from "../engine/url";
+import { extractUrls, registrableName } from "../engine/url";
 
 /**
  * "Is this domain, number or alias one I should trust?"
@@ -197,4 +197,36 @@ export async function lookup(db: D1Database, rawQuery: string): Promise<LookupRe
   }
 
   return { query, kind: "unknown", hint: "unknown", jordan_layer: {} };
+}
+
+/**
+ * The Jordan layer for a message, rather than for a value somebody typed.
+ *
+ * Takes the first host in the text, or failing that the first thing long
+ * enough to be a phone number, and answers the same questions the lookup does.
+ * A message with neither gets no layer at all — better an absent block than
+ * one padded with rows that say nothing.
+ */
+export async function layerForText(
+  db: D1Database,
+  text: string,
+): Promise<{ subject: string; kind: LookupKind; layer: JordanLayer } | null> {
+  const [url] = extractUrls(text);
+  if (url) {
+    const result = await lookup(db, url);
+    if (result.kind === "domain") {
+      return { subject: result.query, kind: result.kind, layer: result.jordan_layer };
+    }
+  }
+
+  const number = /(?:\+?\d[\d\s-]{7,17}\d)/.exec(text)?.[0];
+  if (number) {
+    const digits = number.replace(/[\s-]/g, "").replace(/^\+/, "");
+    if (/^\d{8,}$/.test(digits)) {
+      const result = await lookup(db, digits);
+      return { subject: result.query, kind: result.kind, layer: result.jordan_layer };
+    }
+  }
+
+  return null;
 }

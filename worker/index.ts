@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { radar } from "./routes/radar";
-import { lookup } from "./routes/lookup";
+import { layerForText, lookup } from "./routes/lookup";
 import {
   ALLOWED_IMAGE_TYPES,
   ANALYSIS_TYPES,
@@ -246,6 +246,24 @@ app.post("/api/analyze", async (c) => {
     };
 
     if (result.extracted_text) response.extracted_text = result.extracted_text;
+
+    // The Jordan layer: facts about the domain or the number inside the
+    // message, checked against the verified directory, the documented
+    // campaigns and D1. It never blocks the verdict — if this fails the
+    // screen simply has one block fewer.
+    try {
+      const subject = result.extracted_text ?? text;
+      const found = subject ? await layerForText(c.env.DB, subject) : null;
+      if (found) {
+        response.jordan_layer = {
+          subject: found.subject,
+          kind: found.kind,
+          layer: found.layer as unknown as Record<string, unknown>,
+        };
+      }
+    } catch (error) {
+      console.error("jordan layer failed:", (error as Error).message);
+    }
     if (result.evidence_items.length > 0) response.evidence_items = result.evidence_items;
     if (urlFacts) {
       response.url_analysis = {

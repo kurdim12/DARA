@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Briefcase, Check, Globe, Link2, MessageSquare, Phone } from "lucide-react";
+import { Briefcase, Check, Globe, Link2, MessageSquare, Phone, ShieldAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type {
   AnalysisType,
@@ -11,6 +11,7 @@ import { BottomNav } from "../components/BottomNav";
 import { HighlightedMessage } from "../components/HighlightedMessage";
 import { ScannerCard } from "../components/ScannerCard";
 import { TypeChips, TYPE_META } from "../components/TypeChips";
+import { JordanLayerRows } from "../components/JordanLayer";
 import {
   Bleed,
   Card,
@@ -21,7 +22,7 @@ import {
   SectionLabel,
 } from "../components/Shell";
 import { analyze, AppError } from "../lib/api";
-import { LEVEL_FILL, LEVEL_LABEL, levelFor } from "../lib/level";
+import { LEVEL_FILL, LEVEL_LABEL, VERDICT_WORD, levelFor } from "../lib/level";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
@@ -193,42 +194,58 @@ function Result({
   const { t } = useI18n();
   const level = levelFor(result);
   const fill = LEVEL_FILL[level];
+  const facts: { key: TextKey; value: string }[] = [];
+  if (result.impersonated_entity)
+    facts.push({ key: "verdict.impersonated", value: result.impersonated_entity });
+  if (result.category !== "none")
+    facts.push({ key: "verdict.threat_type", value: t(`category.${result.category}` as TextKey) });
+  if (result.requested_action)
+    facts.push({ key: "verdict.requested", value: result.requested_action });
+  if (result.attack_goal !== "none")
+    facts.push({ key: "verdict.goal", value: t(`goal.${result.attack_goal}` as TextKey) });
+  if (result.pressure_methods.length > 0)
+    facts.push({
+      key: "verdict.pressure",
+      value: result.pressure_methods.map((m) => t(`pressure.${m}` as TextKey)).join(" · "),
+    });
 
   return (
     <>
       <Page>
-        <Header title={t("scan.title")} />
+        <Header title={t("res.title")} />
 
-        {/* The one memorable moment: the verdict, in one colour, edge to edge,
-            with the red flags underlined inside the message the person
-            actually received. Everything below it is quiet on purpose. */}
+        {/* The verdict leads with the word — scam, suspicious, no signs found —
+            and the finer level sits under it. The red flags are underlined
+            inside the message the person actually received, which is the one
+            thing on this screen a jury follows with their eyes. */}
         <Bleed>
           <div className={`reveal relative px-5 py-7 ${fill.bg} ${fill.text}`}>
             {result.cached && (
               <span className="absolute end-4 top-4 rounded-full bg-white/25 px-2.5 py-1 text-[12px] font-bold">
-                {t("result.saved")}
+                {t("res.saved")}
               </span>
             )}
-            <p className="text-[34px] font-extrabold leading-[1.05] tracking-[-1px]">
-              {t(LEVEL_LABEL[level])}
+            <p className="t-verdict">{t(VERDICT_WORD[level])}</p>
+            <p className="t-meta mt-1.5 opacity-80">
+              {t("res.risk_level")}: {t(LEVEL_LABEL[level])}
             </p>
-            <p dir="auto" className="mt-2.5 text-[15px] font-medium leading-[1.45]">
+            <p dir="auto" className="mt-3 text-[15px] font-medium leading-[1.45]">
               {result.headline}
             </p>
           </div>
         </Bleed>
 
-        <p className="t-eyebrow mt-6">{t("result.input")}</p>
+        <p className="t-eyebrow mt-6">
+          {result.input_kind === "image" ? t("res.from_image") : t("res.message")}
+        </p>
         <div className="mt-2.5">
           <HighlightedMessage text={input} flags={result.red_flags} />
         </div>
 
         {result.red_flags.length > 0 && (
           <>
-            <p className="t-eyebrow mt-7">{t("result.why")}</p>
-            {/* Numbered to match the superscripts in the message above. That
-                pairing is the explanation — the same warning icon three times
-                over says nothing about which mark it belongs to. */}
+            <p className="t-eyebrow mt-7">{t("res.why")}</p>
+            {/* Numbered to match the superscripts in the message above. */}
             <ol className="mt-3 space-y-3.5">
               {result.red_flags.map((flag, index) => (
                 <li key={index} className="flex items-start gap-3">
@@ -244,18 +261,45 @@ function Result({
           </>
         )}
 
+        {result.jordan_layer && (
+          <>
+            <p className="t-eyebrow mt-7">{t("jl.title")}</p>
+            <Card className="mt-2.5">
+              <bdi dir="ltr" className="block break-all text-[13px] font-semibold text-ink-2">
+                {result.jordan_layer.subject}
+              </bdi>
+              <div className="mt-2.5">
+                <JordanLayerRows layer={result.jordan_layer.layer} />
+              </div>
+            </Card>
+          </>
+        )}
+
+        {facts.length > 0 && (
+          <>
+            <p className="t-eyebrow mt-7">{t("verdict.whats_happening")}</p>
+            <Card className="mt-2.5">
+              <dl className="divide-y divide-line">
+                {facts.map((row) => (
+                  <div key={row.key} className="flex flex-wrap gap-x-3 gap-y-0.5 py-2 first:pt-0 last:pb-0">
+                    <dt className="t-meta min-w-[104px] text-ink-2">{t(row.key)}</dt>
+                    <dd dir="auto" className="t-body min-w-0 flex-1 text-[14px]">
+                      {row.value}
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </Card>
+          </>
+        )}
+
         {result.actions.length > 0 && (
           <>
-            <p className="t-eyebrow mt-7">{t("result.what_now")}</p>
+            <p className="t-eyebrow mt-7">{t("res.what_now")}</p>
             <ul className="mt-3 space-y-3.5">
               {result.actions.map((action, index) => (
                 <li key={index} className="flex items-start gap-3">
-                  <Check
-                    size={18}
-                    strokeWidth={1.75}
-                    aria-hidden="true"
-                    className="mt-0.5 shrink-0 text-ink"
-                  />
+                  <Check size={18} strokeWidth={1.75} aria-hidden="true" className="mt-0.5 shrink-0 text-ink" />
                   <span dir="auto" className="t-body flex-1">
                     {action}
                   </span>
@@ -265,18 +309,28 @@ function Result({
           </>
         )}
 
-        <div className="mt-8 space-y-2.5">
-          <PrimaryButton
-            onClick={() => onReport({ category: result.category, messageText: input })}
+        {result.route_to_shield && (
+          <button
+            type="button"
+            onClick={() => navigate("shield")}
+            className="press mt-7 flex w-full items-center gap-3 rounded-row border border-line bg-card px-4 py-3 text-start"
           >
-            {t("result.report_cta")}
+            <ShieldAlert size={20} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-red-ink" />
+            <span className="min-w-0 flex-1">
+              <span className="t-row block">{t("res.shield_tile")}</span>
+              <span className="t-sub mt-0.5 block">{t("res.shield_tile_sub")}</span>
+            </span>
+          </button>
+        )}
+
+        <div className="mt-8 space-y-2.5">
+          <PrimaryButton onClick={() => onReport({ category: result.category, messageText: input })}>
+            {t("res.report_cta")}
           </PrimaryButton>
-          <OutlineButton onClick={onAgain}>{t("result.scan_another")}</OutlineButton>
+          <OutlineButton onClick={onAgain}>{t("res.again")}</OutlineButton>
         </div>
 
-        <p className="mt-5 text-center text-[12px] font-semibold text-ink-2">
-          {t("result.powered")}
-        </p>
+        <p className="t-meta mt-5 text-center text-ink-2">{t("verdict.powered")}</p>
       </Page>
       <BottomNav active="scan" navigate={navigate} />
     </>

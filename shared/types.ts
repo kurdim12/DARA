@@ -188,6 +188,12 @@ export interface AnalyzeResponse {
   evidence_items?: EvidenceItem[];
   url_analysis?: UrlAnalysis;
   known_threat_match?: KnownThreatMatch;
+  /** Facts about the domain or number inside the message. See worker/routes/lookup.ts. */
+  jordan_layer?: {
+    subject: string;
+    kind: "domain" | "number" | "alias" | "unknown";
+    layer: Record<string, unknown>;
+  };
   input_kind: "text" | "image";
   model: string;
   latency_ms: number;

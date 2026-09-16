@@ -19,6 +19,19 @@ export function levelFor(result: Pick<AnalyzeResponse, "verdict" | "confidence">
   return result.confidence >= SAFE_CONFIDENCE ? "safe" : "low";
 }
 
+/**
+ * The word the verdict card leads with. Three verdicts, not four levels: the
+ * brief maps medium and low both onto "suspicious", because a person reading
+ * this needs to know whether to act, not which of two middles they are in.
+ * The level word sits underneath as the finer grain.
+ */
+export const VERDICT_WORD: Record<Level, TextKey> = {
+  high: "verdict.scam",
+  medium: "verdict.suspicious",
+  low: "verdict.suspicious",
+  safe: "verdict.likely_safe",
+};
+
 export const LEVEL_LABEL: Record<Level, TextKey> = {
   high: "level.high",
   medium: "level.medium",

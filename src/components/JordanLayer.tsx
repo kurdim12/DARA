@@ -164,7 +164,7 @@ function fill(text: string, values: { text: string; code?: boolean }[]) {
     const value = values[Number(match[1])];
     if (!value) return null;
     return value.code ? (
-      <bdi key={index} dir="ltr" className="break-all font-semibold">
+      <bdi key={index} dir="ltr" className="font-semibold [overflow-wrap:anywhere]">
         {value.text}
       </bdi>
     ) : (
