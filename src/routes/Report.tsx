@@ -39,7 +39,7 @@ import {
   Toggle,
 } from "../components/Shell";
 import { sendReport } from "../lib/api";
-import { isTestMode, rememberCase } from "../lib/storage";
+import { isTestMode, listCases, rememberCase } from "../lib/storage";
 import { officialLink } from "../lib/verified";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
@@ -306,6 +306,12 @@ export function Report({
         </p>
 
         <div className="mt-7">
+          <SectionHeading>{t("reports.title")}</SectionHeading>
+          <p className="t-sub mt-1">{t("reports.subtitle")}</p>
+        </div>
+        <MyReports navigate={navigate} />
+
+        <div className="mt-7">
           <SectionHeading>{t("report.community")}</SectionHeading>
           <p className="t-sub mt-1">{t("report.community_sub")}</p>
         </div>
@@ -500,5 +506,51 @@ function CommunityFeed() {
         </div>
       ))}
     </ListCard>
+  );
+}
+
+/**
+ * Every case number this device has sent, newest first. The tab is called
+ * بلاغاتي, so it has to contain more than a blank form.
+ *
+ * Nothing is fetched. The status shown is what the API said when the report
+ * went in, and the line underneath says the numbers live here and nowhere
+ * else — which is true: `rememberCase` writes to localStorage and the Worker
+ * keeps no link between a device and a row.
+ */
+function MyReports({ navigate }: { navigate: (route: Route) => void }) {
+  const { t } = useI18n();
+  const cases = listCases();
+
+  if (cases.length === 0) {
+    return (
+      <Card className="mt-3">
+        <p className="t-row">{t("reports.empty_title")}</p>
+        <p className="t-sub mt-1">{t("reports.empty_sub")}</p>
+        <button
+          type="button"
+          onClick={() => navigate("scan")}
+          className="press mt-3 flex h-11 w-full items-center justify-center rounded-btn border border-line bg-paper text-[14px] font-bold text-ink"
+        >
+          {t("reports.empty_cta")}
+        </button>
+      </Card>
+    );
+  }
+
+  return (
+    <>
+      <ListCard className="mt-3">
+        {cases.map((entry) => (
+          <div key={entry.case_number} className="flex items-center gap-3 px-4 py-3.5">
+            <span className="min-w-0 flex-1">
+              <bdi className="tnum block text-[16px] font-extrabold">{entry.case_number}</bdi>
+              <span className="t-sub mt-0.5 block">{t("status.received")}</span>
+            </span>
+          </div>
+        ))}
+      </ListCard>
+      <p className="t-sub mt-2 text-[12px]">{t("reports.privacy")}</p>
+    </>
   );
 }
