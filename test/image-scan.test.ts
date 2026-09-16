@@ -18,11 +18,26 @@ describe("the screenshot path", () => {
     expect(ENGINE_IMAGE_TIMEOUT_MS).toBeGreaterThan(ENGINE_TIMEOUT_MS);
   });
 
-  it("keeps the image wall clear of the measured worst case", () => {
-    // 13,400ms was the slowest of six live scans. A wall under that would cut
-    // off scans that work — which is why the brief's proposed 12s was not
-    // applied. See docs/image-scan/REPRO.md.
-    expect(ENGINE_IMAGE_TIMEOUT_MS).toBeGreaterThan(13_400);
+  it("keeps the screenshot wall clear of the measured worst case", () => {
+    // The old measurement — 13,400ms — was one call that read the image AND
+    // judged it. The engine now only judges text, so the wall is 15s rather
+    // than 25s, still above anything observed for the judging half alone.
+    expect(ENGINE_IMAGE_TIMEOUT_MS).toBeGreaterThanOrEqual(15_000);
+  });
+
+  it("applies the longer wall to transcribed text, not to an attached image", () => {
+    // The regression this pins: the wall used to test `args.image`, which is
+    // never set now that OCR reads the picture. Every screenshot silently got
+    // the 10s text wall and 8 of 20 comparison runs timed out.
+    const engine = read("worker/engine/analyze.ts");
+    expect(engine).toMatch(/args\.image \|\| args\.fromScreenshot \? ENGINE_IMAGE_TIMEOUT_MS/);
+  });
+
+  it("fits OCR and the verdict inside the client's ceiling", () => {
+    const worker = read("worker/index.ts");
+    const ocr = Number(worker.match(/const OCR_WALL_MS = ([\d_]+);/)?.[1].replace(/_/g, ""));
+    const ceiling = Number(api.match(/const IMAGE_CEILING_MS = ([\d_]+);/)?.[1].replace(/_/g, ""));
+    expect(ocr + ENGINE_IMAGE_TIMEOUT_MS).toBeLessThan(ceiling);
   });
 
   it("aborts a screenshot request that never answers", () => {

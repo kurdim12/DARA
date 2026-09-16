@@ -35,10 +35,13 @@ import { caseNumberFor, idFromCaseNumber } from "./lib/reports";
 import { chainFor, OcrFailed, ocrReady, transcribe, type Transcript } from "./ocr";
 
 /**
- * The whole OCR step, both providers. Two 8s attempts plus overhead, kept
- * clear of the 25s image wall so the engine still has room to answer.
+ * The whole OCR step, both providers: two 8s attempts.
+ *
+ * Budget for a screenshot scan, worst case: 16s here + 15s for the verdict =
+ * 31s, under the client's 38s ceiling. Observed is far cheaper — OCR ran
+ * 1.0-3.4s across ten fixtures — but the ceiling has to cover the bad day.
  */
-const OCR_WALL_MS = 18_000;
+const OCR_WALL_MS = 16_000;
 
 export interface Env {
   DB: D1Database;

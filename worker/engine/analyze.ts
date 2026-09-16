@@ -5,7 +5,20 @@ import { postValidate, type PostValidated } from "./postvalidate";
 import { REPORT_VERDICT_TOOL, type RawVerdict } from "./tool";
 
 export const ENGINE_TIMEOUT_MS = 10_000;
-export const ENGINE_IMAGE_TIMEOUT_MS = 25_000;
+/**
+ * The wall for a screenshot scan's verdict.
+ *
+ * Keyed off "this came from a screenshot", NOT off "an image is attached" —
+ * the OCR step reads the image now, so the engine never sees one and the old
+ * test was silently false for every screenshot. That dropped the wall from
+ * 25s to 10s and killed 8 of 20 runs in the first comparison.
+ *
+ * 15s rather than the old 25s because the engine's work got smaller: it
+ * judges text instead of reading a picture first. The budget has to hold
+ * OCR (16s worst case, 1.0-3.4s observed) plus this, under the client's
+ * ceiling.
+ */
+export const ENGINE_IMAGE_TIMEOUT_MS = 15_000;
 // BUILD.md specifies 800. A full Arabic verdict — four quotes, four reasons and
 // three actions — lands close enough to that ceiling that a long message can
 // truncate the tool call, and output is billed on tokens produced, so the
@@ -242,7 +255,11 @@ async function runOne(args: AnalyzeArgs, budgetMs: number): Promise<AnalyzeResul
  * visible in the eval rather than silent.
  */
 export async function runEngine(args: AnalyzeArgs): Promise<AnalyzeResult> {
-  const wall = args.image ? ENGINE_IMAGE_TIMEOUT_MS : ENGINE_TIMEOUT_MS;
+  // A transcribed screenshot is longer and messier than a typed message, and
+  // it is the case that already spent time in OCR. `args.image` is never set
+  // any more; leaving the test on it is what broke this.
+  const wall =
+    args.image || args.fromScreenshot ? ENGINE_IMAGE_TIMEOUT_MS : ENGINE_TIMEOUT_MS;
   const chain = [args.model, ...(args.fallbacks ?? [])].filter(
     (model, index, all) => model && all.indexOf(model) === index,
   );

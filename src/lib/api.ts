@@ -18,10 +18,11 @@ const SLOW_MS = 12_000;
  *
  * Deliberately longer than the Worker's own image wall so the Worker's
  * reasoned error wins the race and this only fires when nothing answers.
- * Six live screenshots measured 7.9s-13.4s end to end on a datacentre
- * connection, so anything near 12s here would cut off scans that work.
+ * A screenshot scan is now two calls: OCR (16s worst case) then the verdict
+ * (15s). This sits above their sum so the Worker's reasoned error always
+ * wins the race and this only fires when nothing answers at all.
  */
-const IMAGE_CEILING_MS = 30_000;
+const IMAGE_CEILING_MS = 38_000;
 
 export class AppError extends Error {
   constructor(readonly key: TextKey) {
