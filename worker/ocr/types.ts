@@ -17,6 +17,8 @@ export interface Transcript {
   /** Which provider answered — so a fallback is visible, never silent. */
   provider: OcrProviderName;
   ms: number;
+  /** What the call consumed, when the gateway reports it. */
+  usage?: { input_tokens: number; output_tokens: number };
 }
 
 export type OcrProviderName = "openrouter-gemma4" | "anthropic-haiku";
@@ -29,10 +31,15 @@ export interface OcrArgs {
   signal?: AbortSignal;
 }
 
+export interface OcrResult {
+  text: string;
+  usage?: { input_tokens: number; output_tokens: number };
+}
+
 export interface OcrProvider {
   name: OcrProviderName;
   model: string;
-  transcribe(args: OcrArgs): Promise<string>;
+  transcribe(args: OcrArgs): Promise<OcrResult>;
 }
 
 /** Retryable on the next provider: the chain moves on. */

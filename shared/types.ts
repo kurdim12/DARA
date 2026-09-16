@@ -191,7 +191,12 @@ export interface AnalyzeResponse {
    * screenshot. A fallback is visible here rather than silent — but the UI
    * names no vendor, so this is for the eval and the comparison table.
    */
-  ocr?: { provider: string; lang: Lang; ms: number };
+  ocr?: {
+    provider: string;
+    lang: Lang;
+    ms: number;
+    usage?: { input_tokens: number; output_tokens: number };
+  };
   /** Tokens the call consumed. No vendor name, just the counts. */
   usage?: { input_tokens: number; output_tokens: number };
   evidence_items?: EvidenceItem[];

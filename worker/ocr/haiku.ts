@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { OCR_TIMEOUT_MS, OcrRetryable, TRANSCRIBE_PROMPT, type OcrArgs, type OcrProvider } from "./types";
+import { OCR_TIMEOUT_MS, OcrRetryable, TRANSCRIBE_PROMPT, type OcrArgs, type OcrProvider, type OcrResult } from "./types";
 
 /**
  * The fallback, reached through the same gateway and the same key.
@@ -13,7 +13,7 @@ export const MODEL = "anthropic/claude-haiku-4.5";
 export const haiku: OcrProvider = {
   name: "anthropic-haiku",
   model: MODEL,
-  async transcribe({ image, apiKey, signal }: OcrArgs): Promise<string> {
+  async transcribe({ image, apiKey, signal }: OcrArgs): Promise<OcrResult> {
     const client = new Anthropic({
       apiKey,
       baseURL: "https://openrouter.ai/api",
@@ -68,6 +68,12 @@ export const haiku: OcrProvider = {
       .join("\n")
       .trim();
     if (!text) throw new OcrRetryable("haiku returned no text");
-    return text;
+    return {
+      text,
+      usage: {
+        input_tokens: message.usage?.input_tokens ?? 0,
+        output_tokens: message.usage?.output_tokens ?? 0,
+      },
+    };
   },
 };

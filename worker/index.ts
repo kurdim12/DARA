@@ -32,7 +32,7 @@ import { governmentImpersonationSignal, inspectText, type UrlSignalCode } from "
 import { matchVerifiedPattern, patternById } from "./engine/match";
 import { allowRequest, type RateLimitBinding } from "./lib/ratelimit";
 import { caseNumberFor, idFromCaseNumber } from "./lib/reports";
-import { OcrFailed, ocrReady, transcribe, type Transcript } from "./ocr";
+import { chainFor, OcrFailed, ocrReady, transcribe, type Transcript } from "./ocr";
 
 /**
  * The whole OCR step, both providers. Two 8s attempts plus overhead, kept
@@ -63,6 +63,12 @@ export interface Env {
    * is https://openrouter.ai/api. Unset means straight to Anthropic.
    */
   ANTHROPIC_BASE_URL?: string;
+  /**
+   * Comma-separated OCR provider names the X-DARA-OCR header may pin, so the
+   * comparison table can measure one provider at a time against one
+   * deployment. Nothing outside this list can be requested.
+   */
+  OCR_PROVIDERS?: string;
   ENGINE_THINKING?: string;
   APP_ENV?: string;
   ANALYZE_LIMITER?: RateLimitBinding;
@@ -248,12 +254,17 @@ app.post("/api/analyze", async (c) => {
   let transcript: Transcript | null = null;
   if (image) {
     try {
-      transcript = await transcribe({
-        image,
-        apiKey,
-        referer: new URL(c.req.url).origin,
-        signal: AbortSignal.timeout(OCR_WALL_MS),
-      });
+      transcript = await transcribe(
+        {
+          image,
+          apiKey,
+          referer: new URL(c.req.url).origin,
+          signal: AbortSignal.timeout(OCR_WALL_MS),
+        },
+        // Pinned only for the comparison table, and only to a name the
+        // deployment's own allowlist permits. Unset means the chain.
+        chainFor(c.req.header("X-DARA-OCR"), c.env.OCR_PROVIDERS),
+      );
     } catch (error) {
       // Never a verdict on an image nobody could read.
       if (error instanceof OcrFailed) return c.json({ error: "ocr_failed" }, 422);
@@ -336,6 +347,7 @@ app.post("/api/analyze", async (c) => {
         provider: transcript.provider,
         lang: transcript.lang,
         ms: transcript.ms,
+        usage: transcript.usage,
       };
     }
 

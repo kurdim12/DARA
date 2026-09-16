@@ -52,6 +52,9 @@
     // ten seconds and a timeout has already spent it. Two different vendors on
     // purpose, so one vendor having a bad morning is not the demo's problem.
     "ANTHROPIC_MODEL_FALLBACKS": "anthropic/claude-opus-5,openai/gpt-5.4",
+    // Which OCR providers the X-DARA-OCR header may pin, for the comparison
+    // table only. Production always runs the chain: gemma, then haiku.
+    "OCR_PROVIDERS": "openrouter-gemma4,anthropic-haiku",
     "ENGINE_THINKING": "disabled",
     "APP_ENV": "production"
   },

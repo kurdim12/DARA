@@ -1,4 +1,4 @@
-import { OCR_TIMEOUT_MS, OcrRetryable, TRANSCRIBE_PROMPT, type OcrArgs, type OcrProvider } from "./types";
+import { OCR_TIMEOUT_MS, OcrRetryable, TRANSCRIBE_PROMPT, type OcrArgs, type OcrProvider, type OcrResult } from "./types";
 
 /**
  * Gemma 4 31B on OpenRouter, spoken in the OpenAI chat shape.
@@ -17,7 +17,7 @@ const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 export const gemma: OcrProvider = {
   name: "openrouter-gemma4",
   model: MODEL,
-  async transcribe({ image, apiKey, referer, signal }: OcrArgs): Promise<string> {
+  async transcribe({ image, apiKey, referer, signal }: OcrArgs): Promise<OcrResult> {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), OCR_TIMEOUT_MS);
     // The caller's own abort has to reach this request too.
@@ -72,12 +72,19 @@ export const gemma: OcrProvider = {
 
     const body = (await res.json()) as {
       choices?: { message?: { content?: unknown } }[];
+      usage?: { prompt_tokens?: number; completion_tokens?: number };
     };
     const content = body.choices?.[0]?.message?.content;
     const text = typeof content === "string" ? content.trim() : "";
     // Empty is a failure, not an empty screenshot: an unreadable image must
     // never become a verdict.
     if (!text) throw new OcrRetryable("gemma returned no text");
-    return text;
+    return {
+      text,
+      usage: {
+        input_tokens: body.usage?.prompt_tokens ?? 0,
+        output_tokens: body.usage?.completion_tokens ?? 0,
+      },
+    };
   },
 };

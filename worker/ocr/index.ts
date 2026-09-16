@@ -28,12 +28,13 @@ export async function transcribe(args: OcrArgs, chain: OcrProvider[] = OCR_CHAIN
   for (const provider of chain) {
     const startedAt = Date.now();
     try {
-      const text = await provider.transcribe(args);
+      const { text, usage } = await provider.transcribe(args);
       return {
         text,
         lang: detectLang(text),
         provider: provider.name,
         ms: Date.now() - startedAt,
+        usage,
       };
     } catch (error) {
       if (error instanceof OcrRetryable) {
@@ -51,4 +52,24 @@ export async function transcribe(args: OcrArgs, chain: OcrProvider[] = OCR_CHAIN
 /** Both providers reach the same gateway, so one key readies both. */
 export function ocrReady(apiKey: string | undefined): boolean {
   return Boolean(apiKey);
+}
+
+/**
+ * Pin the chain to one provider, for the comparison table only.
+ *
+ * Same shape as the engine's X-DARA-Model: the caller may name a provider,
+ * and only a name on the configured allowlist is honoured. Unset allowlist
+ * means nothing can be pinned, so production is the chain and only the chain.
+ */
+export function chainFor(requested: string | undefined, allowed: string | undefined): OcrProvider[] {
+  if (!requested) return OCR_CHAIN;
+  const permitted = (allowed ?? "")
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+  if (!permitted.includes(requested)) return OCR_CHAIN;
+  const only = OCR_CHAIN.find((provider) => provider.name === requested);
+  // Pinned means pinned: no fallback, or the table would measure the chain
+  // instead of the provider.
+  return only ? [only] : OCR_CHAIN;
 }

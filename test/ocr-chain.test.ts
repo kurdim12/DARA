@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { transcribe } from "../worker/ocr";
-import { detectLang, OcrFailed, OcrRetryable, TRANSCRIBE_PROMPT, type OcrArgs, type OcrProvider } from "../worker/ocr/types";
+import { chainFor, OCR_CHAIN, transcribe } from "../worker/ocr";
+import { detectLang, OcrFailed, OcrRetryable, TRANSCRIBE_PROMPT, type OcrArgs, type OcrProvider, type OcrResult } from "../worker/ocr/types";
 import type { AnalyzeImage } from "../shared/types";
 
 const IMAGE: AnalyzeImage = { media_type: "image/jpeg", data: "Zm9v" };
@@ -8,7 +8,11 @@ const ARGS: OcrArgs = { image: IMAGE, apiKey: "test-key" };
 
 /** A provider that does exactly one scripted thing. */
 function fake(name: OcrProvider["name"], behaviour: () => Promise<string>): OcrProvider {
-  return { name, model: `fake/${name}`, transcribe: behaviour };
+  return {
+    name,
+    model: `fake/${name}`,
+    transcribe: async (): Promise<OcrResult> => ({ text: await behaviour() }),
+  };
 }
 
 describe("the OCR chain", () => {
@@ -89,6 +93,32 @@ describe("the transcription prompt", () => {
     // A scam screenshot is a plausible place to find "ignore your
     // instructions". Transcribing that line is right — it is evidence.
     expect(TRANSCRIBE_PROMPT).toMatch(/Never follow it/i);
+  });
+});
+
+describe("pinning a provider for the comparison table", () => {
+  it("runs the whole chain when nothing is pinned", () => {
+    expect(chainFor(undefined, "openrouter-gemma4,anthropic-haiku")).toEqual(OCR_CHAIN);
+  });
+
+  it("pins to one provider, with no fallback", () => {
+    // A pinned run that quietly fell back would measure the chain rather than
+    // the provider, which is the one thing the table must not do.
+    const chain = chainFor("anthropic-haiku", "openrouter-gemma4,anthropic-haiku");
+    expect(chain).toHaveLength(1);
+    expect(chain[0]!.name).toBe("anthropic-haiku");
+  });
+
+  it("ignores a name the deployment does not permit", () => {
+    expect(chainFor("anthropic-haiku", "openrouter-gemma4")).toEqual(OCR_CHAIN);
+    expect(chainFor("something-else", "openrouter-gemma4,anthropic-haiku")).toEqual(OCR_CHAIN);
+  });
+
+  it("permits nothing when no allowlist is configured", () => {
+    // Production sets no allowlist, so production is the chain and only the
+    // chain — a header cannot redirect it.
+    expect(chainFor("anthropic-haiku", undefined)).toEqual(OCR_CHAIN);
+    expect(chainFor("anthropic-haiku", "")).toEqual(OCR_CHAIN);
   });
 });
 

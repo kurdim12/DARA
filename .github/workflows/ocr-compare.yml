@@ -1,0 +1,36 @@
+# Both OCR providers, the same ten screenshots, one deployment.
+#
+# Goes through /api/analyze with X-DARA-OCR rather than calling the gateway
+# directly, so this needs no key of its own and the numbers describe the app
+# as it actually runs. Twenty scans, so it costs real money — dispatch only.
+name: ocr-compare
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The deployed URL to measure
+        default: https://dara.abdalrhmankurdi12.workers.dev
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run both providers over every fixture
+        env:
+          TARGET: ${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}
+        run: |
+          echo "=== health ==="
+          curl -sS --max-time 20 "$TARGET/api/health"; echo; echo
+          python3 scripts/ocr-compare.py "$TARGET" docs/image-scan/fixtures > /tmp/rows.json
+          echo
+          echo "=== table ==="
+          python3 scripts/ocr-table.py /tmp/rows.json | tee "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ocr-rows
+          path: /tmp/rows.json
