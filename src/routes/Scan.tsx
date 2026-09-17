@@ -69,7 +69,7 @@ export function Scan({
   seed: Seed | null;
   onSeedUsed: () => void;
   /** Opens Report with the verdict's own category already chosen. */
-  onReport: (prefill: { category: Category; messageText: string }) => void;
+  onReport: (prefill: { category: Category; messageText: string; entity?: string }) => void;
 }) {
   const { t, lang } = useI18n();
   const [type, setType] = useState<AnalysisType>("message");
@@ -197,7 +197,7 @@ function Result({
   input: string;
   navigate: (route: Route) => void;
   onAgain: () => void;
-  onReport: (prefill: { category: Category; messageText: string }) => void;
+  onReport: (prefill: { category: Category; messageText: string; entity?: string }) => void;
   /** Re-runs the ordinary text pipeline on a corrected transcription. */
   onRescan: (text: string) => void;
 }) {
@@ -484,7 +484,11 @@ function Result({
         <div className="mt-8 space-y-2.5">
           {result.report_recommended ? (
             <>
-              <PrimaryButton onClick={() => onReport({ category: result.category, messageText: input })}>
+              <PrimaryButton onClick={() => onReport({
+                  category: result.category,
+                  messageText: input,
+                  entity: result.impersonated_entity ?? undefined,
+                })}>
                 {t("res.report_cta")}
               </PrimaryButton>
               <OutlineButton onClick={onAgain}>{t("res.again")}</OutlineButton>
@@ -493,7 +497,11 @@ function Result({
             <>
               <PrimaryButton onClick={onAgain}>{t("res.again")}</PrimaryButton>
               <OutlineButton
-                onClick={() => onReport({ category: result.category, messageText: input })}
+                onClick={() => onReport({
+                  category: result.category,
+                  messageText: input,
+                  entity: result.impersonated_entity ?? undefined,
+                })}
               >
                 {t("res.report_cta")}
               </OutlineButton>

@@ -44,9 +44,6 @@ import { officialLink } from "../lib/verified";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
 
-/** Enough words that a reader can tell what happened. */
-const MIN_DESCRIPTION = 20;
-
 const THREAT_ICON: Record<ThreatType, LucideIcon> = {
   phishing: Fish,
   financial_scam: Banknote,
@@ -93,7 +90,18 @@ export function Report({
   prefill,
 }: {
   navigate: (route: Route) => void;
-  prefill?: { threatType?: ThreatType; category?: Category; messageText?: string } | null;
+  prefill?: {
+    threatType?: ThreatType;
+    category?: Category;
+    messageText?: string;
+    /**
+     * Whom the message was pretending to be, as the engine read it. It used to
+     * be a box the person typed into; this is the same field filled by the
+     * scan that already worked it out, which is both better data and no taps.
+     * A report opened straight from the tab simply has none.
+     */
+    entity?: string;
+  } | null;
 }) {
   const { t, lang } = useI18n();
   const [threatType, setThreatType] = useState<ThreatType>(
@@ -101,10 +109,10 @@ export function Report({
       (prefill?.category ? (TYPE_FOR_CATEGORY[prefill.category] ?? "other") : "phishing"),
   );
   const [channel, setChannel] = useState<Channel>("sms");
-  const [entity, setEntity] = useState("");
   const [authority, setAuthority] = useState<RelevantAuthority>("cybercrime_unit");
-  const [description, setDescription] = useState("");
   const [attach, setAttach] = useState(Boolean(prefill?.messageText));
+
+  const entity = prefill?.entity?.trim() ?? "";
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
   const [receipt, setReceipt] = useState<string | null>(null);
@@ -121,8 +129,10 @@ export function Report({
         threat_type: threatType,
         relevant_authority: authority,
         channel,
-        impersonated_entity: entity.trim() || undefined,
-        description: description.trim(),
+        impersonated_entity: entity || undefined,
+        // No description field any more. The column is nullable and the
+        // community feed reads only seeded rows, so nothing downstream needs
+        // one — what a report now carries is the scanned message itself.
         message_text: attach ? prefill?.messageText : undefined,
         anonymous: true,
         is_test: isTestMode(),
@@ -142,7 +152,7 @@ export function Report({
         caseNumber={receipt}
         threatType={threatType}
         channel={channel}
-        entity={entity.trim()}
+        entity={entity}
         navigate={navigate}
       />
     );
@@ -200,33 +210,8 @@ export function Report({
           </ChipRow>
         </div>
 
-        <div className="mt-6">
-          <FieldLabel>{t("rep.entity")}</FieldLabel>
-        </div>
-        <input
-          type="text"
-          value={entity}
-          onChange={(e) => setEntity(e.target.value)}
-          placeholder={t("rep.entity_ph")}
-          dir="auto"
-          className="mt-2.5 h-12 w-full rounded-btn border border-line bg-paper px-3.5 text-[15px] text-ink outline-none placeholder:text-ink-2"
-        />
-
-        <div className="mt-6">
-          <FieldLabel>{t("report.what_label")}</FieldLabel>
-        </div>
-        <textarea
-          dir={description.length > 0 ? "auto" : undefined}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder={t("report.what_ph")}
-          rows={4}
-          maxLength={2000}
-          className="mt-2.5 min-h-[120px] w-full resize-none rounded-btn border border-line bg-paper p-3.5 text-[15px] leading-relaxed text-ink outline-none placeholder:text-ink-2"
-        />
-
         {prefill?.messageText && (
-          <Card padded={false} className="mt-2.5">
+          <Card padded={false} className="mt-6">
             <IconRow
               title={t("rep.attach")}
               sub={t("rep.from_scan")}
@@ -277,7 +262,6 @@ export function Report({
           <PrimaryButton
             arrow={false}
             loading={sending}
-            disabled={description.trim().length < MIN_DESCRIPTION}
             onClick={() => void submit()}
           >
             {sending ? t("rep.sending") : t("rep.send")}

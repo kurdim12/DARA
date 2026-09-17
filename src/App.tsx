@@ -31,7 +31,7 @@ function Screens() {
   const [seed, setSeed] = useState<Seed | null>(null);
   const clearSeed = useCallback(() => setSeed(null), []);
   /** What a verdict knew about the threat, so Report opens with it filled in. */
-  const [prefill, setPrefill] = useState<{ category: Category; messageText: string } | null>(null);
+  const [prefill, setPrefill] = useState<{ category: Category; messageText: string; entity?: string } | null>(null);
   /** Set by "Check before you pay", which is the lookup rather than the list. */
   const [focusLookup, setFocusLookup] = useState(false);
   /**
