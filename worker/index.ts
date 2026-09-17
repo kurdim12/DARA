@@ -22,7 +22,6 @@ import {
   type ReportResponse,
 } from "../shared/types";
 import {
-  EngineFailure,
   EngineModelUnavailable,
   EngineRateLimited,
   EngineTimeout,
@@ -33,6 +32,8 @@ import { matchVerifiedPattern, patternById } from "./engine/match";
 import { allowRequest, type RateLimitBinding } from "./lib/ratelimit";
 import { caseNumberFor, idFromCaseNumber } from "./lib/reports";
 import { chainFor, OcrFailed, ocrReady, transcribe, type Transcript } from "./ocr";
+import { cachedScan, storeScan } from "./engine/cache";
+import { preliminaryResponse } from "./engine/preliminary";
 
 /**
  * The whole OCR step, both providers: two 8s attempts.
@@ -279,6 +280,15 @@ app.post("/api/analyze", async (c) => {
   const subject = transcript ? transcript.text : text;
   if (subject.length === 0) return c.json({ error: "ocr_failed" }, 422);
 
+  /*
+   * Identical input inside 24 hours comes straight back. The three staged
+   * demo messages are the reason: a presenter who checks one twice should not
+   * wait six to ten seconds at the gateway for an answer already known.
+   * Only full verdicts are cached — never a preliminary one.
+   */
+  const hit = await cachedScan(c.env.DB, subject, lang, analysisType);
+  if (hit) return c.json({ ...hit, cached: true });
+
   // Deterministic, before the model is asked anything: parse only, never fetch.
   const urlFacts = subject ? inspectText(subject) : null;
   const linkFacts = urlFacts
@@ -390,20 +400,49 @@ app.post("/api/analyze", async (c) => {
     }
     // The eval reads the filter counters; the app ignores them.
     response.stats = result.stats;
+    // Awaited rather than fired and forgotten: a Worker can be torn down the
+    // moment it responds, and a write that loses that race never lands.
+    await storeScan(c.env.DB, subject, lang, analysisType, response);
     return c.json(response);
   } catch (error) {
-    if (error instanceof EngineModelUnavailable) {
-      console.error((error as Error).message);
-      return c.json({ error: "model_unavailable" }, 502);
+    /*
+     * The engine could not answer. That used to end here, as «تعذّر إكمال
+     * الفحص» and nothing else — a dead end on the one screen the whole app
+     * exists for.
+     *
+     * The local signals have been sitting in front of the model the whole
+     * time. When the model cannot be reached they answer instead: same
+     * shape, capped confidence, and a headline that says plainly the server
+     * was not reached. It is never cached and never looks like a full
+     * analysis, but it is an answer, and an answer beats a dead end.
+     */
+    const reason =
+      error instanceof EngineTimeout
+        ? "timeout"
+        : error instanceof EngineRateLimited
+          ? "rate_limited"
+          : error instanceof EngineModelUnavailable
+            ? "model_unavailable"
+            : "server_error";
+    if (error instanceof Error) console.error(`analyze fell back (${reason}):`, error.message);
+
+    const fallback = preliminaryResponse(subject, urlFacts, lang, Boolean(transcript));
+    if (fallback) {
+      if (transcript) {
+        fallback.extracted_text = transcript.text;
+        fallback.ocr = {
+          provider: transcript.provider,
+          lang: transcript.lang,
+          ms: transcript.ms,
+          usage: transcript.usage,
+        };
+      }
+      return c.json(fallback);
     }
-    if (error instanceof EngineTimeout) return c.json({ error: "timeout" }, 504);
-    if (error instanceof EngineRateLimited) return c.json({ error: "rate_limited" }, 429);
-    if (error instanceof EngineFailure) {
-      console.error("analyze failed:", error.message);
-      return c.json({ error: "server_error" }, 502);
-    }
-    // Post-validation rejected the output. The message text is never logged.
-    console.error("analyze rejected the engine output");
+
+    // Nothing to say about it at all — the honest error, unchanged.
+    if (reason === "timeout") return c.json({ error: "timeout" }, 504);
+    if (reason === "rate_limited") return c.json({ error: "rate_limited" }, 429);
     return c.json({ error: "server_error" }, 502);
   }
 });

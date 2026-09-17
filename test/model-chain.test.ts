@@ -3,9 +3,9 @@ import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 /**
  * The chain is what turns "a good model" into "a demo that finishes". It has
  * one rule that is easy to get wrong in the other direction: a timeout must
- * NOT fall back. The wall is ten seconds; a timeout has already spent most of
- * it, and a second attempt leaves a presenter watching a spinner instead of
- * showing an error and moving on.
+ * NOT fall back. A timeout has already spent the wall, and a second attempt
+ * leaves a presenter watching a spinner instead of getting the preliminary
+ * result and moving on.
  */
 const create = vi.fn();
 vi.mock("@anthropic-ai/sdk", () => {
@@ -21,7 +21,7 @@ vi.mock("@anthropic-ai/sdk", () => {
   return { default: Anthropic, APIError };
 });
 
-const { runEngine, EngineTimeout } = await import("../worker/engine/analyze");
+const { runEngine, EngineTimeout, ENGINE_TIMEOUT_MS } = await import("../worker/engine/analyze");
 const AnthropicMod = await import("@anthropic-ai/sdk");
 const APIError = (AnthropicMod as unknown as { APIError: new (s: number) => Error }).APIError;
 
@@ -115,7 +115,9 @@ describe("the model chain", () => {
     vi.useFakeTimers();
     const promise = runEngine(ARGS);
     const assertion = expect(promise).rejects.toBeInstanceOf(EngineTimeout);
-    await vi.advanceTimersByTimeAsync(11_000);
+    // Derived from the wall, not a literal: a hardcoded 11s silently stopped
+    // covering this the moment the wall moved to 25s.
+    await vi.advanceTimersByTimeAsync(ENGINE_TIMEOUT_MS + 1_000);
     await assertion;
     expect(create).toHaveBeenCalledTimes(1);
   });

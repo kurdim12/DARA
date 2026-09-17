@@ -317,3 +317,25 @@ mark.flag sup {
     transform: scaleX(0.92);
   }
 }
+
+/*
+ * The one spinner in the app, on the active line of the scan progress list.
+ * Everything else that waits uses the progress bar on the primary button —
+ * this is the case where the wait is long enough that a person needs to see
+ * which step they are waiting on.
+ */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin 900ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin {
+    animation: none;
+  }
+}

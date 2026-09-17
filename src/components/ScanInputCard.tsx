@@ -1,10 +1,11 @@
 import { useId, useRef, useState } from "react";
-import { ClipboardPaste, ImageUp, X } from "lucide-react";
+import { AlertTriangle, ClipboardPaste, ImageUp, RefreshCw, X } from "lucide-react";
 import { ALLOWED_IMAGE_TYPES, MAX_INPUT_CHARS, type AnalysisType, type AnalyzeImage } from "../../shared/types";
 import { AppError } from "../lib/api";
 import { readClipboardText } from "../lib/clipboard";
 import { detectType } from "../lib/detect";
 import { prepareImage, previewUrl } from "../lib/image";
+import { ScanProgress } from "./ScanProgress";
 import { TypeChips } from "./TypeChips";
 import { PrimaryButton } from "./Shell";
 import { useI18n, type TextKey } from "../i18n";
@@ -34,6 +35,7 @@ export function ScanInputCard({
   onSubmit,
   busy = false,
   submitLabel,
+  failure = null,
 }: {
   text: string;
   onText: (value: string) => void;
@@ -46,6 +48,8 @@ export function ScanInputCard({
   busy?: boolean;
   /** Scan says "analysing" mid-flight; Home never sees that state. */
   submitLabel?: string;
+  /** The last failure, shown inside the card with a retry that resubmits. */
+  failure?: TextKey | null;
 }) {
   const { t } = useI18n();
   const fieldId = useId();
@@ -163,6 +167,29 @@ export function ScanInputCard({
       <p className="mt-2.5 text-[13px] font-normal leading-snug text-ink-2">
         {t("scan.consent")}
       </p>
+
+      {/* The failure sits inside the card, where the eye already is, and
+          carries the way out with it. A thin strip under the button is
+          where a person who just waited nine seconds does not look. */}
+      {failure && !busy && (
+        <div role="alert" className="mt-4 rounded-btn bg-red-soft p-3.5">
+          <p className="flex items-center gap-2 text-[15px] font-bold text-red-ink">
+            <AlertTriangle size={17} strokeWidth={2} aria-hidden="true" />
+            {t("error.title")}
+          </p>
+          <p className="mt-1.5 text-[14px] leading-relaxed text-red-ink">{t(failure)}</p>
+          <button
+            type="button"
+            onClick={onSubmit}
+            className="press tap mt-3 flex h-11 w-full items-center justify-center gap-2 rounded-btn bg-red text-[15px] font-bold text-white-brush"
+          >
+            <RefreshCw size={17} strokeWidth={2} aria-hidden="true" />
+            {t("scan.retry")}
+          </button>
+        </div>
+      )}
+
+      {busy && <ScanProgress />}
 
       <div className="mt-4">
         <PrimaryButton disabled={!ready} loading={busy} onClick={onSubmit}>

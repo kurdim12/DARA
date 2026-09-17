@@ -165,16 +165,8 @@ export function Scan({
           onError={setErrorKey}
           onSubmit={() => void run(text)}
           submitLabel={busy ? t("scan.analyzing") : t("home.analyze")}
+          failure={errorKey}
         />
-
-        {errorKey && (
-          <p
-            role="alert"
-            className="mt-3 rounded-btn bg-red-soft p-3 text-[14px] font-medium text-red-ink"
-          >
-            {t(errorKey)}
-          </p>
-        )}
 
         <Card className="mt-7">
           <SectionLabel>{t("scan.what")}</SectionLabel>
@@ -251,9 +243,9 @@ function Result({
               aria-hidden="true"
               className="pointer-events-none absolute -bottom-6 -end-4 w-[150px] select-none opacity-[0.08]"
             />
-            {result.cached && (
+            {(result.cached || result.preliminary) && (
               <span className="absolute end-4 top-4 rounded-full bg-white/25 px-2.5 py-1 text-[12px] font-bold">
-                {t("res.saved")}
+                {t(result.preliminary ? "prelim.tag" : "res.saved")}
               </span>
             )}
             <div className="relative">
@@ -267,6 +259,13 @@ function Result({
               <p dir="auto" className="mt-3 text-[15px] font-medium leading-[1.45]">
                 {result.headline}
               </p>
+              {/* A preliminary result must never be mistaken for a full one.
+                  The badge says what it is; this says what it is not. */}
+              {result.preliminary && (
+                <p className="mt-2.5 rounded-btn bg-white/20 p-2.5 text-[13px] leading-relaxed">
+                  {t("prelim.note")}
+                </p>
+              )}
             </div>
           </div>
         </Bleed>

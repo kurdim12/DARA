@@ -113,13 +113,8 @@ export function Home({
             }}
             onError={setErrorKey}
             onSubmit={() => onSubmit(text.trim(), type, image)}
+            failure={errorKey}
           />
-
-          {errorKey && (
-            <p role="alert" className="mt-3 rounded-btn bg-red-soft p-3 text-[14px] font-medium text-red-ink">
-              {t(errorKey)}
-            </p>
-          )}
 
           <h2 className="t-h3 mt-9">{t("ft.home.tools")}</h2>
           <div className="mt-3 grid grid-cols-2 gap-2.5">

@@ -22,7 +22,15 @@ const SLOW_MS = 12_000;
  * (15s). This sits above their sum so the Worker's reasoned error always
  * wins the race and this only fires when nothing answers at all.
  */
-const IMAGE_CEILING_MS = 38_000;
+const IMAGE_CEILING_MS = 40_000;
+
+/**
+ * The client's backstop for a text or link scan. Always longer than the
+ * Worker's own 25s wall, so the Worker's reasoned answer — a verdict, or a
+ * preliminary one — always wins the race, and this only fires when nothing
+ * answers at all.
+ */
+const TEXT_CEILING_MS = 30_000;
 
 export class AppError extends Error {
   constructor(readonly key: TextKey) {
@@ -117,6 +125,11 @@ export async function analyze(
   }
 
   const controller = new AbortController();
+  // The backstop. The Worker answers within its own 25s wall — with a verdict
+  // or with a preliminary one — so this only fires when nothing answers at
+  // all, and it is deliberately longer than that wall so the Worker's own
+  // reasoned answer always wins.
+  const ceiling = setTimeout(() => controller.abort(), TEXT_CEILING_MS);
   const live = postAnalyze(text, lang, channel, controller.signal, undefined, type).then((value) => {
     // A staged message that has just been checked live leaves its verdict on
     // this device, so the same message survives a bad network later. Nothing
@@ -130,7 +143,10 @@ export async function analyze(
       return await live;
     } catch (error) {
       if (error instanceof AppError) throw error;
+      if (controller.signal.aborted) throw new AppError("error.timeout");
       throw new AppError("error.generic");
+    } finally {
+      clearTimeout(ceiling);
     }
   }
 
@@ -151,6 +167,7 @@ export async function analyze(
     return outcome.value;
   } finally {
     if (slowTimer) clearTimeout(slowTimer);
+    clearTimeout(ceiling);
   }
 }
 

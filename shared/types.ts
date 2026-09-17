@@ -184,6 +184,14 @@ export interface AnalyzeResponse {
   requested_action: string | null;
   pressure_methods: PressureMethod[];
   /** Screenshots only: what the engine could actually read, and what it saw. */
+  /**
+   * True when the engine could not be reached and the result came from the
+   * local heuristics instead. The screen must say so; this is never a full
+   * analysis and is never cached.
+   */
+  preliminary?: boolean;
+  /** Which local signals produced a preliminary result, for the wording. */
+  preliminary_signals?: string[];
   /** What the OCR step read off the screenshot. The verdict reasons over this. */
   extracted_text?: string;
   /**

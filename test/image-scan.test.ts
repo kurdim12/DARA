@@ -14,15 +14,28 @@ const read = (path: string) => readFileSync(new URL(`../${path}`, import.meta.ur
 describe("the screenshot path", () => {
   const api = read("src/lib/api.ts");
 
-  it("gives an image call a longer wall than a text one", () => {
-    expect(ENGINE_IMAGE_TIMEOUT_MS).toBeGreaterThan(ENGINE_TIMEOUT_MS);
+  it("gives the screenshot verdict a smaller wall than a standalone text one", () => {
+    // It used to be larger, because one call read the picture AND judged it.
+    // OCR does the reading now, so this covers only the judging — and unlike
+    // a text scan it shares its budget with OCR.
+    expect(ENGINE_IMAGE_TIMEOUT_MS).toBeLessThan(ENGINE_TIMEOUT_MS);
+  });
+
+  it("gives a text scan a wall the measured worst case clears easily", () => {
+    // Ten live link scans ran 7,201-9,451ms. The old 10s wall left 549ms of
+    // headroom on the slowest and lost one of the ten to a 504.
+    expect(ENGINE_TIMEOUT_MS).toBeGreaterThan(9_451 * 2);
   });
 
   it("keeps the screenshot wall clear of the measured worst case", () => {
-    // The old measurement — 13,400ms — was one call that read the image AND
-    // judged it. The engine now only judges text, so the wall is 15s rather
-    // than 25s, still above anything observed for the judging half alone.
+    // The engine only judges text now, and the slowest measured text verdict
+    // was 9,451ms.
     expect(ENGINE_IMAGE_TIMEOUT_MS).toBeGreaterThanOrEqual(15_000);
+  });
+
+  it("keeps the client's text ceiling above the Worker's text wall", () => {
+    const ceiling = Number(api.match(/const TEXT_CEILING_MS = ([\d_]+);/)?.[1].replace(/_/g, ""));
+    expect(ceiling).toBeGreaterThan(ENGINE_TIMEOUT_MS);
   });
 
   it("applies the longer wall to transcribed text, not to an attached image", () => {

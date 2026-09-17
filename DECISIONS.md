@@ -452,3 +452,28 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
 - **The transcription renders once, editable in place.** Showing the OCR card
   above the highlighted message printed the same paragraph twice — caught by
   looking at the screen, not by a test.
+
+## P0-1 — link scans
+
+- **The wall was 10s and the model needs 7.2-9.5s.** Ten measured link scans:
+  the slowest cleared the wall by 549ms and one of the ten came back a 504.
+  That is not a timeout, it is a coin toss. Worker wall is 25s now, client
+  ceilings 30s text / 40s image — the client is always longer than the server,
+  so the Worker's own reasoned answer always wins the race.
+- **The model is NOT changed.** `openai/gpt-6-astra` stays primary. A faster
+  model is a real option and is proposed to Abdelrahman in the summary rather
+  than applied, because the brief says so and because 7.2-9.5s inside a 25s
+  wall is no longer the thing that breaks scans.
+- **A failure is no longer a dead end.** The local signals that already run
+  before the model now answer when it cannot be reached: same shape, capped at
+  60 confidence, headline says the server was not reached, `preliminary: true`,
+  never cached, never recommends filing a report. When nothing fires at all it
+  declines rather than guessing "looks safe" — a false all-clear is the one
+  error here that is dangerous.
+- **The cache is D1, not KV.** No KV namespace is bound and creating one needs
+  Cloudflare credentials this build does not have. `scan_cache` keyed on a hash
+  of the normalized input gives the same 24-hour behaviour on a binding that
+  already deploys. If the migration has not run, both reads and writes fail
+  closed and the cache is simply a no-op.
+- **The failure moved inside the card, with a retry that resubmits.** A thin
+  strip under the button is not where someone looks after waiting nine seconds.

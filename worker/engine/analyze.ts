@@ -4,21 +4,29 @@ import { buildUserContent, ENGINE_PROMPT_V1 } from "./prompt";
 import { postValidate, type PostValidated } from "./postvalidate";
 import { REPORT_VERDICT_TOOL, type RawVerdict } from "./tool";
 
-export const ENGINE_TIMEOUT_MS = 10_000;
+/**
+ * The wall for a text or link verdict.
+ *
+ * 10s was not a budget, it was a coin toss. Ten measured link scans ran
+ * 7,201-9,451ms against it — the slowest had 549ms of headroom and one of the
+ * ten tipped over into a 504. 25s ends that, and the preliminary fallback
+ * below means even 25s is not a dead end.
+ */
+export const ENGINE_TIMEOUT_MS = 25_000;
 /**
  * The wall for a screenshot scan's verdict.
  *
- * Keyed off "this came from a screenshot", NOT off "an image is attached" —
- * the OCR step reads the image now, so the engine never sees one and the old
- * test was silently false for every screenshot. That dropped the wall from
- * 25s to 10s and killed 8 of 20 runs in the first comparison.
+ * SMALLER than the text wall, not larger, and that is deliberate. It used to
+ * be larger because the one call read the picture and judged it; OCR does the
+ * reading now, so this covers only the judging — and unlike a text scan it
+ * shares its budget with OCR. 16s of OCR plus 20s here is 36s, under the
+ * client's 40s image ceiling. A text scan has the whole 25s to itself.
  *
- * 15s rather than the old 25s because the engine's work got smaller: it
- * judges text instead of reading a picture first. The budget has to hold
- * OCR (16s worst case, 1.0-3.4s observed) plus this, under the client's
- * ceiling.
+ * Keyed off "this came from a screenshot", NOT off "an image is attached":
+ * the engine never receives an image any more, so the old test was silently
+ * false for every screenshot and cost 8 of 20 runs in the first comparison.
  */
-export const ENGINE_IMAGE_TIMEOUT_MS = 15_000;
+export const ENGINE_IMAGE_TIMEOUT_MS = 20_000;
 // BUILD.md specifies 800. A full Arabic verdict — four quotes, four reasons and
 // three actions — lands close enough to that ceiling that a long message can
 // truncate the tool call, and output is billed on tokens produced, so the
