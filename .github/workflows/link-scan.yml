@@ -1,0 +1,25 @@
+# P0-1's acceptance test: ten consecutive type=link scans, with latencies.
+#
+# Run before a change to get the baseline and after it to prove the fix.
+# Ten real model calls, so it costs money — dispatch only.
+name: link-scan
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: The deployed URL to measure
+        default: https://dara.abdalrhmankurdi12.workers.dev
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Ten link scans
+        env:
+          TARGET: ${{ inputs.target || 'https://dara.abdalrhmankurdi12.workers.dev' }}
+        run: |
+          echo "=== health ==="
+          curl -sS --max-time 20 "$TARGET/api/health"; echo; echo
+          python3 scripts/link-scan.py "$TARGET" | tee "$GITHUB_STEP_SUMMARY"
