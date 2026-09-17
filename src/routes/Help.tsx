@@ -1,4 +1,4 @@
-import { EyeOff, ShieldAlert, Wrench } from "lucide-react";
+import { EyeOff, LifeBuoy, ShieldAlert } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import { HelpLines } from "../components/HelpLines";
 import { Card, Header, IconRow, Page, RowChevron } from "../components/Shell";
@@ -28,7 +28,7 @@ export function Help({ navigate }: { navigate: (route: Route) => void }) {
         <div className="mt-4 space-y-2.5">
           <IconRow
             as="card"
-            Icon={Wrench}
+            Icon={LifeBuoy}
             title={t("help.recover")}
             sub={t("help.recover_sub")}
             trailing={<RowChevron />}

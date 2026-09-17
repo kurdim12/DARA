@@ -1,24 +1,41 @@
 {
   "_meta": {
     "purpose": "Four reports inserted at migration time so the Community Reports section is never empty. They carry seed = 1 and public = 1, and they describe message shapes the engine already models — the same families as content/threats.json.",
-    "rule": "No names, no numbers, no institutions, no contact details. A seeded report reads exactly like a real anonymous one, because a real anonymous one holds nothing else either."
+    "rule": "No names, no numbers, no institutions, no contact details. A seeded report reads exactly like a real anonymous one, because a real anonymous one holds nothing else either.",
+    "language": "Each seed carries a key and both languages. The database row keeps its English description — it is what migration 0002 inserted and what the row has always been — and seed_key is what the app renders from, in the reader's language. A real anonymous report has no key and renders its own words, in whatever language they were written."
   },
   "reports": [
     {
+      "key": "unpaid_fine_sms",
       "threat_type": "phishing",
-      "description": "Got an SMS saying I had an unpaid fine and had 24 hours to settle it through a link. The link was not on a government domain."
+      "description": {
+        "en": "Got an SMS saying I had an unpaid fine and had 24 hours to settle it through a link. The link was not on a government domain.",
+        "ar": "وصلتني رسالة نصية تقول إن عليّ مخالفة غير مدفوعة وأمامي 24 ساعة لتسديدها عبر رابط. الرابط لم يكن على نطاق حكومي."
+      }
     },
     {
+      "key": "work_from_home_fee",
       "threat_type": "fake_job",
-      "description": "A work-from-home offer on WhatsApp, good salary, no interview, then they asked for a registration fee before anything started."
+      "description": {
+        "en": "A work-from-home offer on WhatsApp, good salary, no interview, then they asked for a registration fee before anything started.",
+        "ar": "عرض عمل من البيت عبر واتساب، براتب جيد وبلا مقابلة، ثم طلبوا رسوم تسجيل قبل أن يبدأ أي شيء."
+      }
     },
     {
+      "key": "bank_fraud_call_otp",
       "threat_type": "financial_scam",
-      "description": "Someone called saying they were the bank's fraud department and asked me to read out the code that had just arrived on my phone."
+      "description": {
+        "en": "Someone called saying they were the bank's fraud department and asked me to read out the code that had just arrived on my phone.",
+        "ar": "اتصل بي شخص قال إنه من قسم مكافحة الاحتيال في البنك وطلب مني أن أقرأ له الرمز الذي وصل للتو على هاتفي."
+      }
     },
     {
+      "key": "account_suspended_link",
       "threat_type": "phishing",
-      "description": "A message said my account was suspended and one link would restore it. The sender was not a number I have ever had a message from."
+      "description": {
+        "en": "A message said my account was suspended and one link would restore it. The sender was not a number I have ever had a message from.",
+        "ar": "رسالة تقول إن حسابي موقوف وإن رابطاً واحداً سيعيده. المرسل لم يكن رقماً وصلتني منه رسالة من قبل."
+      }
     }
   ]
 }

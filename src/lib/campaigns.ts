@@ -24,7 +24,10 @@ export interface Campaign {
   sourceName: string;
   sourceUrl?: string;
   sourceUrl2?: string;
+  /** The message as it arrived. Always the Arabic — it is the specimen. */
   sample?: string;
+  /** A translation of it, shown beside the original and never instead of it. */
+  sampleTranslation?: string;
   signals: string[];
 }
 
@@ -47,6 +50,7 @@ interface Raw {
   source_url?: string;
   source_url_2?: string;
   sample_text_ar?: string;
+  sample_text_en?: string;
   signals?: string[];
   verified: boolean;
 }
@@ -64,12 +68,12 @@ const IN_FILTER: Record<Exclude<CampaignFilter, "all">, string[]> = {
 /**
  * The wanted language, or the other one when it is missing.
  *
- * Eleven of the fifteen records carry only an Arabic summary and source name;
- * the reference build has the same gap. Falling back shows the real sourced
- * text instead of a blank, and a campaign card with no visible source is
- * exactly what the sourcing rule exists to prevent. Every consumer renders
- * these with dir="auto", so a fallen-back Arabic line still sets right to left
- * inside an English screen.
+ * All fifteen records carry both languages now; they did not, and the fallback
+ * meant eleven campaigns showed their Arabic summary and source name inside an
+ * English screen. It stays as the floor rather than the plan: a campaign card
+ * with no visible source is exactly what the sourcing rule exists to prevent,
+ * so a future record with a gap still shows the real sourced text rather than
+ * a blank, and test/language.test.ts fails on the gap.
  */
 function pick(ar: string | undefined, en: string | undefined, lang: Lang): string {
   const wanted = lang === "ar" ? ar : en;
@@ -94,6 +98,8 @@ export function campaigns(lang: Lang): Campaign[] {
       sourceUrl: entry.source_url,
       sourceUrl2: entry.source_url_2,
       sample: entry.sample_text_ar,
+      // Only in English: in Arabic the original already reads.
+      sampleTranslation: lang === "en" ? entry.sample_text_en : undefined,
       signals: entry.signals ?? [],
     }))
     // Newest first: a campaign from last month matters more than one from last year.

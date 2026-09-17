@@ -14,6 +14,9 @@ import { useI18n } from "../i18n";
 import { plans, type Plan, type PlanId } from "../lib/plans";
 import type { Route } from "../lib/router";
 
+/** The plans where waiting costs something that cannot be recovered later. */
+const URGENT = new Set<PlanId>(["money_lost"]);
+
 const ICONS: Record<PlanId, LucideIcon> = {
   money_lost: Banknote,
   data_stolen: Fingerprint,
@@ -22,6 +25,19 @@ const ICONS: Record<PlanId, LucideIcon> = {
   device_compromised: Smartphone,
   identity_theft: UserX,
 };
+
+/** The chevron, with the word that says why this row is not like the others. */
+function UrgentRow() {
+  const { t } = useI18n();
+  return (
+    <span className="flex shrink-0 items-center gap-1.5">
+      <span className="rounded-full bg-red-soft px-2.5 py-1 text-[11.5px] font-extrabold text-red-ink">
+        {t("rec.urgent")}
+      </span>
+      <RowChevron />
+    </span>
+  );
+}
 
 export function Recover({ navigate }: { navigate: (route: Route) => void }) {
   const { t, lang } = useI18n();
@@ -59,30 +75,39 @@ export function Recover({ navigate }: { navigate: (route: Route) => void }) {
         <Header title={t("rec.title")} />
         <p className="t-sub -mt-1.5">{t("rec.sub")}</p>
 
+        {/* Being blackmailed is not a recovery plan — it is happening now,
+            and it opens the screen with the quick exit on it. It used to be
+            the seventh of seven cards. It is the first one. */}
         <div className="mt-4 space-y-2">
-          {plans(lang).map((plan) => (
-            <IconRow
-              key={plan.id}
-              as="card"
-              Icon={ICONS[plan.id]}
-              title={plan.title}
-              sub={plan.summary}
-              trailing={<RowChevron />}
-              onClick={() => setOpen(plan)}
-            />
-          ))}
-
-          {/* The sixth. Being blackmailed is not a recovery plan — it opens the
-              shield, which is the screen with the quick exit on it. */}
           <IconRow
             as="card"
             Icon={ShieldAlert}
             tone="red"
             title={t("rec.sit_shield")}
             sub={t("rec.sit_shield_sub")}
-            trailing={<RowChevron />}
+            trailing={<UrgentRow />}
             onClick={() => navigate("shield")}
           />
+
+          {plans(lang).map((plan) => {
+            // Money that has just left an account can sometimes be stopped,
+            // and only for a while. That is a different kind of card from
+            // "change your passwords", and it stopped looking like one when
+            // all six were drawn identically.
+            const urgent = URGENT.has(plan.id);
+            return (
+              <IconRow
+                key={plan.id}
+                as="card"
+                Icon={ICONS[plan.id]}
+                tone={urgent ? "red" : "neutral"}
+                title={plan.title}
+                sub={plan.summary}
+                trailing={urgent ? <UrgentRow /> : <RowChevron />}
+                onClick={() => setOpen(plan)}
+              />
+            );
+          })}
         </div>
       </Page>
       <BottomNav active="recover" navigate={navigate} />

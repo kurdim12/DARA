@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type SetStateAction } from "react";
-import { BookOpen, ChevronRight, ShieldCheck, Wallet, Wrench } from "lucide-react";
+import { BookOpen, ChevronRight, LifeBuoy, ShieldAlert, ShieldCheck, Wallet } from "lucide-react";
 import type { AnalysisType, AnalyzeImage } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { DemoTray } from "../components/DemoTray";
@@ -34,8 +34,8 @@ const TOOLS = [
   { action: "protect", title: "ft.home.tool_dir", sub: "ft.home.tool_dir_sub", Icon: ShieldCheck },
   { action: "lookup", title: "ft.home.tool_pay", sub: "ft.home.tool_pay_sub", Icon: Wallet },
   { action: "learn", title: "ft.home.tool_train", sub: "ft.home.tool_train_sub", Icon: BookOpen },
-  { action: "recover", title: "tool.recover", sub: "tool.recover_sub", Icon: Wrench },
-] satisfies { action: Route | "lookup"; title: TextKey; sub: TextKey; Icon: typeof Wrench }[];
+  { action: "recover", title: "tool.recover", sub: "tool.recover_sub", Icon: LifeBuoy },
+] satisfies { action: Route | "lookup"; title: TextKey; sub: TextKey; Icon: typeof LifeBuoy }[];
 
 /** Half-typed input. Owned by App so the فحص tab can inherit it. */
 export interface Draft {
@@ -115,6 +115,36 @@ export function Home({
             onSubmit={() => onSubmit(text.trim(), type, image)}
             failure={errorKey}
           />
+
+          {/* The shield was reachable only through تعافي's last card or the
+              second card on Recover — seventh of seven for the one person on
+              this screen who cannot afford to browse. It gets a door here.
+
+              Outlined, not filled: the palette allows red on a Shield entry,
+              and «افحص الآن» directly above is the filled one. Two solid red
+              blocks in a row and neither is the primary action any more. */}
+          <button
+            type="button"
+            onClick={() => navigate("shield")}
+            className="press mt-3 flex min-h-16 w-full items-center gap-3 rounded-card border-2 border-red bg-card px-4 py-3 text-start"
+          >
+            <span
+              aria-hidden="true"
+              className="flex size-10 shrink-0 items-center justify-center rounded-box bg-red-soft text-red"
+            >
+              <ShieldAlert size={20} strokeWidth={1.75} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-[15px] font-extrabold text-red-ink">{t("help.shield")}</span>
+              <span className="t-sub mt-0.5 block">{t("help.shield_sub")}</span>
+            </span>
+            <ChevronRight
+              size={18}
+              strokeWidth={1.75}
+              aria-hidden="true"
+              className="shrink-0 text-red rtl:rotate-180"
+            />
+          </button>
 
           <h2 className="t-h3 mt-9">{t("ft.home.tools")}</h2>
           <div className="mt-3 grid grid-cols-2 gap-2.5">

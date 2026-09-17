@@ -23,6 +23,7 @@ import {
 import { BottomNav } from "../components/BottomNav";
 import { CaseNumber } from "../components/CaseNumber";
 import { HelpLines } from "../components/HelpLines";
+import { seedText } from "../lib/seeds";
 import {
   Card,
   Chip,
@@ -436,7 +437,7 @@ function Receipt({
  * submits becomes public on its own.
  */
 function CommunityFeed() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const [rows, setRows] = useState<CommunityReport[]>([]);
 
   useEffect(() => {
@@ -471,8 +472,11 @@ function CommunityFeed() {
               </span>
             )}
           </div>
+          {/* A seeded row is our copy, so it renders in the reader's
+              language. A real one is somebody's own words and renders exactly
+              as they wrote them — dir="auto" so either sets correctly. */}
           <p dir="auto" className="mt-2 line-clamp-2 text-[14px] leading-snug text-ink-2">
-            {row.description}
+            {seedText(row.seed_key, lang) ?? row.description}
           </p>
         </div>
       ))}

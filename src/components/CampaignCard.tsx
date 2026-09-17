@@ -53,13 +53,21 @@ export function CampaignCard({
         </p>
       )}
 
+      {/* The specimen stays in the language it arrived in — translating a
+          quoted scam message would misrepresent the thing being quoted, and
+          this text is also what gets pasted into the scanner. In English the
+          translation sits under it, labelled, rather than in its place. */}
       {campaign.sample && (
-        <p
-          dir="auto"
-          className="whitespace-pre-wrap break-words rounded-btn bg-paper p-3 text-[13.5px] leading-relaxed"
-        >
-          {campaign.sample}
-        </p>
+        <div className="rounded-btn bg-field p-3">
+          <p dir="auto" className="whitespace-pre-wrap break-words text-[13.5px] leading-relaxed">
+            {campaign.sample}
+          </p>
+          {campaign.sampleTranslation && (
+            <p className="mt-2 border-t border-line pt-2 text-[13px] leading-relaxed text-ink-2">
+              <span className="font-bold">{t("camp.translated")}</span> {campaign.sampleTranslation}
+            </p>
+          )}
+        </div>
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2.5">

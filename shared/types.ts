@@ -289,6 +289,13 @@ export interface CommunityReport {
   description: string;
   /** True for the rows the team seeded. The feed marks them as examples. */
   is_seed: boolean;
+  /**
+   * Set only on a seeded row, and only there. It names an entry in
+   * content/community-seed.json, which carries both languages — the row's own
+   * `description` is one column and cannot. A real report has no key and its
+   * description renders verbatim, in whatever language it was written.
+   */
+  seed_key?: string | null;
 }
 
 export interface ReportResponse {

@@ -639,12 +639,18 @@ app.get("/api/reset", (c) => {
 app.get("/api/reports/community", async (c) => {
   try {
     const rows = await c.env.DB.prepare(
-      `SELECT id, threat_type, description, is_seed
+      `SELECT id, threat_type, description, is_seed, seed_key
          FROM reports
         WHERE is_public = 1 AND is_test = 0 AND description IS NOT NULL
         ORDER BY id DESC
         LIMIT 4`,
-    ).all<{ id: number; threat_type: string | null; description: string; is_seed: number }>();
+    ).all<{
+      id: number;
+      threat_type: string | null;
+      description: string;
+      is_seed: number;
+      seed_key: string | null;
+    }>();
 
     const reports: CommunityReport[] = (rows.results ?? []).map((row) => ({
       case_number: caseNumberFor(row.id),
@@ -653,6 +659,9 @@ app.get("/api/reports/community", async (c) => {
       // The screen marks these as examples rather than leaving a presenter to
       // remember to say it.
       is_seed: row.is_seed === 1,
+      // Only a seeded row has one. The screen renders it in the reader's
+      // language; a real report's own words are never swapped out.
+      seed_key: row.seed_key,
     }));
     return c.json({ reports });
   } catch (error) {
