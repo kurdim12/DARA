@@ -540,3 +540,32 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
 - **`npm run verify | head` was lying to me.** `head` closes the pipe, SIGPIPE
   kills the chain, and the build step never ran — I was previewing a bundle 20
   minutes stale. Verify output goes to a file now.
+
+## P2 — the shield's door, the radar, the chrome
+
+- **The Home shield entry is outlined, not filled.** The palette allows red on
+  a Shield entry, and «افحص الآن» sits directly above it as the filled one.
+  Two solid red blocks in a row and neither is the primary action any more.
+- **The floating nav carries a shadow, which CLAUDE.md's "no decorative
+  shadows" would forbid.** The brief asked for one explicitly. It is kept
+  faint and functional — the app's one real shadow still belongs to the raised
+  button — and the blur plus the hairline do most of the separating.
+- **The radar's two report numbers were one fact stated twice.** On a platform
+  young enough that every report arrived this week, "this week" and "in total"
+  hold the same number, and «6» beside «6» reads as double-counting. One
+  platform card with the week as its sub-line.
+- **A block with no rows renders nothing.** Four cards each announcing they
+  had no data is what made the page read as broken. One sentence says it and
+  points at the documented campaigns, which are the real content at this
+  volume.
+- **Three axis labels, not eight.** Eight flex cells at 375px are ~40px wide
+  and clipped every date that did not fit («27 ت…»).
+- **The scan button is a magnifier.** A scan frame on a button that opens a
+  paste form was a promise the app does not keep until the camera ships.
+- **Seeds get a key; real reports do not.** `description` is one column and
+  somebody else's sentence is not ours to swap for a translation. A seed is
+  content we authored, so it carries `seed_key` and the words live in the
+  content file in both languages.
+- **The quoted specimens stay Arabic.** Translating a quoted scam message
+  would be quoting something nobody sent, and that text is also what gets
+  pasted into the scanner. The translation sits under it, labelled.

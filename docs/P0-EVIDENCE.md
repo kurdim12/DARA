@@ -310,3 +310,102 @@ tsc --noEmit: clean · honesty-check: clean
 26 test files, 260 tests passed
 vite build: dist/client/assets/index-teB2E1Cu.js 497.67 kB (gzip 150.62 kB)
 ```
+
+---
+
+# P2 — evidence
+
+## P2-1 — the shield has a door on Home
+
+It was reachable through تعافي's last card or the second card on Recover —
+seventh of seven for the one person who cannot afford to browse. Now: directly
+under the scan card on Home, red-outlined rather than filled, because «افحص
+الآن» immediately above it is the filled one and two solid red blocks in a row
+mean neither is the primary action. On Recover it moves from seventh to first.
+
+## P2-2 — the Recover icons
+
+A wrench is what you fix a tap with. تعافي is for someone who has just lost
+money or had an account taken, so it takes the lifebuoy the nav already uses
+for the same door — Home, Recover and the nav now agree.
+
+The six plans were drawn identically. Money-loss carries «الأسرع أفضل» and the
+red icon tone: money that has just left an account can sometimes be stopped,
+and only for a while. That is a different card from "change your passwords".
+
+## P2-3 — the radar
+
+Read back from the rendered DOM at 375px, both languages:
+
+```
+cells saying "no data": 0      bars in brand red: 11      "not a national statistic": present
+horizontal scroll: false       clipped axis labels: []
+```
+
+| | before | after |
+| --- | --- | --- |
+| the numbers | `6` · `6` · `15` in three cards | `9` reports **«كلها هذا الأسبوع»** · `15` documented |
+| bars | black, value only at the row's end | brand red, 8px, value on each |
+| 8-week chart | 2 bars, no values, no axis | value above each bar, «بلاغات في الأسبوع», 3 week labels |
+| empty blocks | 4 cards each saying "no data" | none render; one sentence + a link into the campaigns |
+
+The duplication was real and the fix is not cosmetic: on a platform young enough
+that every report arrived this week, "reports this week" and "reports in total"
+are the same fact. The week is a line under the platform count now.
+
+The axis labels were clipped («27 ت…») because eight flex cells at 375px are
+~40px wide. Three labels laid out start / centre / end share the full width;
+`scrollWidth > clientWidth` is 0 for every label in both languages.
+
+## P2-4 — the nav and the header
+
+Measured on three routes:
+
+```
+bar: 12px from each side, 10px from the bottom, radius 26px,
+     backdrop-filter blur(14px) saturate(1.4)
+header: position sticky, top 0 before and after scrolling 400px,
+        background rgb(251,248,248) — the page colour, never red
+        hairline rgba(0,0,0,0) unscrolled → rgb(234,228,226) scrolled
+```
+
+The 54px notch reserve is gone: `env(safe-area-inset-top)` already accounts for
+it, and it pushed the first real thing on every screen past the fold.
+
+The scan button was a scan frame on a button that opens a form you paste into.
+It is a magnifier until the camera exists (P3-2).
+
+Swept all ten routes in both themes: no horizontal scroll, and **no control
+overlapped by the floating bar at the bottom of any page** — `--nav-total` grew
+by `--nav-gap` so a page still keeps that much clear.
+
+## P2-5 — one language at a time
+
+Walked seven routes in ar and then in en:
+
+```
+ar: the only Latin left is ecrimes@psd.gov.jo and fpj.dept@psd.gov.jo
+en: the only Arabic left is «عر» (the toggle, which names the other language
+    by design) and «درع» in the brand tile
+```
+
+Eleven of fifteen campaigns had no English summary, entity or source name, so
+`pick()` fell back to Arabic — working as designed, and the design was the
+problem. All fifteen carry both now, and `test/language.test.ts` fails on a gap
+rather than falling back silently.
+
+The four seeded community reports were English inside the Arabic UI.
+`description` is one column and a real report holds whatever the person wrote,
+so it cannot carry two languages and must never be rewritten. A seed is ours:
+migration `0005_seed_language.sql` gives it a `seed_key` and the words live in
+`content/community-seed.json` in both languages. A real report still renders
+its own words verbatim.
+
+The three quoted specimens stay Arabic. That is the message as it arrived and
+it is what gets pasted into the scanner; in English the translation sits under
+it, labelled.
+
+```
+tsc --noEmit: clean · honesty-check: clean
+28 test files, 278 tests passed
+```

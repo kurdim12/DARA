@@ -48,7 +48,11 @@
  */
 :root {
   --nav-inner: max(58px, calc(78px - env(safe-area-inset-bottom)));
-  --nav-total: calc(var(--nav-inner) + env(safe-area-inset-bottom));
+  /* The floating bar sits off the bottom edge and off both sides. --nav-gap
+     is that clearance; --nav-total is what a page has to keep free below its
+     last control so the bar never covers one. */
+  --nav-gap: 10px;
+  --nav-total: calc(var(--nav-inner) + var(--nav-gap) + env(safe-area-inset-bottom));
   --scan-lift: 30px;
   --scan-size: 58px;
 }
@@ -210,6 +214,25 @@
  * the brand colour and adds a 3px ring outside it, which is visible without
  * shifting the layout by a pixel.
  */
+/*
+ * The floating nav bar. Translucent so the page shows through it, which is
+ * what makes it read as floating rather than as a second page edge; the
+ * fallback is the solid card colour wherever backdrop-filter is unavailable,
+ * because a see-through bar with nothing blurring behind it is unreadable.
+ */
+.nav-bar {
+  background: var(--card);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.1);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .nav-bar {
+    background: color-mix(in srgb, var(--card) 82%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+  }
+}
+
 .field {
   background: var(--field);
   border: 2px solid var(--field-line);

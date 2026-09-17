@@ -1,7 +1,8 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { ArrowRight, ChevronRight, Moon, Sun } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useI18n } from "../i18n";
+import { LogoTile } from "./Logo";
 import { useTheme } from "../lib/theme";
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -75,9 +76,17 @@ export function Gutter({
 }
 
 /**
- * Title on the leading side, the two round pills on the trailing one. The 54px
- * above it is the status bar's room: on a phone in standalone the notch sits
- * there, and nothing of ours may.
+ * The mark, the page's title, and the two round pills — fixed to the top of
+ * the page on the page's own colour, never on a slab of red.
+ *
+ * It sticks rather than scrolling away: on a screen someone is reading in a
+ * hurry, the way back and the language switch should not require scrolling up
+ * to find. The hairline underneath appears only once there is content above
+ * it, so an unscrolled screen has no line drawn across it for nothing.
+ *
+ * The 54px reserve it used to carry above the title is gone. It was room for a
+ * notch that env(safe-area-inset-top) already accounts for, and it pushed the
+ * first real thing on every screen down past the fold.
  */
 export function Header({
   title,
@@ -90,12 +99,16 @@ export function Header({
   trailing?: ReactNode;
 }) {
   const { t } = useI18n();
+  const scrolled = useScrolled();
 
   return (
     <header
-      className="flex items-center gap-2 pb-3"
-      style={{ paddingTop: "max(54px, env(safe-area-inset-top))" }}
+      className={`sticky top-0 z-20 -mx-4 flex items-center gap-2 bg-paper px-4 pb-2.5 transition-[border-color] ${
+        scrolled ? "border-b border-line" : "border-b border-transparent"
+      }`}
+      style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}
     >
+      {!onBack && <LogoTile />}
       {onBack && (
         <button
           type="button"
@@ -115,6 +128,18 @@ export function Header({
       {trailing ?? <Pills />}
     </header>
   );
+}
+
+/** True once the page has been scrolled at all. Drives the header's hairline. */
+function useScrolled(): boolean {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return scrolled;
 }
 
 /** Language, then theme. 32px each, hairline border. */

@@ -122,7 +122,12 @@ export function Radar({
                 </button>
               </Card>
             )}
-            {numbers.state === "ready" && <RadarNumbers radar={numbers.radar} />}
+            {numbers.state === "ready" && (
+              <RadarNumbers
+                radar={numbers.radar}
+                onSeeCampaigns={() => setSegment("campaigns")}
+              />
+            )}
           </>
         ) : segment === "campaigns" ? (
           <>

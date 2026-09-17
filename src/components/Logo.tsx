@@ -7,6 +7,24 @@ import { useI18n } from "../i18n";
  * transparency, so the tile supplies the red and nothing is recoloured — the
  * one rule the mark has.
  *
+ * This is the tile alone, for the compact header, where there is no room for
+ * the wordmark and no need for it.
+ */
+export function LogoTile({ size = 32 }: { size?: number }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="flex shrink-0 items-center justify-center rounded-[10px] bg-red"
+      style={{ width: size, height: size }}
+    >
+      <img src="/brand/dara-mark-white.png" alt="" style={{ width: Math.round(size * 0.7) }} />
+    </span>
+  );
+}
+
+/**
+ * The mark with its wordmark, for Home.
+ *
  * In Arabic the brush stands on its own beside the tagline. Setting DARA' in
  * Latin next to a word the reader is already looking at, in Arabic, adds
  * nothing.

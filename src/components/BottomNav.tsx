@@ -1,4 +1,4 @@
-import { House, LifeBuoy, Radar, ScanLine, Send } from "lucide-react";
+import { House, LifeBuoy, Radar, Search, Send } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useI18n, type TextKey } from "../i18n";
 import type { Route } from "../lib/router";
@@ -23,7 +23,7 @@ import type { Route } from "../lib/router";
 const TABS: { route: Route; label: TextKey; Icon: LucideIcon }[] = [
   { route: "home", label: "nav.home", Icon: House },
   { route: "report", label: "nav.report", Icon: Send },
-  { route: "scan", label: "nav.scan", Icon: ScanLine },
+  { route: "scan", label: "nav.scan", Icon: Search },
   { route: "radar", label: "nav.radar", Icon: Radar },
   { route: "help", label: "nav.help", Icon: LifeBuoy },
 ];
@@ -49,11 +49,19 @@ export function BottomNav({
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed inset-x-0 bottom-0 z-30"
+      style={{
+        paddingInline: "max(12px, env(safe-area-inset-left))",
+        paddingBottom: "calc(var(--nav-gap) + env(safe-area-inset-bottom))",
+      }}
     >
+      {/* A bar detached from the edges rather than welded to them. The blur
+          and the hairline are what separate it from whatever scrolls under it;
+          the lift is deliberately faint — the app's one real shadow belongs to
+          the raised button sitting in this bar, and two shadows competing is
+          how a quiet design stops being quiet. */}
       <ul
-        className="mx-auto flex w-full max-w-[30rem]"
+        className="nav-bar mx-auto flex w-full max-w-[30rem] rounded-[26px] border border-line"
         style={{ height: "var(--nav-inner)" }}
       >
         {TABS.map(({ route, label, Icon }) => {
