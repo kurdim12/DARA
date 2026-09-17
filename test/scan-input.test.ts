@@ -39,7 +39,9 @@ describe("the scan input card", () => {
   it("ties a visible label to the field", () => {
     expect(card).toMatch(/htmlFor=\{fieldId\}/);
     expect(card).toMatch(/id=\{fieldId\}/);
-    expect(card).toContain('t("scan.input_label")');
+    // The label is no longer one fixed string: it follows the chip, so it is
+    // read out of TYPE_META alongside the placeholder.
+    expect(card).toContain("t(TYPE_META[type].field)");
   });
 
   it("puts the chips above the field, and lets them wrap", () => {

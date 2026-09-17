@@ -180,7 +180,7 @@ export function Protect({
                       onClick={() =>
                         onCheck(
                           result.result.query,
-                          result.result.kind === "domain" ? "website" : "call",
+                          result.result.kind === "domain" ? "link" : "call",
                         )
                       }
                       className="tap mt-2.5 text-[13px] font-bold text-ink underline underline-offset-2"

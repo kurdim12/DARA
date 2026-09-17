@@ -144,15 +144,9 @@ export interface AnalyzeImage {
  * still decides for itself, and nothing in post-validation keys off this.
  * Distinct from `channel`, which is how the thing reached them.
  */
-export type AnalysisType = "message" | "link" | "call" | "job" | "website";
+export type AnalysisType = "message" | "link" | "call" | "job";
 
-export const ANALYSIS_TYPES: AnalysisType[] = [
-  "message",
-  "link",
-  "call",
-  "job",
-  "website",
-];
+export const ANALYSIS_TYPES: AnalysisType[] = ["message", "link", "call", "job"];
 
 export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 

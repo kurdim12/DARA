@@ -1,12 +1,12 @@
 import { useId, useRef, useState } from "react";
-import { AlertTriangle, ClipboardPaste, ImageUp, RefreshCw, X } from "lucide-react";
+import { AlertTriangle, ClipboardPaste, Eraser, ImageUp, RefreshCw, X } from "lucide-react";
 import { ALLOWED_IMAGE_TYPES, MAX_INPUT_CHARS, type AnalysisType, type AnalyzeImage } from "../../shared/types";
 import { AppError } from "../lib/api";
 import { readClipboardText } from "../lib/clipboard";
 import { detectType } from "../lib/detect";
 import { prepareImage, previewUrl } from "../lib/image";
 import { ScanProgress } from "./ScanProgress";
-import { TypeChips } from "./TypeChips";
+import { TYPE_META, TypeChips } from "./TypeChips";
 import { PrimaryButton } from "./Shell";
 import { useI18n, type TextKey } from "../i18n";
 
@@ -63,9 +63,8 @@ export function ScanInputCard({
    *
    * Two things keep it from being annoying. A guess of null — prose, which is
    * most messages — leaves the chip alone rather than resetting it. And once
-   * someone has picked a chip themselves, detection stops touching it: «رابط»
-   * and «موقع» are genuinely a judgement call, and an app that keeps undoing
-   * that judgement is worse than one that never guessed.
+   * someone has picked a chip themselves, detection stops touching it: an app
+   * that keeps undoing your choice is worse than one that never guessed.
    */
   function fill(value: string) {
     const next = value.slice(0, MAX_INPUT_CHARS);
@@ -110,9 +109,24 @@ export function ScanInputCard({
     <div className="rounded-scanner border border-line bg-card p-4">
       <TypeChips value={type} onChange={chooseType} />
 
-      <label htmlFor={fieldId} className="mt-3.5 block text-[15px] font-bold text-ink">
-        {t("scan.input_label")}
-      </label>
+      {/* Label and placeholder both follow the chip. They used to be one fixed
+          pair, which made the chips look decorative: tapping «رقم هاتف» asked
+          for «الصق رسالة أو رابطًا أو رقم هاتف…» exactly as before. */}
+      <div className="mt-3.5 flex items-end justify-between gap-3">
+        <label htmlFor={fieldId} className="block text-[15px] font-bold text-ink">
+          {t(TYPE_META[type].field)}
+        </label>
+        {text.length > 0 && !busy && (
+          <button
+            type="button"
+            onClick={() => onText("")}
+            className="press tap flex shrink-0 items-center gap-1.5 text-[13px] font-bold text-ink-2"
+          >
+            <Eraser size={15} strokeWidth={1.75} aria-hidden="true" />
+            {t("scan.clear")}
+          </button>
+        )}
+      </div>
 
       <textarea
         id={fieldId}
@@ -121,14 +135,14 @@ export function ScanInputCard({
         disabled={busy}
         maxLength={MAX_INPUT_CHARS}
         onChange={(e) => fill(e.target.value)}
-        placeholder={t("scan.input_ph")}
-        rows={3}
-        className="mt-2 w-full resize-none rounded-btn border border-line bg-paper p-3.5 text-[15px] font-medium leading-relaxed text-ink outline-none placeholder:text-ink-2"
-        style={{ minHeight: 96 }}
+        placeholder={t(TYPE_META[type].placeholder)}
+        rows={4}
+        className="field mt-2 w-full resize-none rounded-btn p-3.5 text-[15px] font-medium leading-relaxed text-ink placeholder:text-ink-2"
+        style={{ minHeight: 124 }}
       />
 
       {image && (
-        <div className="mt-3 flex items-center gap-3 rounded-btn bg-paper p-2.5">
+        <div className="mt-3 flex items-center gap-3 rounded-btn bg-field p-2.5">
           <img
             src={previewUrl(image)}
             alt=""
@@ -146,23 +160,34 @@ export function ScanInputCard({
         </div>
       )}
 
-      {/* Actions on the start side, the counter on the end. Wraps rather than
-          squeezing, because «إرفاق لقطة شاشة» is a long label. */}
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-2">
-        <div className="flex min-w-0 flex-wrap items-center gap-2">
-          <OutlinePill Icon={ClipboardPaste} label={t("scan.paste")} onClick={() => void paste()} />
-          <OutlinePill
-            Icon={ImageUp}
-            label={reading ? t("detect.loading_image") : t("scan.attach")}
-            onClick={() => fileRef.current?.click()}
-          />
-        </div>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <OutlinePill Icon={ClipboardPaste} label={t("scan.paste")} onClick={() => void paste()} />
         <span className="tnum shrink-0 text-[13px] font-semibold text-ink-2">
           <bdi>
             {text.length} / {MAX_INPUT_CHARS}
           </bdi>
         </span>
       </div>
+
+      {/* A screenshot is the second way into this app, not a footnote to the
+          first. It was a 36px outline pill next to «لصق»; it is now its own
+          full-width row that says what it does with the image, above the fold
+          at 375px. */}
+      {!image && (
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          className="press mt-3 flex min-h-14 w-full items-center gap-3 rounded-btn border-2 border-dashed border-field-line bg-field px-4 py-2.5 text-start"
+        >
+          <ImageUp size={22} strokeWidth={1.75} aria-hidden="true" className="shrink-0 text-ink" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-bold text-ink">
+              {reading ? t("detect.loading_image") : t("scan.attach")}
+            </span>
+            <span className="t-sub mt-0.5 block text-[13px]">{t("scan.attach_sub")}</span>
+          </span>
+        </button>
+      )}
 
       <p className="mt-2.5 text-[13px] font-normal leading-snug text-ink-2">
         {t("scan.consent")}

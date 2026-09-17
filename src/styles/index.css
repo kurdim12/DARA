@@ -13,6 +13,9 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-line: var(--line);
+  --color-field: var(--field);
+  --color-field-line: var(--field-line);
+  --color-focus: var(--focus);
   --color-amber: var(--amber);
   --color-amber-fill: var(--amber-fill);
   --color-on-amber: var(--on-amber);
@@ -85,7 +88,7 @@
   }
 
   :focus-visible {
-    outline: 2px solid var(--red);
+    outline: 2px solid var(--focus);
     outline-offset: 2px;
   }
 }
@@ -189,6 +192,34 @@
  * A 44px hit area on a control that is deliberately small. The pseudo-element
  * sits inside the button, so a tap on it still hits it.
  */
+/*
+ * A field that reads as a field.
+ *
+ * Measured before: surface 1.06:1 from the card it sits on, border 1.26:1,
+ * and `outline-none` on the element cancelled the app's focus ring, so
+ * focus changed nothing at all. All three are fixed here rather than in a
+ * class string on one textarea, because the next field to be added should
+ * not have to rediscover the numbers.
+ *
+ * The border is 2px and clears 3:1 against both the card and the field's
+ * own surface — WCAG's bar for the boundary of a control. (1.5px was the
+ * brief's number; Chrome snaps a sub-pixel border down to 1px, so it never
+ * rendered as asked.) Focus swaps it to
+ * the brand colour and adds a 3px ring outside it, which is visible without
+ * shifting the layout by a pixel.
+ */
+.field {
+  background: var(--field);
+  border: 2px solid var(--field-line);
+}
+
+.field:focus,
+.field:focus-visible {
+  outline: none;
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 28%, transparent);
+}
+
 .tap {
   position: relative;
 }

@@ -98,6 +98,8 @@ const APPROVED = {
     "A label in the 'relevant authority (for your reference)' list. Naming a body is not a claim that anything was sent to it, and the confirmation screen says in so many words that nothing was.",
   "report.pilot_note":
     "The confirmation sentence. It contains 'authority' and 'forwarded' because it is the denial: the report is stored on DARA' and has NOT been forwarded.",
+  "scan.ph_call":
+    "The phone-number field's placeholder, «مثال: 07 9XXX XXXX». It is a mask, not a number: the X's make it undialable, and it teaches the shape the field expects rather than asserting that any number exists. The string is the one Abdelrahman's brief specified.",
 };
 
 /**
