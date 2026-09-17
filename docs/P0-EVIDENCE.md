@@ -159,7 +159,15 @@ the deep source paths that were first written into the file were constructed
 rather than read, and have been replaced by `https://www.psd.gov.jo/` with a
 `source_note` on each row explaining the gap.
 `.github/workflows/verify-sources.yml` opens every URL in the file from a
-runner that can reach it and fails when one on a `verified: true` row is dead.
+GitHub runner. **Run `35186792572`: psd.gov.jo did not answer it either** — the
+connection timed out after the full 25 seconds, as did `jocert.ncsc.jo`. That is
+what a Jordanian government host does to foreign traffic, and it is evidence
+neither way. The job now fails only on a real error answer from a host that did
+reply, and reports an unreachable host as inconclusive.
+
+So: **nothing available to this build can open psd.gov.jo.** The one check that
+settles it is a phone in Jordan tapping «الصفحة الرسمية» on Recover. That is
+line 5 of the checklist for exactly this reason.
 
 ### Guards
 

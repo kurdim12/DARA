@@ -16,7 +16,8 @@
         "value": "+962 6 465 5660",
         "why": "Carried from v1. Matches no published PSD number."
       }
-    ]
+    ],
+    "url_check": "verify-sources.yml opened every URL here from a GitHub runner on 17 Sep 2026. psd.gov.jo did not answer it at all — the connection timed out after 25s, as did jocert.ncsc.jo. That is what a Jordanian government host does to foreign traffic; it is not evidence the link is broken, and it is not evidence it works. Nothing available here can open these, so the one check that settles it is a phone in Jordan opening «الصفحة الرسمية» on the Recover screen. The job fails only on a real error answer from a host that did reply."
   },
   "contacts": [
     {

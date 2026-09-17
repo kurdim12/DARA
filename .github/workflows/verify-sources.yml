@@ -1,15 +1,25 @@
-# Do the source URLs in content/verified.json actually resolve?
+# Do the URLs in content/verified.json actually resolve?
 #
-# content/verified.json is the file that decides which phone numbers and links
-# the app is allowed to show a person in trouble. Every row carries a
-# source_url so the claim can be re-checked. The machine this repo is edited
-# from cannot open any of them — the egress proxy refuses psd.gov.jo — so a
-# URL written there is an assertion nobody has tested until this job runs.
+# content/verified.json decides which phone numbers and links the app shows a
+# person in trouble. Every row carries a source_url so the claim can be
+# re-checked. The machine this repo is edited from cannot open any of them —
+# the egress proxy refuses psd.gov.jo — so a URL written there is an assertion
+# nobody has tested until this job runs.
 #
-# A link that 404s on the Shield screen is worse than no link: it is the app
-# telling a frightened person to go somewhere that does not exist. This job
-# reads the URLs out of the content file itself, so it can never drift from
-# what ships, and prints the status of each.
+# What this job can and cannot settle:
+#
+#   - A 4xx or 5xx is a real answer. The host exists, and it says that page
+#     does not. On a row the app ships, that is fatal: a link that 404s in
+#     front of someone in trouble is the app sending them nowhere.
+#   - A connection that never completes is NOT an answer. Jordanian government
+#     hosts do not respond to a GitHub runner in the US or EU at all — every
+#     psd.gov.jo request from here times out after the full 25 seconds, and so
+#     does jocert.ncsc.jo. That is what a geo-filtered government site looks
+#     like from abroad, and it says nothing about what a phone in Amman sees.
+#     So it is reported and never fatal.
+#
+# Which means: for a .gov.jo host this job can prove a link is broken and can
+# never prove it works. The only test that does is a phone in Jordan.
 name: verify-sources
 
 on:
@@ -38,8 +48,8 @@ jobs:
           # in "url", rather than a hand-typed list of paths into the file: a
           # URL added to the content file and not to this job is exactly the
           # URL that would go unchecked. Each one is tagged with its row's
-          # verified flag, because only a row that ships can have a dead link
-          # in front of a person — a staged row renders nowhere yet.
+          # verified flag, because only a row that ships can put a dead link in
+          # front of a person — a staged row renders nowhere yet.
           jq -r '
             [ .. | objects | select(has("verified"))
               | .verified as $v
@@ -52,31 +62,52 @@ jobs:
 
           echo "=== URLs in content/verified.json ==="
           BAD=0
+          UNREACHED=0
           while IFS=$'\t' read -r state u; do
             [ -n "$u" ] || continue
-            # -L: these sites redirect between language variants. A 200 after
-            # following is what a phone would experience.
-            out=$(curl -sSL --max-time 30 -o /dev/null \
-              -w "%{http_code} %{url_effective}" "$u" 2>/dev/null || echo "000 (unreachable)")
-            code=${out%% *}
+
+            # curl's exit code is the evidence for which of the two cases this
+            # is; the status code alone cannot tell "the host said no" from
+            # "the host never spoke". -L because these sites redirect between
+            # language variants, and a 200 after following is what a phone
+            # would experience.
+            set +e
+            code=$(curl -sSL --max-time 25 -o /dev/null -w "%{http_code}" "$u" 2>/dev/null)
+            rc=$?
+            set -e
+
+            if [ "$rc" -ne 0 ]; then
+              # 28 timeout, 6 DNS, 7 refused, 35 TLS. None of them is the host
+              # answering, so none of them is this link being broken.
+              echo "  ??  [$state]  $u  — no answer at all (curl exit $rc). Inconclusive from this runner."
+              UNREACHED=$((UNREACHED + 1))
+              continue
+            fi
+
             case "$code" in
-              2*|3*) mark="ok" ;;
-              *) if [ "$state" = ships ]; then
-                   mark="FAILS — this link is dead in the app"; BAD=1
-                 else
-                   mark="dead, but staged: it renders nowhere yet"
-                 fi ;;
+              2*|3*) echo "  ok  [$state]  $u  ($code)" ;;
+              *)
+                if [ "$state" = ships ]; then
+                  echo "FAILS [$state]  $u  ($code) — the host answered and this page is not there"
+                  BAD=1
+                else
+                  echo "  --  [$state]  $u  ($code) — dead, but staged: it renders nowhere yet"
+                fi ;;
             esac
-            echo "$code  [$state]  $u  -> ${out#* }  [$mark]"
           done < /tmp/urls.tsv
 
+          echo
           if [ "$BAD" = 1 ]; then
-            echo
-            echo "VERDICT: a URL the app ships does not resolve. Do not ship it."
+            echo "VERDICT: a URL the app ships is answered with an error. Do not ship it."
             exit 1
           fi
-          echo
-          echo "VERDICT: every URL this file ships resolves."
+          if [ "$UNREACHED" -gt 0 ]; then
+            echo "VERDICT: nothing is broken. $UNREACHED URL(s) never answered this runner,"
+            echo "which is what a Jordanian government host does to foreign traffic and is"
+            echo "not evidence either way. Those have to be opened on a phone in Jordan."
+          else
+            echo "VERDICT: every URL this file ships resolves."
+          fi
 
       - name: Candidate paths (probe only, never fails)
         if: inputs.probe != ''
@@ -91,11 +122,17 @@ jobs:
           # one that ships is the one that answered, not the one that read well.
           echo "=== candidates ==="
           for u in $PROBE; do
-            out=$(curl -sSL --max-time 30 -o /tmp/body.html \
-              -w "%{http_code} %{url_effective}" "$u" 2>/dev/null || echo "000 (unreachable)")
-            echo "$out"
-            # A site that answers 200 with its own "page not found" is the trap
-            # a status code alone walks into, so the title is printed too.
-            grep -o '<title>[^<]*</title>' /tmp/body.html 2>/dev/null | head -1 || true
+            set +e
+            out=$(curl -sSL --max-time 25 -o /tmp/body.html -w "%{http_code} %{url_effective}" "$u" 2>/dev/null)
+            rc=$?
+            set -e
+            if [ "$rc" -ne 0 ]; then
+              echo "no answer (curl exit $rc)  $u"
+            else
+              echo "$out"
+              # A site that answers 200 with its own "page not found" is the
+              # trap a status code alone walks into, so the title is printed.
+              grep -o '<title>[^<]*</title>' /tmp/body.html 2>/dev/null | head -1 || true
+            fi
             echo
           done
