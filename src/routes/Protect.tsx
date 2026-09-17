@@ -144,7 +144,7 @@ export function Protect({
                     type="submit"
                     disabled={query.trim().length === 0 || result.state === "loading"}
                     className={`h-11 shrink-0 rounded-btn px-4 text-[14px] font-bold ${
-                      query.trim().length === 0 ? "bg-line text-ink-2" : "bg-ink text-white-brush"
+                      query.trim().length === 0 ? "bg-line text-ink-2" : "bg-ink text-paper"
                     }`}
                   >
                     {t("radar.lookup_cta")}

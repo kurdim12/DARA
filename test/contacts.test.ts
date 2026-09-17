@@ -201,3 +201,20 @@ describe("what the screen dials", () => {
     }
   });
 });
+
+describe("the call buttons survive dark mode", () => {
+  it("never puts white-brush text on an ink background", () => {
+    // In dark mode --ink is #f2eeec and --white is #f7f4f3: 1.05:1, which is
+    // an invisible button, and «911 اتصل» is the one button in this app that
+    // must never disappear. --paper inverts with the theme, so text-paper on
+    // bg-ink is 17.4:1 light and 16.2:1 dark.
+    const screens = ["src/components/HelpLines.tsx", "src/routes/Shield.tsx"];
+    for (const path of screens) {
+      const source = readFileSync(join(root, path), "utf8");
+      for (const line of source.split("\n")) {
+        if (!line.includes("bg-ink")) continue;
+        expect(line.includes("text-white-brush"), `${path}: ${line.trim()}`).toBe(false);
+      }
+    }
+  });
+});

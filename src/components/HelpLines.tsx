@@ -166,7 +166,7 @@ function CallButton({
 }) {
   const skin = urgent
     ? "border-2 border-red bg-card text-red-ink"
-    : "bg-ink text-white-brush";
+    : "bg-ink text-paper";
 
   return (
     <a

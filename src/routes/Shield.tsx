@@ -146,7 +146,7 @@ function QuickExit({ onExit }: { onExit: () => void }) {
     <button
       type="button"
       onClick={onExit}
-      className="flex h-[34px] shrink-0 items-center rounded-full bg-ink px-3.5 text-[13px] font-bold text-white-brush"
+      className="flex h-[34px] shrink-0 items-center rounded-full bg-ink px-3.5 text-[13px] font-bold text-paper"
     >
       {t("sh.exit")}
     </button>
