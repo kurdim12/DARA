@@ -1,0 +1,101 @@
+# Do the source URLs in content/verified.json actually resolve?
+#
+# content/verified.json is the file that decides which phone numbers and links
+# the app is allowed to show a person in trouble. Every row carries a
+# source_url so the claim can be re-checked. The machine this repo is edited
+# from cannot open any of them — the egress proxy refuses psd.gov.jo — so a
+# URL written there is an assertion nobody has tested until this job runs.
+#
+# A link that 404s on the Shield screen is worse than no link: it is the app
+# telling a frightened person to go somewhere that does not exist. This job
+# reads the URLs out of the content file itself, so it can never drift from
+# what ships, and prints the status of each.
+name: verify-sources
+
+on:
+  workflow_dispatch:
+    inputs:
+      probe:
+        description: >-
+          Candidate URLs to probe, space separated. Probing never fails the
+          job — it is how a deeper path earns its way into the content file
+          instead of being guessed at.
+        default: ""
+  push:
+    paths:
+      - content/verified.json
+      - .github/workflows/verify-sources.yml
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Every URL the content file ships
+        run: |
+          # jq walks the whole document and takes anything under a key ending
+          # in "url", rather than a hand-typed list of paths into the file: a
+          # URL added to the content file and not to this job is exactly the
+          # URL that would go unchecked. Each one is tagged with its row's
+          # verified flag, because only a row that ships can have a dead link
+          # in front of a person — a staged row renders nowhere yet.
+          jq -r '
+            [ .. | objects | select(has("verified"))
+              | .verified as $v
+              | to_entries[]
+              | select(.key | test("url$"))
+              | .value | select(type == "string")
+              | [ (if $v then "ships" else "staged" end), . ]
+            ] | unique | .[] | @tsv
+          ' content/verified.json > /tmp/urls.tsv
+
+          echo "=== URLs in content/verified.json ==="
+          BAD=0
+          while IFS=$'\t' read -r state u; do
+            [ -n "$u" ] || continue
+            # -L: these sites redirect between language variants. A 200 after
+            # following is what a phone would experience.
+            out=$(curl -sSL --max-time 30 -o /dev/null \
+              -w "%{http_code} %{url_effective}" "$u" 2>/dev/null || echo "000 (unreachable)")
+            code=${out%% *}
+            case "$code" in
+              2*|3*) mark="ok" ;;
+              *) if [ "$state" = ships ]; then
+                   mark="FAILS — this link is dead in the app"; BAD=1
+                 else
+                   mark="dead, but staged: it renders nowhere yet"
+                 fi ;;
+            esac
+            echo "$code  [$state]  $u  -> ${out#* }  [$mark]"
+          done < /tmp/urls.tsv
+
+          if [ "$BAD" = 1 ]; then
+            echo
+            echo "VERDICT: a URL the app ships does not resolve. Do not ship it."
+            exit 1
+          fi
+          echo
+          echo "VERDICT: every URL this file ships resolves."
+
+      - name: Candidate paths (probe only, never fails)
+        if: inputs.probe != ''
+        env:
+          # Through the environment, never interpolated into the script: a
+          # dispatch input pasted straight into a shell line is a command
+          # someone else gets to write.
+          PROBE: ${{ inputs.probe }}
+        run: |
+          # A deeper path is more useful to a person than a site root, but only
+          # if it exists. This prints what each candidate actually does so the
+          # one that ships is the one that answered, not the one that read well.
+          echo "=== candidates ==="
+          for u in $PROBE; do
+            out=$(curl -sSL --max-time 30 -o /tmp/body.html \
+              -w "%{http_code} %{url_effective}" "$u" 2>/dev/null || echo "000 (unreachable)")
+            echo "$out"
+            # A site that answers 200 with its own "page not found" is the trap
+            # a status code alone walks into, so the title is printed too.
+            grep -o '<title>[^<]*</title>' /tmp/body.html 2>/dev/null | head -1 || true
+            echo
+          done

@@ -1,15 +1,8 @@
-import { EyeOff, Phone, ShieldAlert, Wrench } from "lucide-react";
+import { EyeOff, ShieldAlert, Wrench } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
-import {
-  Card,
-  Header,
-  IconRow,
-  ListCard,
-  Page,
-  RowChevron,
-} from "../components/Shell";
+import { HelpLines } from "../components/HelpLines";
+import { Card, Header, IconRow, Page, RowChevron } from "../components/Shell";
 import { useI18n } from "../i18n";
-import { contacts } from "../lib/verified";
 import type { Route } from "../lib/router";
 
 /**
@@ -19,11 +12,12 @@ import type { Route } from "../lib/router";
  * before they could get anywhere.
  *
  * The numbers sit under both, because either way that is what someone may
- * need — and each one says whether it has been checked.
+ * need — and each one says where it came from and when it was checked. The
+ * list itself is the shared HelpLines component, so this screen and the Shield
+ * screen can no longer drift into naming the same directorate two ways.
  */
 export function Help({ navigate }: { navigate: (route: Route) => void }) {
-  const { t, lang } = useI18n();
-  const lines = contacts(lang);
+  const { t } = useI18n();
 
   return (
     <>
@@ -52,31 +46,9 @@ export function Help({ navigate }: { navigate: (route: Route) => void }) {
         </div>
 
         <h2 className="t-h3 mt-7">{t("shield.helplines")}</h2>
-        <ListCard className="mt-3">
-          {lines.map((line) => (
-            <IconRow
-              key={line.id}
-              Icon={Phone}
-              title={line.label}
-              sub={line.number ? <bdi className="tnum">{line.number}</bdi> : t("shield.pending_number")}
-              trailing={
-                line.number ? (
-                  <a
-                    href={`tel:${line.number.replace(/\s/g, "")}`}
-                    className="flex h-[34px] shrink-0 items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-bold text-white-brush"
-                  >
-                    <Phone size={15} strokeWidth={1.75} aria-hidden="true" />
-                    {t("shield.call")}
-                  </a>
-                ) : (
-                  <span className="flex h-[26px] shrink-0 items-center rounded-full border border-amber-ink px-2.5 text-[12px] font-bold text-amber-ink">
-                    {t("shield.verify_tag")}
-                  </span>
-                )
-              }
-            />
-          ))}
-        </ListCard>
+        <div className="mt-3">
+          <HelpLines />
+        </div>
 
         <Card className="mt-3 flex items-start gap-3">
           <EyeOff size={20} strokeWidth={1.75} className="mt-0.5 shrink-0 text-green" aria-hidden="true" />

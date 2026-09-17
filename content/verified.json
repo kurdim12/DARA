@@ -1,8 +1,22 @@
 {
   "_meta": {
     "purpose": "Every phone number and legal line the app could show. Nothing here renders in a production build until someone has checked it against an official source and set verified to true.",
-    "rule": "Only Abdelrahman flips a flag, after reading the official source. Until then the Shield screen shows the card, the name and a 'pending verification' line — never an invented number, and never a tel: link.",
-    "origin": "Checked again on 16 Sep 2026 after Abdelrahman said the numbers were out of date. He is right, and it is worse than stale: the published sources disagree with each other. Each contact now carries a `candidates` list of every number anyone publishes for it, with where it was seen. Choosing between them is not something a search can do — psd.gov.jo is the authority and it is the one page that has to be read. Nothing renders until then."
+    "rule": "Abdelrahman owns this flag: CLAUDE.md says only he flips verified to true, after reading an official source. The three contacts below were flipped on 17 Sep on Zaid's 16 Sep reading as relayed in Abdelrahman's brief, which is his instruction but not his own reading — so it is called out here rather than left to look routine. Every verified entry carries value, source_url, verified_on and verified_by so any of it can be re-checked, or reverted, without repeating the work.",
+    "origin": "The three contacts record Zaid's check against psd.gov.jo on 16 Sep 2026, written here on 17 Sep and attributed to him rather than presented as an independent check — the machine that wrote this file cannot reach psd.gov.jo, the egress proxy refuses it. That is the whole reason verified_by, verified_on and source_url exist on every row. .github/workflows/verify-sources.yml opens every URL in this file from somewhere that can, and fails if one is dead.",
+    "never_show": [
+      {
+        "value": "20224",
+        "why": "Not officially documented anywhere. It circulates as a Cybercrime Unit number and is not one. A test asserts it appears in no file."
+      },
+      {
+        "value": "110",
+        "why": "The Jordan River Foundation's families-and-children helpline — a charity line, not the PSD directorate. This file carried it as Family Protection and was wrong."
+      },
+      {
+        "value": "+962 6 465 5660",
+        "why": "Carried from v1. Matches no published PSD number."
+      }
+    ]
   },
   "contacts": [
     {
@@ -12,49 +26,21 @@
         "en": "Unified Emergency Number",
         "ar": "الرقم الموحد للطوارئ"
       },
+      "value": "911",
       "number": "911",
-      "verified": false,
-      "note": "Abdelrahman's table, 16 Sep. psd.gov.jo describes 911 as Jordan's unified emergency number, which is the one entry of the three I could corroborate. Check it on psd.gov.jo yourself before flipping this: https://www.psd.gov.jo/en-us/content/security-services/911-emergency-number/",
-      "candidates": [
-        {
-          "number": "911",
-          "seen_as": "The unified emergency number",
-          "where": "psd.gov.jo, jordan.gov.jo"
-        }
-      ]
-    },
-    {
-      "id": "family_protection",
-      "tone": "primary",
-      "label": {
-        "en": "Family Protection & Juvenile Dept.",
-        "ar": "إدارة حماية الأسرة والأحداث"
+      "verified": true,
+      "verified_on": "2026-09-16",
+      "verified_by": "Zaid, against psd.gov.jo",
+      "source_url": "https://www.psd.gov.jo/",
+      "also": {
+        "en": "Also reachable through the 911 app.",
+        "ar": "ويمكن الوصول إليه أيضاً عبر تطبيق 911."
       },
-      "number": "06 580 0500",
-      "verified": false,
-      "note": "Abdelrahman's table, 16 Sep. I could NOT corroborate this number from an official source — treat it as the least checked of the three. It replaces 110, which this file had wrong: 110 is the Jordan River Foundation's families-and-children helpline, a charity line, not the PSD directorate this row names. Check against psd.gov.jo or moi.gov.jo's directory.",
-      "candidates": [
-        {
-          "number": "911",
-          "seen_as": "The documented route — PSD says family-violence reports go through 911 or the ammn911 app",
-          "where": "psd.gov.jo service page"
-        },
-        {
-          "number": "06 580 0500",
-          "seen_as": "Abdelrahman's table, 16 Sep",
-          "where": "not corroborated"
-        },
-        {
-          "number": "06 581 5826",
-          "seen_as": "Published as Family Protection & Juveniles",
-          "where": "secondary directories; conflicts with the line above"
-        },
-        {
-          "number": "110",
-          "seen_as": "WRONG BODY — Jordan River Foundation's families-and-children helpline, a charity",
-          "where": "jordanriver.jo"
-        }
-      ]
+      "when_to_call": {
+        "en": "Immediate danger to your safety.",
+        "ar": "خطر مباشر على سلامتك."
+      },
+      "source_note": "Zaid read the 911 page on psd.gov.jo. The domain is recorded rather than the exact path, because this machine cannot open the site to confirm a path and a link that 404s in front of someone in trouble is worse than one more tap."
     },
     {
       "id": "cybercrime_unit",
@@ -63,34 +49,72 @@
         "en": "Cybercrime Unit",
         "ar": "وحدة مكافحة الجرائم الإلكترونية"
       },
+      "affiliation": {
+        "en": "Criminal Investigation Department — Public Security Directorate",
+        "ar": "إدارة البحث الجنائي — مديرية الأمن العام"
+      },
+      "value": "196",
       "number": "196",
-      "verified": false,
+      "free": true,
       "extensions": [
         "812594",
         "812232"
       ],
-      "note": "Abdelrahman's table, 16 Sep. Corroborated: published sources give 196 with extensions 812594 and 812232, and a direct line 06 563 3404. It replaces +962 6 465 5660, which this file carried from v1 and which matches none of those. Confirm on the unit's own page at psd.gov.jo before flipping. NOTE the shape: a caller dials 196 and then the extension — if the Shield screen ever renders this as one tel: link it will dial 196812594, which is not a number. That is why this row carries extensions separately.",
-      "candidates": [
-        {
-          "number": "196",
-          "extensions": [
-            "812594",
-            "812232"
-          ],
-          "seen_as": "Switchboard plus extensions",
-          "where": "petra.gov.jo, psd.gov.jo unit page"
-        },
-        {
-          "number": "06 563 3404",
-          "seen_as": "Direct line, one dial instead of two",
-          "where": "same sources"
-        },
-        {
-          "number": "+962 6 465 5660",
-          "seen_as": "Carried from v1, matches no published number",
-          "where": "unknown"
-        }
-      ]
+      "email": "ecrimes@psd.gov.jo",
+      "address": {
+        "en": "CID — Amman, Abdali",
+        "ar": "إدارة البحث الجنائي — عمّان، العبدلي"
+      },
+      "verified": true,
+      "verified_on": "2026-09-16",
+      "verified_by": "Zaid, against the unit's page on psd.gov.jo",
+      "source_url": "https://www.psd.gov.jo/",
+      "source_note": "Zaid read the unit's own page on psd.gov.jo. The exact path is not recorded here because this machine cannot open it to confirm the URL, and a fabricated path is worse than the domain that is certainly right.",
+      "dial_note": {
+        "en": "Dial 196, then the extension.",
+        "ar": "اتصل على 196 ثم أدخل الرقم الفرعي."
+      },
+      "when_to_call": {
+        "en": "Online fraud, extortion, account takeover, impersonation.",
+        "ar": "احتيال إلكتروني، ابتزاز، اختراق حساب، انتحال صفة."
+      },
+      "dial_note_why": "196 and 812594 are never joined into one number — tel:196812594 dials nothing. extensions is a separate field for exactly this reason."
+    },
+    {
+      "id": "family_protection",
+      "tone": "primary",
+      "label": {
+        "en": "Family Protection & Juveniles Dept.",
+        "ar": "إدارة حماية الأسرة والأحداث"
+      },
+      "affiliation": {
+        "en": "Public Security Directorate",
+        "ar": "مديرية الأمن العام"
+      },
+      "value": null,
+      "number": null,
+      "no_single_number": true,
+      "verified": true,
+      "verified_on": "2026-09-16",
+      "verified_by": "Zaid, against psd.gov.jo",
+      "source_url": "https://www.psd.gov.jo/",
+      "email": "fpj.dept@psd.gov.jo",
+      "route_to": "emergency",
+      "why_no_number": {
+        "en": "This directorate has no single national number — it publishes one per governorate.",
+        "ar": "لا يوجد رقم وطني موحّد لهذه الإدارة؛ لكل محافظة رقم خاص بها."
+      },
+      "also": {
+        "en": "Reports can also be filed through the ammn911 app.",
+        "ar": "ويمكن تقديم البلاغ أيضاً عبر تطبيق ammn911."
+      },
+      "when_to_call": {
+        "en": "Cases involving family, minors, or domestic violence.",
+        "ar": "الحالات التي تخص الأسرة أو الأحداث أو العنف الأسري."
+      },
+      "source_note": "Zaid read the directorate's page on psd.gov.jo. The domain is recorded rather than the exact path, because this machine cannot open the site to confirm a path and a link that 404s in front of someone in trouble is worse than one more tap.",
+      "official_url": "https://www.psd.gov.jo/",
+      "why_no_number_note": "Do not 'fix' this by picking one governorate's number: showing any one of them as THE number sends most people to the wrong governorate. The app shows the directorate's own page instead, and routes immediate danger to 911."
     }
   ],
   "legal": [
@@ -101,10 +125,23 @@
         "ar": "قانون الجرائم الإلكترونية رقم 17 لسنة 2023 يحميك."
       },
       "verified": false,
-      "note": "A statement about the law. It needs the official text and the article cited before it renders."
+      "note": "A statement about the law. It needs the official text and the article cited before it renders. Not part of P0-2, which covered phone numbers only."
     }
   ],
   "links": [
+    {
+      "id": "psd_contact",
+      "label": {
+        "en": "Public Security Directorate",
+        "ar": "مديرية الأمن العام"
+      },
+      "url": "https://www.psd.gov.jo/",
+      "verified": true,
+      "verified_on": "2026-09-16",
+      "verified_by": "Zaid",
+      "source_url": "https://www.psd.gov.jo/",
+      "note": "The authority for all three contacts, kept as the one record of the domain. What the Family Protection row actually opens is its own official_url; there was a second, identical entry here for it and it rendered nowhere."
+    },
     {
       "id": "jocert_form",
       "label": {
@@ -113,27 +150,7 @@
       },
       "url": "https://jocert.ncsc.jo/AR/Forms/",
       "verified": false,
-      "note": "The official reporting form the reference build linked to. A URL the app sends someone to is the same kind of claim as a phone number: it renders only once somebody has opened it and confirmed it is the right form and still live."
-    },
-    {
-      "id": "psd_contact",
-      "label": {
-        "en": "Public Security Directorate",
-        "ar": "مديرية الأمن العام"
-      },
-      "url": "https://www.psd.gov.jo/",
-      "verified": false,
-      "note": "The authority for all three numbers. A link is the honest form for something that changes: it cannot go stale the way a cached extension does, and checking it is opening it once. Open it, confirm it loads and carries the contact details, then flip."
-    },
-    {
-      "id": "psd_family_protection",
-      "label": {
-        "en": "Family Protection & Juvenile Dept.",
-        "ar": "إدارة حماية الأسرة والأحداث"
-      },
-      "url": "https://www.psd.gov.jo/ar-jo/إدارة-حماية-الاسرة-والأحداث/",
-      "verified": false,
-      "note": "The directorate's own page. Settles which of the three published numbers is current."
+      "note": "The official reporting form the reference build linked to. Not covered by Zaid's 16 Sep check, so it stays unverified and does not render."
     }
   ]
 }

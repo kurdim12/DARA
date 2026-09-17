@@ -108,3 +108,69 @@ tsc --noEmit: clean
 23 test files, 220 tests passed
 vite build: dist/client/assets/index-*.js 493.28 kB (gzip 148.93 kB)
 ```
+
+---
+
+## P0-2 — the emergency numbers
+
+### What the screens offer now
+
+Every link on the two screens that carry help lines, read out of the rendered
+DOM (`/shield` and `/help`, both languages, 390×844):
+
+| href | visible text (ar) | visible text (en) |
+| --- | --- | --- |
+| `tel:911` | «911 عند الخطر المباشر» | "911 In immediate danger" |
+| `https://www.psd.gov.jo/` | «الصفحة الرسمية» | "Official page" |
+| `mailto:fpj.dept@psd.gov.jo` | `fpj.dept@psd.gov.jo` | same |
+| `tel:196` | «196 اتصل» | "196 Call" |
+| `mailto:ecrimes@psd.gov.jo` | `ecrimes@psd.gov.jo` | same |
+| `tel:911` | «911 اتصل» | "911 Call" |
+| `https://www.psd.gov.jo/` ×3 | «psd.gov.jo» under each row | same |
+
+Plus the Shield screen's red danger card: `tel:911`, «اتصل بـ 911 الآن».
+
+**Zero dead buttons. Zero «بانتظار التحقق».** The four keys that carried that
+wording are deleted from both dictionaries, so a screen cannot say it and still
+typecheck.
+
+### The one row with no number
+
+Family Protection & Juveniles Dept. publishes one number per governorate. It
+gets no number at all — instead the row says so, routes immediate danger to
+911, opens the directorate's page, and gives `fpj.dept@psd.gov.jo`.
+`why_no_number_note` in the content file tells the next editor not to "fix" it
+by picking a governorate.
+
+### The name
+
+| where | before | after |
+| --- | --- | --- |
+| Report screen (`authority.cybercrime_unit`) | وحدة الجرائم الإلكترونية — **وزارة الداخلية** | وحدة مكافحة الجرائم الإلكترونية — إدارة البحث الجنائي / مديرية الأمن العام |
+| Shield / Recover list | (no affiliation shown) | same string, from `affiliation` in the record |
+
+Both screens render one shared component now, so they cannot drift apart again.
+
+### What is NOT independently verified
+
+The values come from Zaid's 16 Sep check, recorded with `verified_by` on each
+row. **This machine cannot open psd.gov.jo** — the egress proxy refuses it — so
+the deep source paths that were first written into the file were constructed
+rather than read, and have been replaced by `https://www.psd.gov.jo/` with a
+`source_note` on each row explaining the gap.
+`.github/workflows/verify-sources.yml` opens every URL in the file from a
+runner that can reach it and fails when one on a `verified: true` row is dead.
+
+### Guards
+
+`test/contacts.test.ts`, 15 tests. Four of them were proven to fail against the
+old state before being kept: restoring «وزارة الداخلية», restoring
+`shield.pending_number`, and dropping the string `20224` into a source file each
+turn the suite red.
+
+```
+tsc --noEmit: clean
+23 test files, 229 tests passed
+honesty-check: clean
+vite build: dist/client/assets/index-*.js 496.68 kB (gzip 150.18 kB)
+```

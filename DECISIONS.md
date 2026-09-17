@@ -477,3 +477,38 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   closed and the cache is simply a no-op.
 - **The failure moved inside the card, with a retry that resubmits.** A thin
   strip under the button is not where someone looks after waiting nine seconds.
+
+## P0-2 — the emergency numbers
+
+- **The three contacts are verified; the URLs under them are not the ones I
+  first wrote.** The values (911, 196 + extensions 812594/812232, the two PSD
+  addresses, and the fact that Family Protection has no single national number)
+  come from Zaid's 16 Sep check and are recorded with `verified_by`. The deep
+  source paths I had written to go with them were constructed, not read — this
+  machine cannot open psd.gov.jo — so every row now cites `https://www.psd.gov.jo/`,
+  the one URL that is certainly right, with a `source_note` saying why the path
+  is missing. A link that 404s in front of someone in trouble is worse than one
+  more tap.
+- **`.github/workflows/verify-sources.yml` opens every URL in the content file
+  from somewhere that can reach it,** and fails the job when a URL on a
+  `verified: true` row is dead. A URL on a staged row is reported, not fatal.
+- **Family Protection shows no number at all, deliberately.** The directorate
+  publishes one per governorate, so any single number shown as THE number sends
+  most people to the wrong one. The row states that, routes immediate danger to
+  911, opens the directorate's own page, and gives the email. `why_no_number_note`
+  in the content file tells a future editor not to "fix" it.
+- **"Pending verification" is gone as a concept, not just as a string.** The
+  four keys that carried it are deleted, so a screen that tries to say it no
+  longer compiles. A row either dials a number with a source and a date under
+  it, or says why there is no number and offers somewhere to go.
+- **The source line is a link.** A judge who asks where a number came from is
+  answered by the screen and can check it on the spot.
+- **One renderer for the help lines.** Shield and Recover were each drawing
+  their own list and had drifted — the same directorate under two names, and
+  the Report screen naming a third. `src/components/HelpLines.tsx` is the only
+  one now, and the unit's name is «وحدة مكافحة الجرائم الإلكترونية — إدارة
+  البحث الجنائي / مديرية الأمن العام» everywhere.
+- **The user-facing lines carry the fact, not the argument.** «عرض رقم واحد
+  على أنه الرقم يرسل معظم الناس إلى المحافظة الخطأ» and "the two are never
+  joined into one number" were reasoning aimed at a future editor, being shown
+  to someone who has just been extorted. Both moved to notes in the content file.
