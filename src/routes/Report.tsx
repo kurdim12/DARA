@@ -14,20 +14,19 @@ import {
 import type { LucideIcon } from "lucide-react";
 import {
   CHANNELS,
-  RELEVANT_AUTHORITIES,
   THREAT_TYPES,
   type Category,
   type Channel,
   type CommunityReport,
-  type RelevantAuthority,
   type ThreatType,
 } from "../../shared/types";
 import { BottomNav } from "../components/BottomNav";
 import { CaseNumber } from "../components/CaseNumber";
+import { HelpLines } from "../components/HelpLines";
 import {
   Card,
   Chip,
-  ChipRow,
+  ChipWrap,
   FieldLabel,
   Header,
   IconRow,
@@ -94,6 +93,8 @@ export function Report({
     threatType?: ThreatType;
     category?: Category;
     messageText?: string;
+    /** «رقم هاتف» is a call. Nothing else about a verdict says how it arrived. */
+    channel?: Channel;
     /**
      * Whom the message was pretending to be, as the engine read it. It used to
      * be a box the person typed into; this is the same field filled by the
@@ -108,8 +109,7 @@ export function Report({
     prefill?.threatType ??
       (prefill?.category ? (TYPE_FOR_CATEGORY[prefill.category] ?? "other") : "phishing"),
   );
-  const [channel, setChannel] = useState<Channel>("sms");
-  const [authority, setAuthority] = useState<RelevantAuthority>("cybercrime_unit");
+  const [channel, setChannel] = useState<Channel>(prefill?.channel ?? "sms");
   const [attach, setAttach] = useState(Boolean(prefill?.messageText));
 
   const entity = prefill?.entity?.trim() ?? "";
@@ -127,7 +127,6 @@ export function Report({
         source: "detect",
         category: prefill?.category ?? CATEGORY_FOR[threatType],
         threat_type: threatType,
-        relevant_authority: authority,
         channel,
         impersonated_entity: entity || undefined,
         // No description field any more. The column is nullable and the
@@ -181,7 +180,7 @@ export function Report({
           <FieldLabel>{t("rep.category")}</FieldLabel>
         </div>
         <div className="mt-2.5">
-          <ChipRow>
+          <ChipWrap>
             {THREAT_TYPES.map((option) => (
               <Chip
                 key={option}
@@ -191,14 +190,14 @@ export function Report({
                 onClick={() => setThreatType(option)}
               />
             ))}
-          </ChipRow>
+          </ChipWrap>
         </div>
 
         <div className="mt-6">
           <FieldLabel>{t("rep.channel")}</FieldLabel>
         </div>
         <div className="mt-2.5">
-          <ChipRow>
+          <ChipWrap>
             {CHANNELS.map((option) => (
               <Chip
                 key={option}
@@ -207,7 +206,7 @@ export function Report({
                 onClick={() => setChannel(option)}
               />
             ))}
-          </ChipRow>
+          </ChipWrap>
         </div>
 
         {prefill?.messageText && (
@@ -222,33 +221,21 @@ export function Report({
           </Card>
         )}
 
-        <div className="mt-6">
-          <FieldLabel>{t("report.authority_label")}</FieldLabel>
+        {/* Information, not an input. Choosing a body was never a choice the
+            app acted on — nothing reads relevant_authority back out of the
+            database — and a radio list invited a person in trouble to classify
+            Jordanian jurisdiction before they could send anything.
+
+            What replaces it is the same verified record the Recover and Shield
+            screens show, so the only jurisdiction claim on this screen is one
+            somebody checked against an official source and dated. The report
+            itself now carries no authority field at all, which is the honest
+            shape: DARA' does not route anything to anyone. */}
+        <h2 className="t-h3 mt-8">{t("report.who_handles")}</h2>
+        <p className="t-sub mt-1">{t("report.who_handles_sub")}</p>
+        <div className="mt-2.5">
+          <HelpLines only={["cybercrime_unit"]} />
         </div>
-        <ListCard className="mt-2.5">
-          {RELEVANT_AUTHORITIES.map((option) => {
-            const selected = option === authority;
-            return (
-              <IconRow
-                key={option}
-                role="radio"
-                selected={selected}
-                onClick={() => setAuthority(option)}
-                title={t(`authority.${option}` as TextKey)}
-                lead={
-                  <span
-                    aria-hidden="true"
-                    className={`flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 ${
-                      selected ? "border-ink" : "border-line"
-                    }`}
-                  >
-                    {selected && <span className="size-[11px] rounded-full bg-ink" />}
-                  </span>
-                }
-              />
-            );
-          })}
-        </ListCard>
 
         {isTestMode() && <p className="t-sub mt-3 text-amber-ink">{t("rep.test_mode")}</p>}
 

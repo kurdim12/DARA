@@ -103,6 +103,22 @@ const APPROVED = {
 };
 
 /**
+ * A source comment is not copy either, for the same reason an identifier is
+ * not: nobody using the app reads it. A comment explaining WHY a row names the
+ * cybercrime unit was stopping the build, which is exactly the kind of false
+ * positive that teaches people to run this with their eyes closed.
+ *
+ * Deliberately narrow: only a line that STARTS with a comment marker, and only
+ * in source files. A JSON line can never be one, so no copy string can hide
+ * behind this — the i18n dictionaries and the content file are scanned whole.
+ */
+function isCommentLine(file, line) {
+  if (file.endsWith(".json")) return false;
+  const trimmed = line.trimStart();
+  return trimmed.startsWith("//") || trimmed.startsWith("/*") || trimmed.startsWith("*");
+}
+
+/**
  * A term inside an identifier is not copy. `cybercrime_unit` and
  * `RELEVANT_AUTHORITIES` are symbols the compiler reads, not sentences anyone
  * sees, and flagging them trains people to ignore this check.
@@ -130,6 +146,7 @@ function report(where, why, line) {
 async function scanLines(file) {
   const text = await readFile(new URL(file, ROOT), "utf8");
   text.split("\n").forEach((line, index) => {
+    if (isCommentLine(file, line)) return;
     for (const term of [...CLAIM_TERMS, ...ENTITY_NAME_TERMS]) {
       if (!line.toLowerCase().includes(term.toLowerCase())) continue;
       if (insideIdentifier(line, term)) continue;

@@ -231,3 +231,24 @@ describe("the bodies are named as they name themselves", () => {
     }
   });
 });
+
+describe("the honesty check tells copy from commentary", () => {
+  const checker = readFileSync(join(root, "scripts/honesty-check.mjs"), "utf8");
+
+  it("skips a source comment but never a JSON line", () => {
+    // A comment explaining WHY a row names the cybercrime unit was stopping
+    // the build. A false positive that has to be worked around every time is
+    // how a safety check stops being read at all.
+    expect(checker).toMatch(/function isCommentLine\(file, line\)/);
+    // The escape hatch closes on JSON, which is where every UI string lives.
+    const fn = checker.slice(checker.indexOf("function isCommentLine"), checker.indexOf("}", checker.indexOf("trimmed.startsWith(\"*\")")));
+    expect(fn).toContain('if (file.endsWith(".json")) return false;');
+  });
+
+  it("still fails the build on a barred term in a dictionary", () => {
+    // Proven by running it: the check is a build gate, and this asserts the
+    // gate is still armed for the case it exists for.
+    expect(checker).toMatch(/CLAIM_TERMS/);
+    expect(checker).toContain('"src/i18n/ar.json"');
+  });
+});

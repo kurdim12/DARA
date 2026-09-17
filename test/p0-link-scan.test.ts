@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { inspectTextSignals, preliminaryVerdict } from "../worker/engine/heuristics";
+import { inspectTextSignals, preliminaryVerdict, SIGNAL_REASON } from "../worker/engine/heuristics";
 import { preliminaryResponse } from "../worker/engine/preliminary";
 import { inspectText } from "../worker/engine/url";
 import { ENGINE_TIMEOUT_MS } from "../worker/engine/analyze";
@@ -167,5 +167,27 @@ describe("the waiting and failure UI", () => {
     const scan = read("src/routes/Scan.tsx");
     expect(scan).toContain('t(result.preliminary ? "prelim.tag" : "res.saved")');
     expect(scan).toContain('t("prelim.note")');
+  });
+});
+
+describe("the preliminary reasons reach the reader as sentences", () => {
+  it("translates a flag's why instead of printing the key at them", () => {
+    // preliminaryResponse stores an i18n key in `why` — the engine stores a
+    // sentence. The result screen rendered `{item.why}` raw, so a fallback
+    // verdict printed "prelim.payment" into «لماذا» on a 375px phone. t()
+    // falls through to the raw string for an unknown key, so one call is
+    // correct for both paths.
+    const scan = read("src/routes/Scan.tsx");
+    expect(scan).toContain("{t(item.why as TextKey)}");
+    expect(scan).not.toMatch(/\{item\.why\}/);
+  });
+
+  it("has every preliminary reason worded in both dictionaries", () => {
+    const ar = JSON.parse(read("src/i18n/ar.json"));
+    const en = JSON.parse(read("src/i18n/en.json"));
+    for (const key of Object.values(SIGNAL_REASON)) {
+      expect(ar[key], `ar is missing ${key}`).toBeTruthy();
+      expect(en[key], `en is missing ${key}`).toBeTruthy();
+    }
   });
 });

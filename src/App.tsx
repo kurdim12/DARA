@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import type { AnalysisType, AnalyzeImage, Category } from "../shared/types";
+import type { AnalysisType, AnalyzeImage, Category, Channel } from "../shared/types";
 import { LangProvider } from "./i18n";
 import { ThemeProvider } from "./lib/theme";
 import { useRouter, type Route } from "./lib/router";
@@ -25,13 +25,25 @@ export default function App() {
   );
 }
 
+/**
+ * What a verdict already knows, handed to Report so the form opens filled in.
+ * Written down because the fields are optional: a narrower parameter type here
+ * would still typecheck and would silently drop them on the way through.
+ */
+interface Prefill {
+  category: Category;
+  messageText: string;
+  entity?: string;
+  channel?: Channel;
+}
+
 function Screens() {
   const { route, navigate, quickExit } = useRouter();
   /** Text or a screenshot handed to Scan, the chip to land on, and whether to run it. */
   const [seed, setSeed] = useState<Seed | null>(null);
   const clearSeed = useCallback(() => setSeed(null), []);
   /** What a verdict knew about the threat, so Report opens with it filled in. */
-  const [prefill, setPrefill] = useState<{ category: Category; messageText: string; entity?: string } | null>(null);
+  const [prefill, setPrefill] = useState<Prefill | null>(null);
   /** Set by "Check before you pay", which is the lookup rather than the list. */
   const [focusLookup, setFocusLookup] = useState(false);
   /**
@@ -71,7 +83,7 @@ function Screens() {
   }, [navigate]);
 
   const openReport = useCallback(
-    (next: { category: Category; messageText: string }) => {
+    (next: Prefill) => {
       setPrefill(next);
       navigate("report");
     },

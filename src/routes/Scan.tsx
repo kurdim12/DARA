@@ -13,6 +13,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import type {
   AnalysisType,
+  Channel,
   AnalyzeImage,
   AnalyzeResponse,
   Category,
@@ -69,7 +70,7 @@ export function Scan({
   seed: Seed | null;
   onSeedUsed: () => void;
   /** Opens Report with the verdict's own category already chosen. */
-  onReport: (prefill: { category: Category; messageText: string; entity?: string }) => void;
+  onReport: (prefill: { category: Category; messageText: string; entity?: string; channel?: Channel }) => void;
 }) {
   const { t, lang } = useI18n();
   const [type, setType] = useState<AnalysisType>("message");
@@ -123,6 +124,7 @@ export function Scan({
       <Result
         result={stage.result}
         input={stage.input}
+        type={type}
         navigate={navigate}
         onReport={onReport}
         /* A corrected transcription re-enters as ordinary text — no image, so
@@ -188,6 +190,7 @@ export function Scan({
 function Result({
   result,
   input,
+  type,
   navigate,
   onAgain,
   onReport,
@@ -195,9 +198,11 @@ function Result({
 }: {
   result: AnalyzeResponse;
   input: string;
+  /** The chip the person picked. The only thing here that knows the channel. */
+  type: AnalysisType;
   navigate: (route: Route) => void;
   onAgain: () => void;
-  onReport: (prefill: { category: Category; messageText: string; entity?: string }) => void;
+  onReport: (prefill: { category: Category; messageText: string; entity?: string; channel?: Channel }) => void;
   /** Re-runs the ordinary text pipeline on a corrected transcription. */
   onRescan: (text: string) => void;
 }) {
@@ -205,9 +210,12 @@ function Result({
   // Seeded from the transcription, and reset whenever a new one arrives.
   const [draft, setDraft] = useState(input);
   const [editing, setEditing] = useState(false);
+  /** Which flagged span is lit, so its reason in «لماذا» lights with it. */
+  const [flag, setFlag] = useState<number | null>(null);
   useEffect(() => {
     setDraft(input);
     setEditing(false);
+    setFlag(null);
   }, [input]);
   const level = levelFor(result);
   const fill = LEVEL_FILL[level];
@@ -318,7 +326,13 @@ function Result({
           </div>
         ) : (
           <div className="mt-2.5">
-            <HighlightedMessage text={input} flags={result.red_flags} />
+            <HighlightedMessage
+              text={input}
+              flags={result.red_flags}
+              selected={flag}
+              onSelect={setFlag}
+              label={(n) => t("res.flag_aria").replace("{n}", String(n))}
+            />
           </div>
         )}
 
@@ -326,17 +340,33 @@ function Result({
           <>
             <p className="t-eyebrow mt-7">{t("res.why")}</p>
             {/* Numbered to match the superscripts in the message above. */}
-            <ol className="mt-3 space-y-3.5">
-              {result.red_flags.map((flag, index) => (
-                <li key={index} className="flex items-start gap-3">
-                  <span className="mt-px flex size-[22px] shrink-0 items-center justify-center rounded-full bg-red-soft text-[12px] font-extrabold text-red-ink">
-                    <bdi className="tnum">{index + 1}</bdi>
-                  </span>
-                  <span dir="auto" className="t-body flex-1">
-                    {flag.why}
-                  </span>
-                </li>
-              ))}
+            <ol className="mt-3 space-y-1.5">
+              {result.red_flags.map((item, index) => {
+                const lit = flag === index;
+                return (
+                  <li key={index}>
+                    {/* Tapping either end lights both, so the link between a
+                        span and its reason works whichever one you found
+                        first. -mx-2 keeps the lit row's fill flush with the
+                        text column rather than inset from it. */}
+                    <button
+                      type="button"
+                      onClick={() => setFlag(lit ? null : index)}
+                      aria-pressed={lit}
+                      className={`press -mx-2 flex w-[calc(100%+1rem)] items-start gap-3 rounded-btn px-2 py-2 text-start ${
+                        lit ? "flag-on" : ""
+                      }`}
+                    >
+                      <span className="mt-px flex size-[22px] shrink-0 items-center justify-center rounded-full bg-red text-[12px] font-extrabold text-white-brush">
+                        <bdi className="tnum">{index + 1}</bdi>
+                      </span>
+                      <span dir="auto" className="t-body flex-1">
+                        {t(item.why as TextKey)}
+                      </span>
+                    </button>
+                  </li>
+                );
+              })}
             </ol>
           </>
         )}
@@ -434,7 +464,7 @@ function Result({
                     <dt className="t-meta text-ink-2">{t(`evidence.${item.type}` as TextKey)}</dt>
                     <dd dir="auto" className="t-body mt-0.5 text-[14px]">
                       <bdi className="font-semibold">{item.value}</bdi>
-                      {item.why && <span className="text-ink-2"> — {item.why}</span>}
+                      {item.why && <span className="text-ink-2"> — {t(item.why as TextKey)}</span>}
                     </dd>
                   </div>
                 ))}
@@ -488,6 +518,7 @@ function Result({
                   category: result.category,
                   messageText: input,
                   entity: result.impersonated_entity ?? undefined,
+                  channel: type === "call" ? "call" : undefined,
                 })}>
                 {t("res.report_cta")}
               </PrimaryButton>
@@ -501,6 +532,7 @@ function Result({
                   category: result.category,
                   messageText: input,
                   entity: result.impersonated_entity ?? undefined,
+                  channel: type === "call" ? "call" : undefined,
                 })}
               >
                 {t("res.report_cta")}

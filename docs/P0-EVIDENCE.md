@@ -199,3 +199,114 @@ tsc --noEmit: clean
 honesty-check: clean
 vite build: dist/client/assets/index-*.js 496.68 kB (gzip 150.18 kB)
 ```
+
+---
+
+# P1 — evidence
+
+## P1-1 — the field reads as a field
+
+Measured in the browser at 375px, both themes, not read off the stylesheet:
+
+| | before (Zaid, production) | after |
+| --- | --- | --- |
+| field surface vs card, light | 1.06:1 | **1.15:1** (`#f2eeec` on `#ffffff`) |
+| border vs card, light | 1.26:1 | **3.65:1** (`#8a8582`) |
+| border vs field, light | — | **3.16:1** |
+| border vs card, dark | 1.19:1 | **3.85:1** (`#7b7573`) |
+| border vs field, dark | — | **3.30:1** |
+| focus | `outline: none`, nothing | border → `#c40c29` light / `#e03a52` dark + 3px ring |
+| border width | 0.8px | **2px** |
+
+The brief asked for 1.5px. Chrome snaps a sub-pixel border down — `getComputedStyle`
+returned `1px` — so it renders at 2px instead. Dark needed its own focus red:
+the brand `#c40c29` is 2.85:1 on the dark card, below the 3:1 bar, so a ring in
+it is a ring nobody sees. The app-wide `:focus-visible` uses the same token now.
+
+Also: «مسح» appears once there is something to clear, and «إرفاق لقطة شاشة» is a
+full-width dashed row saying «نقرأ النص من الصورة» rather than a 36px pill beside
+«لصق». No horizontal scroll at 375px in either theme.
+
+## P1-2 — the field follows the chip
+
+It was a disconnected wire. `TYPE_META` and the five `scan.ph_*` strings both
+existed; the textarea rendered `scan.input_ph` regardless. Read back out of the
+rendered DOM after tapping each chip:
+
+| chip | label | placeholder |
+| --- | --- | --- |
+| نص | نص الرسالة | الصق نص الرسالة المشبوهة… |
+| رابط أو موقع | الرابط أو الموقع | الصق الرابط… |
+| رقم هاتف | رقم الهاتف | مثال: 07 9XXX XXXX |
+| عرض عمل | عرض العمل | الصق عرض العمل… |
+
+Five chips became four. The engine never branched on `website` — it only ever
+wrote `TYPE: <value>` into the prompt — so merging it into «رابط أو موقع» is a
+chip change, not an engine change.
+
+The honesty check stopped the build on the new placeholder, correctly: it flags
+every number in UI copy. Approved by key with the reason (a mask is not a
+number), in `scripts/honesty-check.mjs`.
+
+## P1-3 — a report from a verdict
+
+Read out of the rendered DOM at 375px:
+
+```
+radios: 0     text inputs: 0     chips clipped off-screen: []     h-scroll: false
+chips: تصيّد · احتيال مالي · عرض عمل وهمي · ابتزاز إلكتروني · استيلاء على حساب · أخرى
+       رسالة نصية · واتساب · مكالمة · بريد إلكتروني · تواصل اجتماعي · أخرى
+```
+
+«ابتزاز إلكتروني» was the chip sitting off the edge of a scrolling rail. Both
+groups wrap now. The prefill carries category, message text, the entity the
+verdict extracted, and the channel when the chip already said so («رقم هاتف»
+is a call; nothing in a verdict distinguishes SMS from WhatsApp, so it does not
+guess at those).
+
+**«الجهة المعنية» is gone as an input and the report sends no authority field at
+all.** Nothing ever read `relevant_authority` back out of the database, and a
+radio list asked someone in trouble to classify Jordanian jurisdiction before
+they could send anything. What replaces it is the same verified record the
+Recover screen shows — one sourced, dated jurisdiction claim instead of four
+unsourced ones — under «مين بيتعامل مع هذا النوع من البلاغات» and «للمعلومات
+فقط. بلاغك لا يُرسل إلى أي جهة.»
+
+Item 6 was already built: `CaseNumber` is 28px extrabold with a copy button and
+a select-the-text fallback, and `rememberCase` saves to «بلاغاتي».
+
+## P1-4 — the flagged spans
+
+Rendered against the staged demo SMS, measured in both themes:
+
+| | before | after (light) | after (dark) |
+| --- | --- | --- | --- |
+| fill vs card | `--red-soft`, 1.17:1 | **1.74:1** `#edb6bf` | **1.49:1** `#701221` |
+| when tapped | — | `#e48f9d` | `#8e1226` |
+| underline | 2px `--red` | **none** | none |
+| number | 0.7em `<sup>` | 18px filled badge | 18px filled badge |
+| ink on the fill | — | 10.57:1 | 10.13:1 |
+
+Every fill is the brand red mixed into the surface it sits on — 30% over white,
+50% over the dark card — so the palette still has exactly one accent.
+
+Tapping a span sets `aria-pressed` and lights exactly one row in «لماذا»;
+tapping the row does the same in reverse. Verified by clicking the first mark:
+`pressed: "true"`, `reasonLit: 1`.
+
+### A bug this found
+
+The «لماذا» list was printing **`prelim.payment`** and **`prelim.deadline`** at
+the reader. `preliminaryResponse` stores an i18n key in a flag's `why` while the
+engine stores a sentence, and the screen rendered `{item.why}` raw — so every
+fallback verdict, which is exactly the situation the fallback exists for, showed
+key names on a 375px phone. `t()` falls through to the raw string for an unknown
+key, so one call is correct for both paths. My P0-1 test had checked that the
+dictionary held the keys, not that the screen resolved them; the new test checks
+the screen.
+
+```
+tsc --noEmit: clean · honesty-check: clean
+26 test files, 260 tests passed
+vite build: dist/client/assets/index-teB2E1Cu.js 497.67 kB (gzip 150.62 kB)
+```

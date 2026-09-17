@@ -512,3 +512,31 @@ Accepted, not fixed: `content/v1-content.json` is still imported whole, so the u
   على أنه الرقم يرسل معظم الناس إلى المحافظة الخطأ» and "the two are never
   joined into one number" were reasoning aimed at a future editor, being shown
   to someone who has just been extorted. Both moved to notes in the content file.
+
+## P1 — the input, the report, the flags
+
+- **Three measured colour tokens, not eyeballed ones.** `--field`,
+  `--field-line` and `--focus` exist in both themes with their contrast ratios
+  written next to them, and a test recomputes those ratios from the token file
+  rather than trusting the comment. Dark needed its own focus red because the
+  brand `#c40c29` is 2.85:1 on the dark card.
+- **2px, not the brief's 1.5px.** Chrome snaps a sub-pixel border down to 1px,
+  so 1.5 never rendered as asked. Measured, then changed.
+- **«موقع» folded into «رابط أو موقع».** The engine never branched on the two;
+  it only ever wrote `TYPE:` into the prompt. Five chips became four.
+- **The report sends no `relevant_authority` at all.** Nothing read it back out
+  of the database, so deriving one would have been the app asserting Jordanian
+  jurisdiction for no gain. The screen shows the verified record instead —
+  one sourced, dated claim rather than four unsourced ones.
+- **The flag fill is the brand red mixed into its surface**, 30% over white and
+  50% over the dark card, so the palette still has one accent. The underline is
+  gone: it was 2px under a 1.17:1 fill, and Arabic descenders forced
+  `skip-ink: none` to keep it from breaking into crumbs.
+- **The honesty check now skips source comments.** A comment explaining why a
+  row names the cybercrime unit was stopping the build. Narrow by design: only
+  a line starting with a comment marker, and never in a .json file, so no copy
+  string can hide behind it. Proven still armed by poisoning `rep.sub` with
+  «تم إرسال بلاغك إلى السلطات» — 2 hits, exit 1.
+- **`npm run verify | head` was lying to me.** `head` closes the pipe, SIGPIPE
+  kills the chain, and the build step never ran — I was previewing a bundle 20
+  minutes stale. Verify output goes to a file now.

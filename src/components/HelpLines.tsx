@@ -47,11 +47,14 @@ function host(url: string): string {
  * second kind: it publishes one number per governorate, so any single number
  * shown as THE number sends most people to the wrong one.
  */
-export function HelpLines() {
+export function HelpLines({ only }: { only?: string[] } = {}) {
   const { t, lang } = useI18n();
   const all = contacts(lang);
   const byId = new Map(all.map((entry) => [entry.id, entry]));
-  const lines = ORDER.map((id) => byId.get(id)).filter((entry) => entry !== undefined);
+  // `only` lets one row stand alone — the Report screen shows the cybercrime
+  // unit and nothing else — without a second renderer that could drift from
+  // this one, which is the whole reason this component exists.
+  const lines = (only ?? ORDER).map((id) => byId.get(id)).filter((entry) => entry !== undefined);
 
   return (
     <ListCard>

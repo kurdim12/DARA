@@ -13,6 +13,8 @@
   --color-ink: var(--ink);
   --color-ink-2: var(--ink-2);
   --color-line: var(--line);
+  --color-flag: var(--flag);
+  --color-flag-on: var(--flag-on);
   --color-field: var(--field);
   --color-field-line: var(--field-line);
   --color-focus: var(--focus);
@@ -253,25 +255,46 @@
   animation: reveal 160ms ease-out;
 }
 
-/* A flagged span inside the message being analysed. Never a link. */
+/*
+ * A flagged span inside the message being analysed. Never a link.
+ *
+ * The underline is gone. It was 2px of --red under a --red-soft fill that was
+ * 1.17:1 from the page, and Arabic descenders meant the line had to run
+ * through the dots to stay unbroken. A filled block reads as one mark at a
+ * glance, which is what "see the dangerous spans within two seconds" needs;
+ * the number now rides in a badge rather than a 0.7em superscript.
+ */
 mark.flag {
-  background: var(--red-soft);
+  background: var(--flag);
   color: inherit;
-  text-decoration: underline;
-  text-decoration-color: var(--red);
-  text-decoration-thickness: 2px;
-  text-underline-offset: 5px;
-  /* Arabic sits a lot of dots below the baseline; skip-ink would chop the
-     underline into crumbs exactly where the flag needs to read as one mark. */
-  text-decoration-skip-ink: none;
-  padding-block: 1px;
+  border-radius: 5px;
+  padding: 2px 4px;
+  /* The line-height of the paragraph, so a filled span on a wrapped line does
+     not collide with the line above it. */
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
 }
 
-mark.flag sup {
-  color: var(--red-ink);
-  font-weight: 700;
-  font-size: 0.7em;
-  padding-inline-start: 2px;
+/* The span a person has tapped, and the reason it points at. */
+mark.flag[aria-pressed="true"],
+.flag-on {
+  background: var(--flag-on);
+}
+
+mark.flag .badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  margin-inline-start: 5px;
+  border-radius: 999px;
+  background: var(--red);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  vertical-align: 1px;
 }
 
 /* The progress line along the top edge of a button that is working. */

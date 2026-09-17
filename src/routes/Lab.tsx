@@ -2,14 +2,14 @@ import { useState } from "react";
 import type { AnalyzeResponse, Lang } from "../../shared/types";
 import { HighlightedMessage } from "../components/HighlightedMessage";
 import { Page, PrimaryButton, SectionLabel } from "../components/Shell";
-import { useI18n } from "../i18n";
+import { useI18n, type TextKey } from "../i18n";
 
 /**
  * Hidden route for testing the engine on a phone. Nothing links here.
  * It calls the API directly so the raw output is visible next to the render.
  */
 export function Lab() {
-  const { setLang } = useI18n();
+  const { setLang, t } = useI18n();
   const [text, setText] = useState("");
   const [lang, setEngineLang] = useState<Lang>("ar");
   const [busy, setBusy] = useState(false);
@@ -90,7 +90,7 @@ export function Lab() {
           <ul className="mt-5 space-y-2">
             {result.red_flags.map((flag, index) => (
               <li key={index} className="text-base">
-                <bdi>{index + 1}</bdi> — {flag.why}
+                <bdi>{index + 1}</bdi> — {t(flag.why as TextKey)}
               </li>
             ))}
           </ul>
