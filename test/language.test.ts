@@ -101,3 +101,19 @@ describe("the seeded community reports speak the reader's language", () => {
     expect(read("src/routes/Report.tsx")).toContain("seedText(row.seed_key, lang) ?? row.description");
   });
 });
+
+describe("the feed survives a database that has not caught up", () => {
+  it("asks for seed_key, and asks again without it when the column is missing", () => {
+    // A Worker deploys before its migrations run against the remote database.
+    // Asking for a column that is not there throws, and the catch below it
+    // answers with an empty feed — the whole section would vanish rather than
+    // show its English seeds for an hour.
+    const worker = read("worker/index.ts");
+    const block = worker.slice(
+      worker.indexOf('app.get("/api/reports/community"'),
+      worker.indexOf("});", worker.indexOf("community feed failed")),
+    );
+    expect(block).toContain("const select = (withKey: boolean)");
+    expect(block).toMatch(/rows = await select\(true\);[\s\S]*?rows = await select\(false\);/);
+  });
+});

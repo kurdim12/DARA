@@ -405,6 +405,28 @@ The three quoted specimens stay Arabic. That is the message as it arrived and
 it is what gets pasted into the scanner; in English the translation sits under
 it, labelled.
 
+### The migration has not run on production
+
+`wrangler d1 migrations apply dara --remote` needs Cloudflare credentials this
+build does not have, and nothing in CI applies them — `deploy:ci` would, but
+the deployment happens through Cloudflare's own build. So the Worker will reach
+production before `seed_key` exists on the remote database.
+
+Asking for a column that is not there throws, and the handler's catch would
+have answered with an empty feed: **the whole «بلاغات المجتمع» section would
+have vanished** rather than simply showing its English seeds. The query asks
+for the column, and asks again without it if that fails. Proven locally by
+dropping the column:
+
+```
+with seed_key:     4 reports, keys present  → Arabic renders
+column dropped:    4 reports, keys null     → English descriptions render
+```
+
+**Abdelrahman: run `npm run db:migrate` once** (it is
+`wrangler d1 migrations apply dara --remote`) and the Arabic seeds appear.
+Nothing breaks until you do.
+
 ```
 tsc --noEmit: clean · honesty-check: clean
 28 test files, 278 tests passed

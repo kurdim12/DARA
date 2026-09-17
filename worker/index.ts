@@ -637,9 +637,15 @@ app.get("/api/reset", (c) => {
  * never the analysed message, never whether the reporter stayed anonymous.
  */
 app.get("/api/reports/community", async (c) => {
-  try {
-    const rows = await c.env.DB.prepare(
-      `SELECT id, threat_type, description, is_seed, seed_key
+  // seed_key arrives with migration 0005, and a Worker can be deployed before
+  // its migrations have run against the remote database. Asking for a column
+  // that is not there yet throws, and the catch below would answer with an
+  // empty feed — the section would quietly vanish rather than simply show its
+  // English seeds. So the column is optional: with it, a seeded row renders in
+  // the reader's language; without it, the feed is exactly what it was.
+  const select = (withKey: boolean) =>
+    c.env.DB.prepare(
+      `SELECT id, threat_type, description, is_seed${withKey ? ", seed_key" : ""}
          FROM reports
         WHERE is_public = 1 AND is_test = 0 AND description IS NOT NULL
         ORDER BY id DESC
@@ -649,8 +655,17 @@ app.get("/api/reports/community", async (c) => {
       threat_type: string | null;
       description: string;
       is_seed: number;
-      seed_key: string | null;
+      seed_key?: string | null;
     }>();
+
+  try {
+    let rows;
+    try {
+      rows = await select(true);
+    } catch {
+      console.warn("community feed: seed_key is missing — migration 0005 has not run here");
+      rows = await select(false);
+    }
 
     const reports: CommunityReport[] = (rows.results ?? []).map((row) => ({
       case_number: caseNumberFor(row.id),
@@ -661,7 +676,7 @@ app.get("/api/reports/community", async (c) => {
       is_seed: row.is_seed === 1,
       // Only a seeded row has one. The screen renders it in the reader's
       // language; a real report's own words are never swapped out.
-      seed_key: row.seed_key,
+      seed_key: row.seed_key ?? null,
     }));
     return c.json({ reports });
   } catch (error) {
