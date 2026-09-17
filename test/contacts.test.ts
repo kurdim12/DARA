@@ -218,3 +218,16 @@ describe("the call buttons survive dark mode", () => {
     }
   });
 });
+
+describe("the bodies are named as they name themselves", () => {
+  it("does not call the Public Security Directorate 'Jordan Police'", () => {
+    // The Arabic danger card says «الأمن العام»; the English one said "Jordan
+    // Police", which is not the body's name. Same class of error as the
+    // ministry on the Report screen, on the same card as the 911 button.
+    for (const dict of [ar, en] as Record<string, string>[]) {
+      for (const [key, value] of Object.entries(dict)) {
+        expect(value, `${key} invents a name for the PSD`).not.toMatch(/jordan police/i);
+      }
+    }
+  });
+});

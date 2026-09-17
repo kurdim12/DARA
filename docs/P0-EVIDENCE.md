@@ -151,6 +151,11 @@ by picking a governorate.
 
 Both screens render one shared component now, so they cannot drift apart again.
 
+The Shield screen's own danger card had a third version: the Arabic said
+«اتصل بالأمن العام» and the English said "call **Jordan Police**", which is not
+the body's name. Fixed, and a test now fails on that string anywhere in either
+dictionary.
+
 ### What is NOT independently verified
 
 The values come from Zaid's 16 Sep check, recorded with `verified_by` on each
@@ -168,6 +173,18 @@ reply, and reports an unreachable host as inconclusive.
 So: **nothing available to this build can open psd.gov.jo.** The one check that
 settles it is a phone in Jordan tapping «الصفحة الرسمية» on Recover. That is
 line 5 of the checklist for exactly this reason.
+
+### Two things found while screenshotting, not in the brief
+
+- **The call buttons were invisible in dark mode.** `bg-ink text-white-brush`
+  is 16.8:1 in light and **1.05:1 in dark**, because dark mode swaps `--ink` to
+  `#f2eeec` while `--white` stays `#f7f4f3`. «911 اتصل» was near-white on
+  near-white. `text-paper` inverts with the theme: 17.4:1 light, 16.2:1 dark.
+  The same pairing was in three other places (Shield's quick exit, Protect's
+  search, Lab's language toggle) and all four are changed.
+- **`vite preview` serves a stale asset listing after a rebuild**, which
+  renders a blank page and looks like an app crash. Every screenshot run here
+  starts a fresh port for that reason.
 
 ### Guards
 
